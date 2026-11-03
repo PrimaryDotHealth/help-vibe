@@ -1,0 +1,11 @@
+<% content_for :title, "Reset your password" %>
+<% content_for :hide_header_search, true %>
+<div class="auth">
+  <h1>Reset your password</h1>
+  <div class="card">
+    <%= form_with url: passwords_path do |form| %>
+      <label class="field"><span>Email</span><%= form.email_field :email_address, required: true, autofocus: true, autocomplete: "username", value: params[:email_address], class: "input" %></label>
+      <%= form.submit "Email me a reset link", class: "btn primary" %>
+    <% end %>
+  </div>
+</div>

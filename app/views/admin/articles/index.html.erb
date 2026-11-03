@@ -1,0 +1,47 @@
+<% content_for :title, "Articles" %>
+<div class="head">
+  <h1>Articles</h1><span class="count"><%= @counts["all"] %></span>
+  <span class="grow"></span>
+  <%= link_to new_admin_article_path, class: "btn primary" do %><%= icon "plus" %>New article<% end %>
+</div>
+
+<div class="toolbar-row">
+  <div class="seg">
+    <% { "all" => "All", "drafts" => "Drafts", "live" => "Live" }.each do |key, label| %>
+      <%= link_to admin_articles_path(status: key, q: params[:q]), class: ("on" if @status == key) do %><%= label %> <span class="code"><%= @counts[key] %></span><% end %>
+    <% end %>
+  </div>
+  <span class="grow"></span>
+  <%= form_with url: admin_articles_path, method: :get, class: "search" do %>
+    <%= hidden_field_tag :status, @status %>
+    <%= icon "search" %><%= search_field_tag :q, params[:q], class: "input", style: "height:32px;font-size:13px", placeholder: "Code or address" %>
+  <% end %>
+</div>
+
+<div class="card">
+  <% if @articles.any? %>
+    <div class="table-wrap">
+      <table class="data">
+        <thead><tr><th>Article</th><th>Status</th><th>Who can see it</th><th>Updated</th><th class="num">Views</th></tr></thead>
+        <tbody>
+          <% @articles.each do |a| %>
+            <% latest = a.versions.max_by(&:number) %>
+            <tr>
+              <td><div class="title-cell"><%= code_tag a.code %><%= link_to latest&.title, edit_admin_article_path(a) %></div></td>
+              <td><span class="status <%= a.status_key %>"><%= a.status_label %></span></td>
+              <td><%= visibility_tag a.accessibility %></td>
+              <td class="meta"><%= relative_day(a.updated_at) %><%= " · #{a.created_by.first_name.presence || a.created_by.name}" if a.created_by %></td>
+              <td class="num"><%= number_with_delimiter a.views %></td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  <% else %>
+    <div class="blank">
+      <h2><%= params[:q].present? || @status != "all" ? "No articles match" : "No articles yet" %></h2>
+      <p>Write the first one. Importing from Helpjuice arrives in the next milestone.</p>
+      <div class="row"><%= link_to "Write an article", new_admin_article_path, class: "btn primary" %></div>
+    </div>
+  <% end %>
+</div>

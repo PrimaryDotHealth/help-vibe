@@ -325,4 +325,8 @@ IP allow-list, auto-join…).
 1. **Inbound email ingress:** Amazon SES via Action Mailbox (recommended, since we're on AWS anyway) or an IMAP poller on a Google Workspace mailbox.
 2. **The AWS account for the BAA,** and whether to start Part 1 on a cheaper non-BAA host before any PHI exists.
 3. **Anonymous visitors:** allow them to write in with just an email (as unverified contacts), or require sign-in through our app.
-4. **The editor** (decided by the M0 spike).
+4. ~~The editor~~ **Decided in M0 (2026-11-03): Lexxy 1.0.3**, Basecamp's Lexical-based editor for Action Text.
+   - It replaces Action Text's default editor, and its JavaScript ships inside the gem (no CDN, no Node).
+   - It has tables, code blocks, headings, lists and markdown shortcuts built in.
+   - Callouts, Q&A and tabs are still to build (M3) as Action Text attachments.
+   - Stored content is Action Text's canonical HTML, so switching editors later doesn't need a data migration.

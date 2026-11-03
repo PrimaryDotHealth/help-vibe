@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Our app (stand-in)</title>
+  <style>
+    body{margin:0;font:14px/1.5 -apple-system,"Segoe UI",sans-serif;background:#eceef1;color:#4b5563}
+    .top{height:52px;background:#fff;border-bottom:1px solid #dfe2e7;display:flex;align-items:center;gap:24px;padding:0 20px}
+    .top b{color:#111827}.grid{display:grid;grid-template-columns:200px 1fr}
+    .side{background:#f7f8fa;border-right:1px solid #dfe2e7;min-height:calc(100vh - 53px);padding:16px 12px}
+    .side div{padding:6px 8px;border-radius:6px}.side .on{background:#e5e7eb;color:#111827}
+    .main{padding:24px}.ph{background:#fff;border:1px solid #dfe2e7;border-radius:10px;height:96px;margin-bottom:16px}.ph.t{height:280px}
+    button.q{margin-bottom:16px}
+  </style>
+</head>
+<body>
+  <div class="top"><b>Our app</b><span>Calendar</span><span>Patients</span><span style="color:#111827">Billing</span><span style="margin-left:auto;font:11px ui-monospace,monospace;color:#9ca3af">stand-in for our product · development only</span></div>
+  <div class="grid">
+    <div class="side"><div>Overview</div><div class="on">Invoices</div><div>Claims</div><div>Settings</div></div>
+    <div class="main">
+      <button class="q" onclick="HelpVibe.open({ article: 'SCH·01' })">Open SCH·01 from our own button</button>
+      <div class="ph"></div><div class="ph t"></div><div class="ph"></div>
+    </div>
+  </div>
+  <script src="<%= embed_script_path %>" async></script>
+  <script>addEventListener("load", function () { if (/[?&]open/.test(location.search)) setTimeout(function () { HelpVibe.open() }, 200) })</script>
+</body>
+</html>

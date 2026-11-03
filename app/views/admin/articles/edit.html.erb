@@ -1,0 +1,66 @@
+<% content_for :title, @version.title %>
+<% content_for :full_page, true %>
+<% live = @article.live_version %>
+<%= form_with scope: :editor, url: admin_article_path(@article), method: :patch, class: "ed-form",
+      data: { controller: "autosave", autosave_url_value: admin_version_revisions_path(@version), action: "input->autosave#changed lexxy:change->autosave#changed" } do |f| %>
+  <%= f.hidden_field :version_id, value: @version.id, data: { autosave_target: "version" } %>
+  <%= f.hidden_field :base_revision_id, value: @revision&.id, data: { autosave_target: "base" } %>
+  <div class="ed">
+    <div class="ed-top">
+      <%= link_to admin_articles_path, class: "btn quiet sm", "aria-label": "Back to articles" do %><%= icon "back" %><% end %>
+      <div class="crumb grow"><%= code_tag @article.code %><b><%= @version.title %></b></div>
+      <span class="status <%= @article.status_key %>" data-autosave-target="status"><%= @article.status_label %></span>
+      <span class="saved" data-autosave-target="saved"><%= @revision ? "Saved #{@revision.created_at.strftime("%H:%M")}" : "Not saved yet" %></span>
+      <% if live %><%= link_to article_path(@article), class: "btn quiet sm", target: "_blank" do %><%= icon "eye" %>View live<% end %><% end %>
+      <%= f.button class: "btn sm", name: "save", value: "1" do %>Save<% end %>
+      <% if Current.user.can_publish? %>
+        <%= f.button class: "btn sm primary", name: "publish", value: "1" do %>Publish<% end %>
+      <% end %>
+    </div>
+    <div class="ed-body">
+      <div class="sheet-wrap">
+        <div class="sheet">
+          <div class="paper">
+            <%= code_tag @article.code %>
+            <%= f.text_field :title, value: @version.title, class: "title", "aria-label": "Title", required: true %>
+            <%= f.text_field :subtitle, value: @version.subtitle, class: "sub", "aria-label": "Subtitle", placeholder: "One line on what this article helps with" %>
+            <%= f.rich_text_area :body, value: @revision&.body %>
+          </div>
+        </div>
+      </div>
+      <aside class="panel">
+        <div class="tabs"><a href="#" class="on">Details</a></div>
+        <section>
+          <h3>Where it lives</h3>
+          <label class="field"><span>Chapter</span>
+            <%= f.select :main_category_id, @chapters.map { [ (_1.parent_id ? "  #{_1.parent.code} · #{_1.name}" : "#{_1.code} · #{_1.name}"), _1.id ] }, { selected: @article.main_category_id }, class: "input" %></label>
+          <div class="field"><span>Address</span><div class="mono t2"><%= article_url(@article) %></div></div>
+        </section>
+        <section>
+          <h3>Who can see it</h3>
+          <% ApplicationHelper::VISIBILITY.each do |key, (ico, label, hint)| %>
+            <label class="radio"><%= f.radio_button :accessibility, key, checked: @article.accessibility == key %><%= icon ico %><span><%= label %><span><%= hint %></span></span></label>
+          <% end %>
+        </section>
+        <section>
+          <h3>Found by</h3>
+          <%= f.text_field :keywords, value: @article.keyword_list, class: "input", placeholder: "reschedule, move appointment" %>
+          <div class="hint">Comma-separated. Matched alongside the title.</div>
+        </section>
+        <section>
+          <h3>Versions</h3>
+          <% @article.versions.reverse_each do |v| %>
+            <div class="review-line"><span class="grow">v<%= v.number %> · <%= v.is_default ? "live" : v.status %></span><span class="meta"><%= relative_day(v.updated_at) %></span></div>
+          <% end %>
+          <% if live && Current.user.can_publish? %>
+            <%# Lives outside the editor form (nested forms are invalid HTML); linked by the form attribute %>
+            <button type="submit" form="unpublish-form" class="btn sm quiet" style="margin-top:8px">Unpublish</button>
+          <% end %>
+        </section>
+      </aside>
+    </div>
+  </div>
+<% end %>
+<% if live && Current.user.can_publish? %>
+  <%= form_with url: admin_article_publication_path(@article), method: :delete, id: "unpublish-form", data: { turbo_confirm: "Take this article down? Readers will get a not-found page." } do %><% end %>
+<% end %>

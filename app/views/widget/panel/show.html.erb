@@ -1,0 +1,18 @@
+<%= render layout: "frame" do %>
+  <div class="w-label">Most read<% if @page.present? %><span class="mono t3"><%= @page %></span><% end %></div>
+  <% if (top = @popular.first) && (v = top.live_version) %>
+    <div class="answer">
+      <%= code_tag top.code %>
+      <h3><%= v.title %></h3>
+      <% if v.subtitle.present? %><p class="t2" style="font-size:14px;margin-top:8px"><%= v.subtitle %></p><% end %>
+      <%= link_to "Read the article", widget_article_path(top, page: @page), class: "more" %>
+    </div>
+    <ul class="w-list" style="margin-top:12px">
+      <% @popular.drop(1).each do |a| %>
+        <li><%= link_to widget_article_path(a, page: @page) do %><%= code_tag a.code %><span><%= a.live_version.title %></span><%= icon "right" %><% end %></li>
+      <% end %>
+    </ul>
+  <% else %>
+    <p class="t2" style="font-size:14px;padding-top:24px">No help articles are published yet.</p>
+  <% end %>
+<% end %>

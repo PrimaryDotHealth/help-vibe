@@ -1,0 +1,22 @@
+<% content_for :title, "Chapters" %>
+<div class="head">
+  <h1>Chapters</h1><span class="count"><%= @chapters.size %></span>
+  <span class="grow"></span>
+  <% if Current.user.can_publish? %><%= link_to new_admin_chapter_path, class: "btn primary" do %><%= icon "plus" %>New chapter<% end %><% end %>
+</div>
+<div class="card">
+  <% if @chapters.any? %>
+    <ul class="tree">
+      <% @chapters.each do |c| %>
+        <li>
+          <div class="node"><%= code_tag c.code %><span class="name"><%= link_to c.name, edit_admin_chapter_path(c), style: "color:inherit" %></span><%= visibility_tag c.accessibility %><span class="count"><%= @counts[c.id].to_i %></span></div>
+          <% if c.children.any? %>
+            <ul><% c.children.each do |sub| %><li><div class="node"><span class="code"></span><span class="name"><%= link_to sub.name, edit_admin_chapter_path(sub), style: "color:inherit" %></span><span class="count"><%= @counts[sub.id].to_i %></span></div></li><% end %></ul>
+          <% end %>
+        </li>
+      <% end %>
+    </ul>
+  <% else %>
+    <div class="blank"><h2>No chapters yet</h2><p>Chapters group articles and give them their codes, like SCH for Scheduling.</p></div>
+  <% end %>
+</div>

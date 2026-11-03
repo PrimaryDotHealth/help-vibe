@@ -1,29 +1,38 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
-    <title><%= content_for(:title) || "Helpvibe" %></title>
+    <title><%= content_for(:title) || "Help Center" %></title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="application-name" content="Helpvibe">
-    <meta name="mobile-web-app-capable" content="yes">
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
-
     <%= yield :head %>
-
-    <%# Enable PWA manifest for installable apps (make sure to enable in config/routes.rb too!) %>
-    <%#= tag.link rel: "manifest", href: pwa_manifest_path(format: :json) %>
-
-    <link rel="icon" href="/icon.png" type="image/png">
     <link rel="icon" href="/icon.svg" type="image/svg+xml">
-    <link rel="apple-touch-icon" href="/icon.png">
-
-    <%# Includes all stylesheet files in app/assets/stylesheets %>
     <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
     <%= javascript_importmap_tags %>
   </head>
-
-  <body>
+  <body class="reader">
+    <%= render "shared/icons" %>
+    <header class="site-head">
+      <div class="in">
+        <%= link_to root_path, class: "wordmark" do %><span class="mark">h</span>Help Center<% end %>
+        <% unless content_for?(:hide_header_search) %>
+          <%= form_with url: search_path, method: :get, class: "search", style: "width:320px", data: { turbo_frame: "_top" } do %>
+            <%= icon "search" %>
+            <%= search_field_tag :q, params[:q], class: "input", placeholder: "Search or enter a code", "aria-label": "Search" %>
+          <% end %>
+        <% end %>
+        <span class="grow"></span>
+        <nav class="links">
+          <% if authenticated? && Current.user&.editor? %>
+            <%= link_to "Admin", admin_root_path %>
+          <% elsif !authenticated? %>
+            <%= link_to "Staff sign in", new_session_path %>
+          <% end %>
+        </nav>
+      </div>
+    </header>
+    <% flash.each do |type, message| %><div class="flash <%= type %>"><%= message %></div><% end %>
     <%= yield %>
+    <footer class="site-foot">Help Center</footer>
   </body>
 </html>

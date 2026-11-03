@@ -1,0 +1,13 @@
+<% content_for :title, "Staff sign in" %>
+<% content_for :hide_header_search, true %>
+<div class="auth">
+  <h1>Staff sign in</h1>
+  <div class="card">
+    <%= form_with url: session_path do |form| %>
+      <label class="field"><span>Email</span><%= form.email_field :email_address, required: true, autofocus: true, autocomplete: "username", value: params[:email_address], class: "input" %></label>
+      <label class="field"><span>Password</span><%= form.password_field :password, required: true, autocomplete: "current-password", maxlength: 72, class: "input" %></label>
+      <%= form.submit "Sign in", class: "btn primary" %>
+    <% end %>
+  </div>
+  <p class="meta" style="margin-top:16px"><%= link_to "Forgot your password?", new_password_path %></p>
+</div>

@@ -1,0 +1,64 @@
+// helpvibe widget loader. Add to our app with one tag:
+//   <script src="<%= embed_script_url %>" async></script>
+// API: HelpVibe.open(), HelpVibe.open({ article: "slug-or-code" }), HelpVibe.close(), HelpVibe.setPage("/billing")
+(function () {
+  if (window.HelpVibe && window.HelpVibe.loaded) return;
+  var BASE = <%= raw root_url.chomp("/").to_json %>;
+  var script = document.currentScript;
+  var label = (script && script.dataset.label) || "Help";
+  var showLauncher = !(script && script.dataset.launcher === "none");
+  var page = location.pathname;
+  var iframe, launcher, open = false;
+
+  var host = document.createElement("div");
+  host.id = "helpvibe";
+  var root = host.attachShadow ? host.attachShadow({ mode: "open" }) : host;
+  root.innerHTML =
+    "<style>" +
+    ":host{all:initial}" +
+    ".launcher{position:fixed;right:24px;bottom:24px;z-index:2147483646;height:40px;padding:0 16px 0 12px;border:0;border-radius:20px;" +
+    "background:#171717;color:#fafafa;font:500 14px/1 -apple-system,'Segoe UI',sans-serif;display:inline-flex;align-items:center;gap:8px;" +
+    "box-shadow:0 8px 24px rgba(0,0,0,.12);cursor:pointer}" +
+    ".launcher svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}" +
+    "iframe{position:fixed;right:24px;bottom:76px;z-index:2147483647;width:384px;height:600px;max-height:calc(100vh - 100px);border:1px solid rgba(23,23,23,.08);" +
+    "border-radius:16px;box-shadow:0 8px 24px rgba(0,0,0,.08),0 1px 2px rgba(0,0,0,.05);background:#fff;display:none}" +
+    "@media (max-width:480px){iframe{left:8px;right:8px;width:auto}}" +
+    "</style>";
+
+  iframe = document.createElement("iframe");
+  iframe.title = "Help";
+  root.appendChild(iframe);
+
+  if (showLauncher) {
+    launcher = document.createElement("button");
+    launcher.className = "launcher";
+    launcher.type = "button";
+    launcher.innerHTML = '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>';
+    launcher.appendChild(document.createTextNode(label));
+    launcher.addEventListener("click", function () { open ? api.close() : api.open(); });
+    root.appendChild(launcher);
+  }
+
+  function url(path) { return BASE + path + (path.indexOf("?") < 0 ? "?" : "&") + "page=" + encodeURIComponent(page); }
+
+  var api = {
+    loaded: true,
+    open: function (opts) {
+      var target = opts && opts.article ? "/widget/a/" + encodeURIComponent(opts.article) : "/widget";
+      if (!iframe.src || (opts && opts.article)) iframe.src = url(target);
+      iframe.style.display = "block"; open = true;
+    },
+    close: function () { iframe.style.display = "none"; open = false; },
+    setPage: function (path) { page = path; }
+  };
+  window.HelpVibe = api;
+
+  window.addEventListener("message", function (e) {
+    if (e.origin === BASE && e.data && e.data.helpvibe === "close") api.close();
+  });
+  // Single-page apps: keep the page context current.
+  window.addEventListener("popstate", function () { page = location.pathname; });
+
+  (document.body ? Promise.resolve() : new Promise(function (r) { document.addEventListener("DOMContentLoaded", r); }))
+    .then(function () { document.body.appendChild(host); });
+})();

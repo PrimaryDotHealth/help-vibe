@@ -1,0 +1,30 @@
+<% content_for :title, @query.present? ? "#{@query} · Search" : "Search" %>
+<% content_for :hide_header_search, true %>
+<main class="results">
+  <%= form_with url: search_path, method: :get, class: "search lg" do %>
+    <%= icon "search" %>
+    <%= search_field_tag :q, @query, class: "input", "aria-label": "Search", autofocus: @query.blank? %>
+  <% end %>
+
+  <% if @query.blank? %>
+    <p class="meta" style="margin-top:16px">Type a question, a few words, or an article code like SCH·07.</p>
+  <% elsif @results.any? %>
+    <div class="summary"><span class="meta"><%= pluralize(@results.size, "result") %> for <b class="t2" style="font-weight:500"><%= @query %></b><%= ", using close matches" if @fuzzy %></span></div>
+    <% @results.each do |r| %>
+      <div class="hit">
+        <span class="code"><%= r.code %></span>
+        <div>
+          <h2><%= link_to r.title, article_path(r.slug, sid: @event&.id) %></h2>
+          <div class="path"><%= r.chapter %></div>
+          <% if r.snippet.present? %><p><%= sanitize r.snippet, tags: %w[mark] %></p><% end %>
+        </div>
+      </div>
+    <% end %>
+  <% else %>
+    <section class="empty">
+      <h2>No articles match "<%= @query %>"</h2>
+      <p>Try fewer words, or ask our support team. We log searches like this one so the right article gets written.</p>
+      <div class="row"><%= link_to "Browse the contents", root_path, class: "btn quiet" %></div>
+    </section>
+  <% end %>
+</main>

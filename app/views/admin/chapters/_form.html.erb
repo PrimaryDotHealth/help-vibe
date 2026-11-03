@@ -1,0 +1,12 @@
+<div class="card form-card" style="max-width:560px">
+  <%= form_with model: [ :admin, chapter ], scope: :category, url: (chapter.persisted? ? admin_chapter_path(chapter) : admin_chapters_path) do |f| %>
+    <% if chapter.errors.any? %><div class="errors"><%= chapter.errors.full_messages.to_sentence %></div><% end %>
+    <label class="field"><span>Name</span><%= f.text_field :name, class: "input", required: true %></label>
+    <label class="field"><span>Inside</span><%= f.select :parent_id, Category.chapters.where.not(id: chapter.id).map { [ "#{_1.code} · #{_1.name}", _1.id ] }, { include_blank: "Nothing: this is a top-level chapter" }, class: "input" %></label>
+    <label class="field"><span>Code</span><%= f.text_field :code, class: "input mono", style: "width:120px", placeholder: "SCH" %><div class="hint">2–4 letters, top-level chapters only. Articles are numbered from it: SCH·01, SCH·02…</div></label>
+    <label class="field"><span>Description</span><%= f.text_area :description, rows: 2, class: "input" %></label>
+    <label class="field"><span>Who can see it</span><%= f.select :accessibility, Category::ACCESSIBILITY.map { [ ApplicationHelper::VISIBILITY[_1][1], _1 ] }, {}, class: "input" %><div class="hint">Articles inside can be more restricted, never less</div></label>
+    <label class="field"><span>Position</span><%= f.number_field :position, class: "input", style: "width:120px" %></label>
+    <div class="acts"><%= f.submit "Save", class: "btn primary" %><%= link_to "Cancel", admin_chapters_path, class: "btn quiet" %></div>
+  <% end %>
+</div>

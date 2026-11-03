@@ -1,0 +1,20 @@
+<div class="widget" role="dialog" aria-label="Help">
+  <div class="w-head">
+    <% if local_assigns[:back] %><%= link_to back, class: "x", style: "margin:0 0 0 -8px", "aria-label": "Back" do %><%= icon "back" %><% end %><% end %>
+    <% if local_assigns[:code] %><%= code_tag code %><% else %><b>Help</b><% end %>
+    <button class="x" aria-label="Close" onclick="parent.postMessage({ helpvibe: 'close' }, '*')"><%= icon "x" %></button>
+  </div>
+  <% unless local_assigns[:hide_search] %>
+    <div class="w-search">
+      <%= form_with url: widget_search_path, method: :get, class: "search" do %>
+        <%= hidden_field_tag :page, params[:page] %>
+        <%= icon "search" %><%= search_field_tag :q, local_assigns[:query], class: "input", placeholder: "Search help", "aria-label": "Search help" %>
+      <% end %>
+    </div>
+  <% end %>
+  <div class="w-body"><%= yield %></div>
+  <div class="w-foot">
+    <%= link_to (local_assigns[:full_url] || root_url), target: "_blank", class: "quiet" do %><%= local_assigns[:full_url] ? "Open in new tab" : "Open help center" %><%= icon "out" %><% end %>
+    <span></span>
+  </div>
+</div>

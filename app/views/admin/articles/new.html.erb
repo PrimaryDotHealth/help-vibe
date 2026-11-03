@@ -1,0 +1,15 @@
+<% content_for :title, "New article" %>
+<div class="head"><h1>New article</h1></div>
+<% if @chapters.empty? %>
+  <div class="card blank"><h2>Create a chapter first</h2><p>Every article lives in a chapter, and takes its code from it.</p>
+    <div class="row"><%= link_to "New chapter", new_admin_chapter_path, class: "btn primary" %></div></div>
+<% else %>
+  <div class="card form-card" style="max-width:560px">
+    <%= form_with scope: :article, url: admin_articles_path do |f| %>
+      <label class="field"><span>Title</span><%= f.text_field :title, class: "input", required: true, autofocus: true, placeholder: "e.g. Reschedule or cancel an appointment" %></label>
+      <label class="field"><span>Chapter</span><%= f.select :main_category_id, @chapters.map { [ "#{_1.code} · #{_1.name}", _1.id ] }, {}, class: "input" %>
+        <div class="hint">The article's code comes from its chapter, e.g. SCH·07</div></label>
+      <div class="acts"><%= f.submit "Create and open the editor", class: "btn primary" %></div>
+    <% end %>
+  </div>
+<% end %>

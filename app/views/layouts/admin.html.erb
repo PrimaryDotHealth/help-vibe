@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title><%= content_for(:title) || "helpvibe" %> · helpvibe</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+    <link rel="icon" href="/icon.svg" type="image/svg+xml">
+    <%= stylesheet_link_tag "lexxy", "data-turbo-track": "reload" %>
+    <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
+    <%= javascript_importmap_tags %>
+  </head>
+  <body>
+    <%= render "shared/icons" %>
+    <% if content_for?(:full_page) %>
+      <% flash.each do |type, message| %><div class="flash <%= type %>" style="margin:0;border-radius:0"><%= message %></div><% end %>
+      <%= yield %>
+    <% else %>
+      <div class="app" style="min-height:100vh">
+        <nav class="side">
+          <%= link_to admin_root_path, class: "wordmark" do %><span class="mark">h</span>helpvibe<% end %>
+          <% nav = ->(label, ico, path, on) { link_to(safe_join([ icon(ico), label ]), path, class: [ "nav", ("on" if on) ]) } %>
+          <%= nav.("Articles", "file", admin_articles_path, controller_name == "articles") %>
+          <%= nav.("Chapters", "folder", admin_chapters_path, controller_name == "chapters") %>
+          <div class="label">Readers</div>
+          <%= nav.("Help center", "globe", root_path, false) %>
+          <%= nav.("Widget preview", "help", (Rails.env.development? ? dev_host_path : widget_root_path), false) %>
+          <div class="me"><span class="avatar"><%= Current.user.initials %></span><%= Current.user.name %>
+            <span class="grow"></span><%= button_to "Sign out", session_path, method: :delete, class: "link", form_class: "inline", style: "font-size:13px" %></div>
+        </nav>
+        <main class="main">
+          <% flash.each do |type, message| %><div class="flash <%= type %>"><%= message %></div><% end %>
+          <%= yield %>
+        </main>
+      </div>
+    <% end %>
+  </body>
+</html>

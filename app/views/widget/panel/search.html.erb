@@ -1,0 +1,16 @@
+<%= render layout: "frame", locals: { query: @query, back: widget_root_path(page: params[:page]) } do %>
+  <% if @results.any? %>
+    <div class="w-label"><%= pluralize(@results.size, "result") %><%= ", close matches" if @fuzzy %></div>
+    <ul class="w-list">
+      <% @results.each do |r| %>
+        <li><%= link_to widget_article_path(r.slug, sid: @event&.id, page: params[:page]) do %><%= code_tag r.code %><span><%= r.title %><% if r.snippet.present? %><p><%= sanitize r.snippet, tags: %w[mark] %></p><% end %></span><%= icon "right" %><% end %></li>
+      <% end %>
+    </ul>
+  <% elsif @query.present? %>
+    <div style="padding-top:32px">
+      <h3 style="font:400 20px/26px var(--serif)">Nothing on that yet</h3>
+      <p class="t2" style="font-size:14px;margin-top:8px">We've noted the search so an article gets written.</p>
+      <p class="meta" style="margin-top:16px"><%= link_to "Browse the help center", root_url, target: "_blank" %></p>
+    </div>
+  <% end %>
+<% end %>

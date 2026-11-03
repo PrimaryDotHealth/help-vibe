@@ -1,0 +1,13 @@
+<% content_for :title, @chapter.name %>
+<main class="results" style="max-width:860px">
+  <div class="crumbs meta" style="margin-bottom:16px"><%= link_to "Help Center", root_path, class: "t3" %> / <%= @chapter.name %></div>
+  <div class="chapter-head" style="display:flex;gap:12px;align-items:baseline"><%= code_tag @chapter.chapter.code, style: "color:var(--ink);font-size:14px" %><h1 style="font:400 40px/46px var(--serif)"><%= @chapter.name %></h1></div>
+  <% if @chapter.description.present? %><p class="t2" style="margin-top:12px;font-size:17px"><%= @chapter.description %></p><% end %>
+  <div style="margin-top:32px;border-top:1px solid var(--text)">
+    <% @articles.each do |a| %>
+      <% v = a.live_version %>
+      <div class="hit"><%= code_tag a.code %><div><h2><%= link_to v.title, article_path(a) %></h2><% if v.subtitle.present? %><p><%= v.subtitle %></p><% end %></div></div>
+    <% end %>
+    <% if @articles.empty? %><p class="meta" style="padding:24px 0">No published articles in this chapter yet.</p><% end %>
+  </div>
+</main>
