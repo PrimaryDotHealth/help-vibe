@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>S12 Article editor</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="mock"><span>S12 + S14 · Admin · Editor and review</span><a href="index.html">All screens</a><span class="grow"></span><button data-toggle="notes">Show notes</button><button data-toggle="theme">Theme</button></div>
+
+<div class="ed">
+  <div class="ed-top">
+    <a class="btn quiet sm" href="S11-articles.html" aria-label="Back to articles"><svg class="i"><use href="#i-back"/></svg></a>
+    <div class="crumb grow"><span class="code">SCH·07</span><b>Reschedule or cancel an appointment</b></div>
+    <span class="status live">Live is v2 · editing v3</span><span class="n">1</span>
+    <span class="saved">Saved 14:02</span><span class="n">2</span>
+    <span class="row" style="gap:4px"><span class="avatar">DK</span><span class="avatar">LM</span></span><span class="n">3</span>
+    <a class="btn quiet sm" href="S13-revisions.html"><svg class="i"><use href="#i-history"/></svg>History</a>
+    <a class="btn quiet sm" href="S03-article.html"><svg class="i"><use href="#i-eye"/></svg>Preview</a>
+    <button class="btn sm primary">Publish v3<svg class="i"><use href="#i-down"/></svg></button><span class="n">4</span>
+  </div>
+
+  <div class="tools" role="toolbar" aria-label="Formatting">
+    <button><svg class="i"><use href="#i-heading"/></svg>Text<svg class="i"><use href="#i-down"/></svg></button>
+    <span class="sep"></span>
+    <button aria-label="Bold"><svg class="i"><use href="#i-bold"/></svg></button>
+    <button aria-label="Italic"><svg class="i"><use href="#i-italic"/></svg></button>
+    <button aria-label="Underline"><svg class="i"><use href="#i-underline"/></svg></button>
+    <button aria-label="Inline code"><svg class="i"><use href="#i-code"/></svg></button>
+    <button aria-label="Link"><svg class="i"><use href="#i-link"/></svg></button>
+    <span class="sep"></span>
+    <button aria-label="Bulleted list"><svg class="i"><use href="#i-list"/></svg></button>
+    <button aria-label="Numbered steps"><svg class="i"><use href="#i-olist"/></svg></button>
+    <span class="sep"></span>
+    <button aria-label="Image"><svg class="i"><use href="#i-image"/></svg></button>
+    <button aria-label="Video"><svg class="i"><use href="#i-video"/></svg></button>
+    <button aria-label="File"><svg class="i"><use href="#i-clip"/></svg></button>
+    <button aria-label="Note"><svg class="i"><use href="#i-info"/></svg></button>
+    <button aria-label="Questions"><svg class="i"><use href="#i-rows"/></svg></button>
+    <button aria-label="Tabs"><svg class="i"><use href="#i-tabs"/></svg></button>
+    <button aria-label="Table"><svg class="i"><use href="#i-table"/></svg></button>
+    <button aria-label="Staff-only section"><svg class="i"><use href="#i-eyeoff"/></svg></button>
+    <span class="sep"></span>
+    <button aria-label="Undo"><svg class="i"><use href="#i-undo"/></svg></button>
+    <button aria-label="Redo"><svg class="i"><use href="#i-redo"/></svg></button>
+    <div class="mode"><span class="on">Visual</span><span>Markdown</span></div><span class="n">5</span>
+  </div>
+
+  <div class="ed-body">
+    <div class="sheet-wrap">
+      <div class="sheet">
+        <div class="paper">
+          <span class="code">SCH·07</span>
+          <div class="title" contenteditable="true">Reschedule or cancel an appointment</div>
+          <div class="sub" contenteditable="true">Move an appointment to a new time, or cancel it and tell the patient why.</div>
+          <div class="bodytext" contenteditable="true">
+            <h2><span class="sec">1</span>Reschedule an appointment</h2>
+            <ol class="steps">
+              <li><span>Open <b>Calendar</b> and select the appointment.</span></li>
+              <li><span>Choose <b>Reschedule</b>.</span></li>
+              <li><span>Pick a new date and time. <span class="mark-c">Times are shown in your time zone.</span></span></li>
+              <li><span>Decide whether to notify the patient, then choose <b>Save</b>.</span></li>
+            </ol>
+            <h2><span class="sec">2</span>Cancel an appointment</h2>
+            <p>Cancelling frees the slot straight away. The patient gets an email with the reason you enter.</p>
+            <p class="t3" style="margin-top:16px">/no<span class="n">6</span></p>
+          </div>
+        </div>
+        <div class="slash" style="top:auto;margin-top:-56px">
+          <a href="#" class="on"><span class="ic"><svg class="i"><use href="#i-info"/></svg></span><span>Note<br><span>Info or caution, set apart from the text</span></span></a>
+          <a href="#"><span class="ic"><svg class="i"><use href="#i-rows"/></svg></span><span>Questions<br><span>Collapsible question and answer</span></span></a>
+          <a href="#"><span class="ic"><svg class="i"><use href="#i-link"/></svg></span><span>Link to article<br><span>Find by title or code</span></span></a>
+        </div>
+        <div class="margin-note" style="top:268px">
+          <div class="card">
+            <div class="who"><span class="avatar">LM</span>Lee<span class="t3">2 h</span></div>
+            <p>Worth saying what the patient sees? Their email uses their own time zone.</p>
+            <div class="acts"><a href="#">Reply</a><a href="#">Resolve</a></div>
+          </div><span class="n">7</span>
+        </div>
+      </div>
+    </div>
+
+    <aside class="panel">
+      <div class="tabs"><a href="#" class="on">Details</a><a href="#">Review <span class="code">1</span></a><a href="#">Comments <span class="code" style="color:var(--text-3)">1</span></a></div>
+
+      <section>
+        <h3>Review<span class="n">8</span></h3>
+        <p class="meta" style="margin-bottom:8px">Requested by Dana · all reviewers must approve</p>
+        <div class="review-line"><span class="avatar">LM</span><span class="grow">Lee Moreno</span><span class="status live">Approved</span></div>
+        <div class="review-line"><span class="avatar">ST</span><span class="grow">Support team</span><span class="status review">Waiting</span></div>
+        <div class="row" style="margin-top:12px"><button class="btn sm primary">Approve</button><button class="btn sm">Request changes</button></div>
+      </section>
+
+      <section>
+        <h3>Where it lives<span class="n">9</span></h3>
+        <label class="field"><span>Chapter</span><select class="input"><option>SCH · Scheduling</option></select></label>
+        <div class="field"><span>Also listed in</span><div><span class="tag">GET · Getting started<svg class="i" style="width:12px;height:12px"><use href="#i-x"/></svg></span><a href="#" style="font-size:13px">Add</a></div></div>
+        <label class="field"><span>Code and address</span><input class="input mono" value="SCH·07 · reschedule-or-cancel"><div class="hint">Old links redirect automatically</div></label>
+      </section>
+
+      <section>
+        <h3>Who can see it</h3>
+        <label class="radio"><input type="radio" name="v"><svg class="i"><use href="#i-globe"/></svg><span>Everyone<span>Patients and the public</span></span></label>
+        <label class="radio"><input type="radio" name="v" checked><svg class="i"><use href="#i-building"/></svg><span>Staff<span>Anyone signed in to our app as staff</span></span></label>
+        <label class="radio"><input type="radio" name="v"><svg class="i"><use href="#i-lock"/></svg><span>Specific people<span>Chosen people and groups</span></span></label>
+        <label class="radio"><input type="radio" name="v"><svg class="i"><use href="#i-link"/></svg><span>Link only<span>Not listed or searchable</span></span></label>
+      </section>
+
+      <section>
+        <h3>Found by</h3>
+        <div><span class="tag">reschedule</span><span class="tag">cancel</span><span class="tag">move appointment</span></div>
+        <input class="input" placeholder="Add a search term" style="margin-top:4px">
+        <div class="hint">Matched before the title and body</div>
+      </section>
+
+      <section>
+        <h3>Schedule</h3>
+        <div class="row" style="font-size:14px"><input type="checkbox" style="accent-color:var(--ink)"> Go live at a set time</div>
+        <div class="row" style="font-size:14px;margin-top:8px"><input type="checkbox" style="accent-color:var(--ink)"> Unpublish at a set time</div>
+      </section>
+    </aside>
+  </div>
+</div>
+
+<section class="notes">
+  <h2>Notes · S12 and S14</h2>
+  <ol>
+    <li><b>Version status</b> is always visible. Editing a published article quietly starts a new version, and the live copy only changes when you publish.</li>
+    <li><b>Autosave</b>, so there's no Save button. The states are "Saving…", "Saved 14:02", "Offline, retrying" and "Lee saved a newer copy: reload or keep yours".</li>
+    <li><b>Presence</b> shows who else has the article open. There's no live co-editing; two people saving the same draft get the conflict prompt instead. <span class="q">Q: does your team often edit the same article at the same time?</span></li>
+    <li><b>Publish menu</b>: Publish now, Schedule, Unpublish, Archive. For draft writers it becomes "Request review". When an approval is missing, the button is disabled and says why.</li>
+    <li><b>Markdown</b> switches the same content to plain text and back.</li>
+    <li><b>"/" inserts a block</b>: note, questions, tabs, table, image, link to another article (searchable by code). Paste from Google Docs or Word is cleaned to the allowed formatting.</li>
+    <li><b>Comments sit in the margin</b>, like a proof-reader's notes, beside the highlighted text. Readers never see them.</li>
+    <li><b>Review</b> is the first thing in the panel while one is open, and disappears once it's done. Reviewers can be people or a group. <span class="q">Q: do you use Helpjuice's review step today? If not, it can ship later.</span></li>
+    <li><b>The code is generated</b> from the chapter plus the next free number, and can be edited.</li>
+  </ol>
+</section>
+<script src="mock.js"></script>
+</body>
+</html>

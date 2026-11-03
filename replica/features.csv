@@ -1,0 +1,125 @@
+feature,area,priority,original,clone,notes
+Editor sign in with email and password,auth,must,yes,no,
+Password reset by email,auth,must,yes,no,
+Five roles: superadmin admin collaborator draft_writer viewer,auth,must,yes,no,draft writer cannot publish
+Invite deactivate and reactivate users,users,must,yes,no,
+Groups of users,users,must,yes,no,
+Create edit and delete articles,editor,must,yes,no,
+WYSIWYG rich text editor,editor,must,yes,no,no CDN: editor JS embedded in the binary
+Images and file uploads in articles,editor,must,yes,no,
+Internal links between articles,editor,must,yes,no,
+Autosave creating revisions,editor,must,yes,no,
+Drafts and publish / unpublish,publishing,must,yes,no,
+Draft version on top of a published article,publishing,must,yes,no,live copy unchanged until publish
+Revision history with restore,publishing,must,yes,no,
+Nested categories,organization,must,yes,no,
+Article in multiple categories (main plus also-in),organization,must,yes,no,
+Article slugs and stable URLs,organization,must,yes,no,
+Visibility: public internal private,permissions,must,yes,no,
+Per-article and per-category accessors (users and groups),permissions,must,yes,no,
+Public KB home with categories and popular articles,reader,must,yes,no,
+Category page,reader,must,yes,no,
+Article page with table of contents,reader,must,yes,no,
+Full-text search with snippets and highlighting,search,must,yes,no,SQLite FTS5
+Keywords boost search,search,must,yes,no,
+Embeddable in-app help widget (search browse read),embed,must,yes,no,served from helpvibe itself. Swifty-equivalent
+Chromeless article embed (iframe),embed,must,partial,no,original uses JS embed with hash routing
+Deep link to an article from the host app,embed,must,yes,no,
+REST API: articles categories search (read),api,must,yes,no,shape close to Helpjuice v3 so our app code ports easily
+API keys,api,must,yes,no,
+Import from Helpjuice API v3,migration,must,no,no,ours: categories articles users groups uploads
+Single binary with single SQLite file and no external assets,platform,must,no,no,ours: the 'in a box' requirement
+Markdown editing mode,editor,should,yes,no,
+Callout blocks,editor,should,yes,no,
+Accordions and tabs,editor,should,yes,no,
+Tables and code blocks,editor,should,yes,no,
+Compare revisions (diff),publishing,should,yes,no,
+Multiple published versions with default,publishing,should,yes,no,
+Auto-publish and expiration dates,publishing,should,yes,no,
+Review process: request reviewers approve or disapprove,review,should,yes,no,
+Review rule any or all approvers and bypass roles,review,should,yes,no,
+Inline comments on article text,review,should,yes,no,
+Email notifications (review requested and decided),notifications,should,yes,no,SMTP config. Optional
+Was this helpful votes,feedback,should,yes,no,
+Contextual suggestions by host page URL,embed,should,no,no,ours: original docs do not show page-aware suggestions
+Search analytics with dead-end and bounced searches,analytics,should,yes,no,
+Article analytics: views readings time spent votes,analytics,should,yes,no,
+Activity log,admin,should,yes,no,
+REST API: write endpoints and users groups,api,should,yes,no,
+Webhooks (14 events) with test and last response,api,should,yes,no,we add HMAC signing and retries
+Contact form when no answer,reader,should,yes,no,
+Related articles,reader,should,yes,no,
+Backup download and restore,admin,should,yes,no,the SQLite file plus uploads
+Reader sign in for internal content,auth,should,yes,no,
+Customization: logo colours custom CSS,customization,could,yes,no,
+URL-only visibility,permissions,could,yes,no,
+Files manager screen,editor,could,yes,no,
+Find and replace,editor,could,yes,no,
+Anchor links,editor,could,yes,no,
+Article planner kanban,admin,could,yes,no,
+Allowed IPs restriction,settings,could,yes,no,
+Accessible only via JavaScript embed,settings,could,yes,no,
+Group auto-join by email domain,users,could,yes,no,
+Multiple languages and translations,i18n,could,yes,no,data model ready. UI later (assumption A2)
+Index attachments in search,search,could,yes,no,
+Swifty AI chatbot and AI answers,ai,could,yes,skip,needs an external LLM. Breaks 'in a box'
+AI subtitles keywords and article requests,ai,could,yes,skip,same as above
+Third-party integrations marketplace,integrations,could,yes,skip,their partner network. API and webhooks instead
+Liquid template engine theming,customization,could,yes,skip,our own templates and custom CSS
+LDAP ADFS Active Directory,auth,could,yes,skip,OIDC later covers our needs
+Custom domain and SSL upload,settings,could,yes,skip,handled by reverse proxy or host
+Share access between accounts,settings,could,yes,skip,single tenant
+Billing and subscription,billing,could,yes,skip,internal tool
+Article decision trees,editor,could,yes,skip,low value for us. Revisit
+SSO via OIDC (Okta Azure Google),auth,must,yes,no,promoted from could: agents handle PHI (Part 2)
+Two-factor sign-in for staff,auth,must,yes,no,PHI (Part 2)
+Idle sign-out and session limits for agents,auth,must,yes,no,PHI: 15 min idle
+Start a conversation from the widget,support-messenger,must,yes,no,'Contact support' becomes this
+Article suggestions while typing a question,support-messenger,must,yes,no,deflection. Logged
+Live replies in the widget (realtime),support-messenger,must,yes,no,WebSockets
+Conversation list in the widget with unread,support-messenger,must,yes,no,
+Attachments in conversations (private),support-messenger,must,yes,no,never public. 25 MiB
+Reply-time expectation and office-closed notice,support-messenger,should,yes,no,
+Customer can see their tickets and states,support-messenger,should,yes,no,customer-facing labels
+Rating after close (CSAT),support-messenger,should,yes,no,
+Shared inbox with views: mine unassigned team all,support-inbox,must,yes,no,
+Assign to person or team,support-inbox,must,yes,no,
+States: open snoozed closed with reopen on reply,support-inbox,must,yes,no,
+Internal notes and @mentions,support-inbox,must,yes,no,
+Collision warning when two agents reply,support-inbox,must,yes,no,
+Insert help article into reply (by code),support-inbox,must,no,no,ours: ties Part 1 to Part 2
+Contact sidebar with page context and past conversations,support-inbox,must,yes,no,plus articles read before asking (ours)
+Priority levels,support-inbox,should,yes,no,
+Tags,support-inbox,should,yes,no,
+Custom views (saved filters),support-inbox,should,yes,no,
+Agent notifications (browser and email),support-inbox,must,yes,no,
+Macros (saved replies with variables and actions),support-inbox,must,yes,no,
+Contacts identified from our app token (patient or staff),support-contacts,must,yes,no,same JWT as the widget
+Contacts list and profile,support-contacts,should,yes,no,
+Companies (practices),support-contacts,could,yes,no,
+Email in: support address creates conversations,support-email,must,yes,no,needs an inbound email provider with a BAA (A12)
+Email out with threading (reply by email),support-email,must,yes,no,Message-ID threading. Loop protection
+PHI-safe notification emails (link only),support-email,must,no,no,ours: HIPAA
+Ticket types with custom fields (7 data types),support-tickets,should,yes,no,string list integer decimal boolean datetime files
+Ticket states with internal and customer labels,support-tickets,should,yes,no,4 categories
+Back-office hand-off tickets,support-tickets,should,yes,no,
+Tracker tickets with notify all linked,support-tickets,could,yes,no,
+Teams and members,support-routing,must,yes,no,
+Round robin and balanced assignment with limits and away status,support-routing,should,yes,no,
+Simple rules (when / if / then),support-routing,should,yes,no,simplified Workflows
+SLA rules (first response next response close),support-sla,should,yes,no,
+Office hours and holidays per team,support-sla,should,yes,no,SLA clocks pause outside hours
+Support reports: volume response resolution SLA CSAT,support-reports,should,yes,no,
+Report: tickets after reading an article,support-reports,could,no,no,ours: KB gap signal
+Draft an article from a resolved conversation,support-kb,should,no,no,ours (F18)
+Access log of PHI views changes and exports,support-compliance,must,no,no,ours: HIPAA. Kept 6 years
+Encryption at rest for database and backups,support-compliance,must,no,no,ours: encrypted volume or SQLCipher
+Retention policy and per-contact delete/export,support-compliance,must,no,no,ours: HIPAA and GDPR
+Team-scoped access to conversations,support-compliance,must,yes,no,minimum necessary
+Support REST API and webhooks (conversations tickets contacts),support-api,should,yes,no,extends /api/v3
+Fin AI agent and Copilot,support-ai,could,yes,skip,external LLM plus BAA. Breaks 'in a box'
+Outbound: product tours banners news series,support-outbound,could,yes,skip,marketing. Not a support need
+Phone SMS WhatsApp and social channels,support-channels,could,yes,skip,email and widget only
+Intercom app store and integrations,support-integrations,could,yes,skip,their partner network
+Group conversations with several customers,support-inbox,could,yes,skip,rare for us
+AI QA monitors and scorecards,support-ai,could,yes,skip,needs LLM

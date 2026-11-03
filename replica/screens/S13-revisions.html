@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>S13 Revision history</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="mock"><span>S13 · Admin · History</span><a href="index.html">All screens</a><span class="grow"></span><button data-toggle="notes">Show notes</button><button data-toggle="theme">Theme</button></div>
+
+<div class="rev-app">
+  <nav class="rev-list">
+    <a class="btn quiet sm back" href="S12-editor.html"><svg class="i"><use href="#i-back"/></svg>Back to editor</a>
+    <div style="padding:0 8px"><span class="code" style="color:var(--ink)">SCH·07</span></div>
+    <h2 style="margin-top:4px">Reschedule or cancel an appointment</h2>
+    <div class="ver"><select class="input"><option>v3 · draft, being edited</option><option>v2 · live</option><option>v1 · retired</option></select><span class="n">1</span></div>
+    <a class="rev on" href="#"><div class="when">Now</div><div class="who">Dana Kim</div></a>
+    <a class="rev" href="#"><div class="when">Today 13:58</div><div class="who">Dana Kim · autosave</div></a>
+    <a class="rev cmp" href="#"><div class="when">Today 11:20</div><div class="who">Lee Moreno · comparing</div></a>
+    <a class="rev" href="#"><div class="when">Yesterday 17:45</div><div class="who">Dana Kim · started v3 from v2</div></a>
+    <a class="rev" href="#" style="color:var(--text-3);font-size:13px">14 more autosaves<span class="n">2</span></a>
+  </nav>
+
+  <main class="main" style="max-width:none">
+    <div class="head">
+      <h1 style="font-size:18px">Today 11:20 compared with now</h1>
+      <span class="grow"></span>
+      <div class="seg"><a href="#" class="on">Inline</a><a href="#">Side by side</a><a href="#">Against live v2</a></div><span class="n">3</span>
+      <button class="btn">Restore 11:20</button><span class="n">4</span>
+    </div>
+    <div class="diff">
+      <div class="paper">
+        <h2>1 · Reschedule an appointment</h2>
+        <ol>
+          <li>Open Calendar and select the appointment.</li>
+          <li>Choose Reschedule.</li>
+          <li>Pick a new date and time. <ins>Times are shown in your time zone.</ins></li>
+          <li><del>Click Save.</del> <ins>Decide whether to notify the patient, then choose Save.</ins></li>
+        </ol>
+        <h2>2 · Cancel an appointment</h2>
+        <p>Cancelling frees the slot <del>immediately</del> <ins>straight away</ins>. The patient gets an email with the reason you enter.</p>
+        <p class="meta" style="margin-top:16px">Image "appointment-drawer.png" replaced</p>
+      </div>
+      <p class="meta" style="margin-top:12px">3 additions · 2 removals · title and settings unchanged</p>
+    </div>
+  </main>
+</div>
+
+<section class="notes">
+  <h2>Notes · S13</h2>
+  <ol>
+    <li><b>Versions and revisions.</b> A version is a publishable copy: v2 is live and v3 is the draft on top of it. Revisions are the saves inside a version.</li>
+    <li><b>Autosaves are collapsed</b> so the list shows the saves people meant. After 30 days they're thinned to one per hour.</li>
+    <li><b>"Against live v2"</b> is the comparison reviewers want most. Helpjuice can only compare within one version. <span class="q">Q: worth including? It's cheap to build.</span></li>
+    <li><b>Restore</b> creates a new revision from the old one. Nothing is deleted, so a restore can be undone.</li>
+  </ol>
+</section>
+<script src="mock.js"></script>
+</body>
+</html>

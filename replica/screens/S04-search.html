@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>S04 Search results</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body class="reader">
+<div class="mock"><span>S04 · Search results</span><a href="index.html">All screens</a><span class="grow"></span><button data-toggle="notes">Show notes</button><button data-toggle="theme">Theme</button></div>
+
+<header class="site-head">
+  <div class="in">
+    <a class="wordmark" href="S01-kb-home.html"><span class="mark">h</span>Help Center</a>
+    <span class="grow"></span>
+    <nav class="links"><a href="#">Contact support</a></nav>
+  </div>
+</header>
+
+<main class="results">
+  <form class="search lg">
+    <svg class="i"><use href="#i-search"/></svg>
+    <input class="input" value="cancel apointment" aria-label="Search">
+  </form>
+
+  <div class="summary">
+    <span class="meta">Showing 4 results for <b class="t2" style="font-weight:500">cancel appointment</b>, corrected from "apointment"</span><span class="n">1</span>
+    <span class="grow"></span>
+    <div class="seg"><a href="#" class="on">All</a><a href="#">Scheduling <span class="code">3</span></a><a href="#">Billing <span class="code">1</span></a></div><span class="n">2</span>
+  </div>
+
+  <div class="hit">
+    <span class="code">SCH·07</span>
+    <div><h2><a href="S03-article.html">Reschedule or <mark>cancel</mark> an <mark>appointment</mark></a></h2><div class="path">Scheduling</div>
+    <p><mark>Cancelling</mark> frees the slot straight away. The patient gets an email with the reason you enter.</p></div>
+  </div>
+  <div class="hit">
+    <span class="code">BIL·15</span>
+    <div><h2><a href="#">Late-<mark>cancellation</mark> fees</a></h2><div class="path">Billing and payments / Fees</div>
+    <p>Charge a fee when a patient <mark>cancels</mark> an <mark>appointment</mark> less than 24 hours before it starts.</p></div>
+  </div>
+  <div class="hit">
+    <span class="code">SCH·11</span>
+    <div><h2><a href="#">Text message reminders</a></h2><div class="path">Scheduling</div>
+    <p>Patients can confirm or <mark>cancel</mark> by replying to the reminder.</p></div><span class="n">3</span>
+  </div>
+  <div class="hit">
+    <span class="code">PAT·06</span>
+    <div><h2><a href="#">A patient's <mark>appointment</mark> history</a></h2><div class="path">Patients and records</div>
+    <p>Includes <mark>cancelled</mark> and missed visits, with who made each change.</p></div>
+  </div>
+
+  <section class="empty">
+    <p class="meta" style="margin:0 0 8px">When nothing matches<span class="n">4</span></p>
+    <h2>No articles match "xray upload limits"</h2>
+    <p>Try fewer words, or ask our support team. We log searches like this one so the right article gets written.</p>
+    <div class="row"><a class="btn primary" href="#">Ask support</a><a class="btn quiet" href="S01-kb-home.html">Browse the contents</a></div>
+  </section>
+</main>
+
+<section class="notes">
+  <h2>Notes · S04</h2>
+  <ol>
+    <li><b>Typo handling.</b> If nothing matches what they typed, we retry with fuzzy matching and show the correction. We never change the query without saying so.</li>
+    <li><b>Chapter filter</b> with counts, shown only when results span more than one chapter.</li>
+    <li><b>Ranking</b>: keywords, then title, subtitle and body, then helpfulness and views. A code match ("SCH·07") always comes first.</li>
+    <li><b>No results</b> is logged as a dead end (see S19), and the support form opens with the search already filled in.</li>
+  </ol>
+</section>
+<script src="mock.js"></script>
+</body>
+</html>

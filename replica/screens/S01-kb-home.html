@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>S01 Help center home</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body class="reader">
+<div class="mock"><span>S01 · Help center home</span><a href="index.html">All screens</a><span class="grow"></span><button data-toggle="notes">Show notes</button><button data-toggle="theme">Theme</button></div>
+
+<header class="site-head">
+  <div class="in">
+    <a class="wordmark" href="S01-kb-home.html"><span class="mark">h</span>Help Center</a>
+    <span class="grow"></span>
+    <nav class="links"><a href="#">Contact support</a><a href="#">Staff sign in</a><span class="n">1</span></nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="home-head">
+    <div>
+      <h1>Guides for scheduling, patients and billing</h1>
+      <p>Step-by-step answers for every part of the app, kept current by our team.</p>
+    </div>
+    <div>
+      <form class="search lg" action="S04-search.html">
+        <svg class="i"><use href="#i-search"/></svg>
+        <input class="input" name="q" placeholder="Search or enter a code like BIL·07" aria-label="Search">
+        <span class="kbd">/</span>
+      </form>
+      <p class="popular">Often searched: <a href="#">reset password</a><a href="#">export reports</a><a href="#">invite a teammate</a><span class="n">2</span></p>
+    </div>
+  </section>
+
+  <div class="contents">
+    <section class="chapter">
+      <div class="chapter-head"><span class="code">GET</span><h2>Getting started</h2><span class="meta count">12 articles</span><span class="n">3</span></div>
+      <ul>
+        <li><span class="code">GET·01</span><a href="#">Set up your practice profile</a></li>
+        <li><span class="code">GET·02</span><a href="#">Invite a teammate and choose their role</a></li>
+        <li><span class="code">GET·05</span><a href="#">Your first week: a checklist</a></li>
+      </ul>
+      <a class="all" href="#">All 12 in Getting started</a>
+    </section>
+    <section class="chapter">
+      <div class="chapter-head"><span class="code">SCH</span><h2>Scheduling</h2><span class="meta count">24 articles</span></div>
+      <ul>
+        <li><span class="code">SCH·07</span><a href="S03-article.html">Reschedule or cancel an appointment</a></li>
+        <li><span class="code">SCH·02</span><a href="#">Set your weekly availability</a></li>
+        <li><span class="code">SCH·11</span><a href="#">Text message reminders</a></li>
+      </ul>
+      <a class="all" href="#">All 24 in Scheduling</a>
+    </section>
+    <section class="chapter">
+      <div class="chapter-head"><span class="code">PAT</span><h2>Patients and records</h2><span class="meta count">31 articles</span></div>
+      <ul>
+        <li><span class="code">PAT·03</span><a href="#">Add a new patient</a></li>
+        <li><span class="code">PAT·14</span><a href="#">Upload documents to a record</a></li>
+        <li><span class="code">PAT·09</span><a href="#">Merge duplicate patients</a></li>
+      </ul>
+      <a class="all" href="#">All 31 in Patients and records</a>
+    </section>
+    <section class="chapter">
+      <div class="chapter-head"><span class="code">BIL</span><h2>Billing and payments</h2><span class="meta count">18 articles</span></div>
+      <ul>
+        <li><span class="code">BIL·07</span><a href="#">Send an invoice to a patient</a></li>
+        <li><span class="code">BIL·12</span><a href="#">Refund a payment</a></li>
+        <li><span class="code">BIL·04</span><a href="#">Understand claim statuses</a></li>
+      </ul>
+      <a class="all" href="#">All 18 in Billing and payments</a>
+    </section>
+    <section class="chapter">
+      <div class="chapter-head"><span class="code">ACC</span><h2>Account and security</h2><span class="meta count">9 articles</span></div>
+      <ul>
+        <li><span class="code">ACC·01</span><a href="#">Reset your password</a></li>
+        <li><span class="code">ACC·04</span><a href="#">Turn on two-factor sign-in</a></li>
+      </ul>
+      <a class="all" href="#">All 9 in Account and security</a>
+    </section>
+    <section class="chapter">
+      <div class="chapter-head"><span class="code">INT</span><h2>Integrations</h2><span class="meta count">7 articles</span></div>
+      <ul>
+        <li><span class="code">INT·02</span><a href="#">Connect Google Calendar</a></li>
+        <li><span class="code">INT·05</span><a href="#">Send lab orders</a></li>
+      </ul>
+      <a class="all" href="#">All 7 in Integrations</a>
+    </section>
+  </div>
+
+  <section class="band">
+    <div><h2>Can't find it?</h2><p>Our support team replies within one business day. Mention the article code if you have one.</p></div>
+    <a class="btn" href="#">Contact support</a><span class="n">4</span>
+  </section>
+</main>
+
+<footer class="site-foot">Updated 3 Nov 2026</footer>
+
+<section class="notes">
+  <h2>Notes · S01</h2>
+  <ol>
+    <li><b>Staff sign in</b> is a quiet text link. People who come from our app are recognised through the widget token and never need it. <span class="q">Q: do we want a public help site at all, or only the widget plus a staff-only site?</span></li>
+    <li><b>Search accepts codes.</b> Typing "BIL·07" (or "bil07") jumps straight to that article. "Often searched" comes from real queries in the last 30 days.</li>
+    <li><b>The home page is a contents page</b>, like the front of a manual: each chapter shows its code, its count and its three most-read articles. There are no topic cards and no icons.</li>
+    <li><b>Section codes are the signature.</b> Every article gets a short code (chapter + number) that staff and patients can quote in support chats. This adds one column, <span class="mono">articles.code</span>, to the schema. <span class="q">Q: worth keeping? It's the one new idea in this pass.</span></li>
+  </ol>
+</section>
+<script src="mock.js"></script>
+</body>
+</html>

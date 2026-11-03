@@ -1,0 +1,531 @@
+-- helpvibe migration 0002: support desk (Part 2) + PHI hardening. PostgreSQL 16+.
+-- Applies on top of 0001 (replica/schema.sql).
+--
+-- Modelling choice: conversations and tickets share ONE table, `threads`
+-- (kind = 'conversation' | 'ticket'). Both have parts, assignees, snooze,
+-- tags and SLAs, and appear side by side in the inbox.
+--
+-- Access, two layers:
+--   1. authz.rs checks every request (primary, gives good errors).
+--   2. Row-level security on PHI tables (threads, thread_parts, contacts,
+--      private uploads, audit_events) as a backstop. The app connects as a
+--      non-owner role and sets, per transaction:
+--        set local app.actor_type = 'user' | 'contact' | 'system';
+--        set local app.user_id = '<id>';  set local app.contact_id = '<id>';
+--        set local app.see_all = 'on';    set local app.compliance = 'on';
+--      A query that forgets authz still can't return another team's or
+--      another patient's threads.
+
+-- ---------------------------------------------------------------- staff auth hardening
+alter table users
+  add column availability    text not null default 'active' check (availability in ('active','away')),
+  add column totp_secret     bytea,          -- encrypted with the app key, null = not enrolled
+  add column totp_enabled_at timestamptz,
+  add column last_active_at  timestamptz,    -- idle sign-out and "away" detection
+  add column permissions     text[] not null default '{}';   -- see_all_threads, see_all_contacts, compliance
+
+create table user_recovery_codes (
+  id          bigint generated always as identity primary key,
+  user_id     bigint not null references users(id) on delete cascade,
+  code_hash   bytea not null,
+  used_at     timestamptz,
+  created_at  timestamptz not null default now()
+);
+create index user_recovery_codes_user on user_recovery_codes(user_id);
+
+create table user_identities (            -- OIDC SSO links (Okta, Azure AD, Google Workspace)
+  id          bigint generated always as identity primary key,
+  user_id     bigint not null references users(id) on delete cascade,
+  provider    text not null,
+  subject     text not null,
+  created_at  timestamptz not null default now(),
+  unique (provider, subject)
+);
+create index user_identities_user on user_identities(user_id);
+
+-- ---------------------------------------------------------------- contacts
+create table companies (                  -- a practice / clinic in our world
+  id           bigint generated always as identity primary key,
+  external_id  text unique,               -- id in our app
+  name         text not null,
+  attributes   jsonb not null default '{}',
+  created_at   timestamptz not null default now(),
+  updated_at   timestamptz not null default now()
+);
+
+create table contacts (
+  id                bigint generated always as identity primary key,
+  external_id       text unique,          -- JWT `sub` from our app. null = email-only contact
+  email             citext,
+  name              text not null default '',
+  kind              text not null default 'unknown' check (kind in ('patient','staff','unknown')),
+  company_id        bigint references companies(id) on delete set null,
+  attributes        jsonb not null default '{}',
+  email_verified_at timestamptz,
+  last_seen_at      timestamptz,
+  deleted_at        timestamptz,          -- soft delete, then purged by the retention job
+  created_at        timestamptz not null default now(),
+  updated_at        timestamptz not null default now(),
+  check (num_nonnulls(external_id, email) >= 1)
+);
+create unique index contacts_email on contacts(email) where email is not null and deleted_at is null;
+create index contacts_company on contacts(company_id);
+create index contacts_last_seen on contacts(last_seen_at);
+create index contacts_name_trgm on contacts using gin (name gin_trgm_ops);
+
+create table contact_sessions (           -- the widget's bearer session for a contact
+  id           bigint generated always as identity primary key,
+  token_hash   bytea not null unique,
+  contact_id   bigint not null references contacts(id) on delete cascade,
+  created_at   timestamptz not null default now(),
+  expires_at   timestamptz not null
+);
+create index contact_sessions_contact on contact_sessions(contact_id);
+create index contact_sessions_expires on contact_sessions(expires_at);
+
+-- ---------------------------------------------------------------- teams, hours
+create table office_hours (
+  id        bigint generated always as identity primary key,
+  name      text not null,
+  timezone  text not null,                -- IANA, e.g. 'America/New_York'
+  weekly    jsonb not null,               -- {"mon":[["09:00","17:00"]], ...}
+  holidays  jsonb not null default '[]',  -- [{"date":"2026-12-25","hours":[]}]
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create table teams (
+  id                bigint generated always as identity primary key,
+  name              citext not null unique,
+  assignment        text not null default 'manual' check (assignment in ('manual','round_robin','balanced')),
+  assignment_limit  integer check (assignment_limit is null or assignment_limit > 0),  -- open threads per agent
+  rr_cursor_user_id bigint references users(id) on delete set null,                   -- last round-robin pick
+  office_hours_id   bigint references office_hours(id) on delete set null,
+  created_at        timestamptz not null default now(),
+  updated_at        timestamptz not null default now()
+);
+create index teams_office_hours on teams(office_hours_id);
+create index teams_rr_cursor on teams(rr_cursor_user_id);
+
+create table team_members (
+  team_id    bigint not null references teams(id) on delete cascade,
+  user_id    bigint not null references users(id) on delete cascade,
+  created_at timestamptz not null default now(),
+  primary key (team_id, user_id)
+);
+create index team_members_user on team_members(user_id);
+
+-- ---------------------------------------------------------------- ticket types
+create table ticket_states (
+  id              bigint generated always as identity primary key,
+  category        text not null check (category in ('submitted','in_progress','waiting_on_customer','resolved')),
+  internal_label  text not null,
+  external_label  text not null,          -- what the customer sees
+  notify_customer boolean not null default true,
+  archived_at     timestamptz,
+  created_at      timestamptz not null default now()
+);
+create index ticket_states_category on ticket_states(category);
+
+create table ticket_types (
+  id              bigint generated always as identity primary key,
+  name            text not null,
+  description     text not null default '',
+  category        text not null check (category in ('customer','back_office','tracker')),
+  icon            text not null default 'file',
+  shareable       boolean not null default false,   -- back-office may be shared with the customer if set
+  default_team_id bigint references teams(id) on delete set null,
+  archived_at     timestamptz,
+  created_at      timestamptz not null default now(),
+  updated_at      timestamptz not null default now(),
+  check (category <> 'tracker' or not shareable)    -- trackers are always internal
+);
+create index ticket_types_default_team on ticket_types(default_team_id);
+
+create table ticket_type_states (         -- each type must cover all 4 categories (checked in app on save)
+  ticket_type_id  bigint not null references ticket_types(id) on delete cascade,
+  state_id        bigint not null references ticket_states(id) on delete restrict,
+  position        integer not null default 0,
+  primary key (ticket_type_id, state_id)
+);
+create index ticket_type_states_state on ticket_type_states(state_id);
+
+create table ticket_type_attributes (
+  id                     bigint generated always as identity primary key,
+  ticket_type_id         bigint not null references ticket_types(id) on delete cascade,
+  key                    text not null check (key ~ '^[a-z][a-z0-9_]{0,62}$'),
+  label                  text not null,
+  data_type              text not null check (data_type in ('string','list','integer','decimal','boolean','datetime','files')),
+  options                jsonb not null default '[]',   -- for 'list'
+  required_for_agents    boolean not null default false,
+  required_for_contacts  boolean not null default false,
+  visible_to_contacts    boolean not null default false,
+  position               integer not null default 0,
+  archived_at            timestamptz,
+  unique (ticket_type_id, key),
+  check (not required_for_contacts or visible_to_contacts)   -- can't require what they can't see
+);
+
+-- ---------------------------------------------------------------- threads (conversations + tickets)
+create sequence thread_number_seq start 1001;
+
+create table threads (
+  id                 bigint generated always as identity primary key,
+  kind               text not null check (kind in ('conversation','ticket')),
+  number             bigint not null unique default nextval('thread_number_seq'),  -- human-facing #1042
+  contact_id         bigint references contacts(id) on delete set null,   -- null for trackers
+  channel            text not null check (channel in ('widget','email','api','internal')),
+  title              text not null default '',
+  state              text not null default 'open' check (state in ('open','snoozed','closed')),
+  priority           text not null default 'none' check (priority in ('none','low','medium','high','urgent')),
+  assignee_user_id   bigint references users(id) on delete set null,
+  assignee_team_id   bigint references teams(id) on delete set null,
+  snoozed_until      timestamptz,
+  waiting_since      timestamptz,         -- last customer message not yet answered; null = ball is with customer
+  page_context       text,                -- host path the widget was on
+  search_event_id    bigint references search_events(id) on delete set null,  -- what they searched first
+  first_response_at  timestamptz,
+  closed_at          timestamptz,
+  rating             smallint check (rating between 1 and 5),
+  rating_comment     text,
+  -- ticket-only
+  ticket_type_id     bigint references ticket_types(id) on delete restrict,
+  ticket_state_id    bigint references ticket_states(id) on delete restrict,
+  ticket_attributes  jsonb,               -- keyed by ticket_type_attributes.key
+  is_shared          boolean,
+  -- retention
+  purge_after        timestamptz,
+  created_at         timestamptz not null default now(),
+  updated_at         timestamptz not null default now(),
+  check (state <> 'snoozed' or snoozed_until is not null),
+  check (state <> 'closed' or closed_at is not null),
+  check (kind = 'ticket' or num_nonnulls(ticket_type_id, ticket_state_id, ticket_attributes, is_shared) = 0),
+  check (kind = 'conversation' or num_nonnulls(ticket_type_id, ticket_state_id, ticket_attributes, is_shared) = 4)
+);
+alter sequence thread_number_seq owned by threads.number;
+-- the inbox's hot paths
+create index threads_open_team on threads(assignee_team_id, state, waiting_since);
+create index threads_open_user on threads(assignee_user_id, state, waiting_since);
+create index threads_unassigned on threads(created_at) where assignee_user_id is null and state = 'open';
+create index threads_contact on threads(contact_id, created_at);
+create index threads_snoozed on threads(snoozed_until) where state = 'snoozed';
+create index threads_ticket_type on threads(ticket_type_id, ticket_state_id) where kind = 'ticket';
+create index threads_ticket_state on threads(ticket_state_id);
+create index threads_search_event on threads(search_event_id);
+create index threads_purge on threads(purge_after) where purge_after is not null;
+create index threads_updated on threads(updated_at);
+create index threads_title_trgm on threads using gin (title gin_trgm_ops);
+
+create table thread_parts (
+  id                bigint generated always as identity primary key,
+  thread_id         bigint not null references threads(id) on delete cascade,
+  author_type       text not null check (author_type in ('contact','user','system')),
+  author_user_id    bigint references users(id) on delete set null,
+  author_contact_id bigint references contacts(id) on delete set null,
+  kind              text not null check (kind in (
+                      'comment','note','assignment','state_change','ticket_state_change','priority',
+                      'snooze','close','open','rating','article','link','attribute_change')),
+  body              text not null default '',  -- sanitised HTML for comment/note
+  event             jsonb,                     -- structured payload for event kinds
+  body_text         text not null default '',  -- plain text for search and email
+  article_id        bigint references articles(id) on delete set null,   -- when kind = 'article'
+  client_id         text,                      -- idempotency key from the composer / widget
+  edited_at         timestamptz,
+  created_at        timestamptz not null default now(),
+  search            tsvector generated always as (to_tsvector('english', body_text)) stored,
+  check (author_type <> 'contact' or kind in ('comment','rating'))        -- customers can't write notes
+);
+create index thread_parts_thread on thread_parts(thread_id, id);
+create index thread_parts_author_user on thread_parts(author_user_id);
+create index thread_parts_author_contact on thread_parts(author_contact_id);
+create index thread_parts_article on thread_parts(article_id);
+create unique index thread_parts_client_id on thread_parts(thread_id, client_id) where client_id is not null;
+create index thread_parts_search on thread_parts using gin (search) where kind in ('comment','note');   -- agent-only search
+
+alter table uploads add column private boolean not null default false;  -- support files: never public
+create index uploads_private on uploads(id) where private;
+
+create table part_attachments (
+  part_id    bigint not null references thread_parts(id) on delete cascade,
+  upload_id  bigint not null references uploads(id) on delete restrict,
+  primary key (part_id, upload_id)
+);
+create index part_attachments_upload on part_attachments(upload_id);
+
+create table thread_links (
+  from_thread_id  bigint not null references threads(id) on delete cascade,
+  to_thread_id    bigint not null references threads(id) on delete cascade,
+  kind            text not null check (kind in ('handoff','tracker')),
+  created_by_id   bigint references users(id) on delete set null,
+  created_at      timestamptz not null default now(),
+  primary key (from_thread_id, to_thread_id),
+  check (from_thread_id <> to_thread_id)
+);
+create index thread_links_to on thread_links(to_thread_id);
+create index thread_links_created_by on thread_links(created_by_id);
+
+create table thread_reads (               -- per-agent read marker, for unread dots and counts
+  thread_id     bigint not null references threads(id) on delete cascade,
+  user_id       bigint not null references users(id) on delete cascade,
+  last_part_id  bigint not null,
+  read_at       timestamptz not null default now(),
+  primary key (thread_id, user_id)
+);
+create index thread_reads_user on thread_reads(user_id);
+
+create table tags (
+  id    bigint generated always as identity primary key,
+  name  citext not null unique
+);
+create table thread_tags (
+  thread_id  bigint not null references threads(id) on delete cascade,
+  tag_id     bigint not null references tags(id) on delete cascade,
+  primary key (thread_id, tag_id)
+);
+create index thread_tags_tag on thread_tags(tag_id);
+
+create table mentions (
+  id         bigint generated always as identity primary key,
+  part_id    bigint not null references thread_parts(id) on delete cascade,
+  user_id    bigint not null references users(id) on delete cascade,
+  read_at    timestamptz,
+  created_at timestamptz not null default now(),
+  unique (part_id, user_id)
+);
+create index mentions_user on mentions(user_id, read_at);
+
+create table saved_views (                -- custom inbox views
+  id          bigint generated always as identity primary key,
+  name        text not null,
+  filters     jsonb not null,
+  owner_id    bigint references users(id) on delete cascade,  -- null = shared with everyone
+  position    integer not null default 0,
+  created_at  timestamptz not null default now()
+);
+create index saved_views_owner on saved_views(owner_id);
+
+-- ---------------------------------------------------------------- macros, rules, SLAs
+create table macros (
+  id            bigint generated always as identity primary key,
+  name          text not null,
+  body          text not null default '',     -- sanitised HTML with {{contact.first_name}} style variables
+  actions       jsonb not null default '[]',  -- [{"tag":"billing"},{"assign_team":3},{"close":true}]
+  team_id       bigint references teams(id) on delete cascade,  -- null = everyone
+  created_by_id bigint references users(id) on delete set null,
+  uses          integer not null default 0,
+  created_at    timestamptz not null default now(),
+  updated_at    timestamptz not null default now()
+);
+create index macros_team on macros(team_id);
+create index macros_created_by on macros(created_by_id);
+
+create table sla_rules (
+  id                bigint generated always as identity primary key,
+  name              text not null,
+  conditions        jsonb not null default '[]',  -- same grammar as rules
+  first_response    interval check (first_response > interval '0'),
+  next_response     interval check (next_response > interval '0'),
+  time_to_close     interval check (time_to_close > interval '0'),
+  office_hours_only boolean not null default true,
+  position          integer not null default 0,   -- first matching rule wins
+  enabled           boolean not null default true,
+  created_at        timestamptz not null default now(),
+  check (num_nonnulls(first_response, next_response, time_to_close) >= 1)
+);
+
+create table sla_timers (
+  id          bigint generated always as identity primary key,
+  thread_id   bigint not null references threads(id) on delete cascade,
+  rule_id     bigint references sla_rules(id) on delete set null,
+  kind        text not null check (kind in ('first_response','next_response','close')),
+  started_at  timestamptz not null,
+  due_at      timestamptz not null,       -- computed in Rust from office hours + holidays
+  status      text not null default 'active' check (status in ('active','hit','missed','cancelled')),
+  at_risk_notified_at timestamptz,
+  finished_at timestamptz,
+  check (due_at > started_at)
+);
+create unique index sla_timers_one_active on sla_timers(thread_id, kind) where status = 'active';
+create index sla_timers_due on sla_timers(due_at) where status = 'active';
+create index sla_timers_rule on sla_timers(rule_id);
+
+create table rules (                      -- simplified workflows: when / if / then
+  id          bigint generated always as identity primary key,
+  name        text not null,
+  trigger     text not null check (trigger in ('thread_created','ticket_created','contact_replied','thread_closed','idle')),
+  conditions  jsonb not null default '[]',
+  actions     jsonb not null default '[]',
+  position    integer not null default 0,
+  enabled     boolean not null default true,
+  created_at  timestamptz not null default now(),
+  updated_at  timestamptz not null default now()
+);
+create index rules_trigger on rules(trigger, position) where enabled;
+
+-- ---------------------------------------------------------------- notifications & email
+create table notifications (
+  id          bigint generated always as identity primary key,
+  user_id     bigint not null references users(id) on delete cascade,
+  thread_id   bigint references threads(id) on delete cascade,
+  kind        text not null check (kind in ('assigned','mentioned','replied','sla_at_risk','sla_missed','handoff_resolved')),
+  read_at     timestamptz,
+  emailed_at  timestamptz,
+  created_at  timestamptz not null default now()
+);
+create index notifications_user on notifications(user_id, read_at, created_at);
+create index notifications_thread on notifications(thread_id);
+
+create table email_outbox (               -- every outgoing email (also reset, review, contact form from 0001)
+  id              bigint generated always as identity primary key,
+  to_address      citext not null,
+  subject         text not null,
+  body_html       text not null,
+  body_text       text not null,
+  message_id      text not null unique,   -- our Message-ID, used for threading replies
+  in_reply_to     text,
+  thread_id       bigint references threads(id) on delete set null,
+  part_id         bigint references thread_parts(id) on delete set null,
+  status          text not null default 'pending' check (status in ('pending','sent','failed','dead')),
+  attempts        integer not null default 0,
+  next_attempt_at timestamptz not null default now(),
+  error           text,
+  sent_at         timestamptz,
+  created_at      timestamptz not null default now()
+);
+create index email_outbox_due on email_outbox(next_attempt_at) where status in ('pending','failed');
+create index email_outbox_thread on email_outbox(thread_id);
+create index email_outbox_part on email_outbox(part_id);
+
+create table email_inbound (              -- inbound log, kept 30 days for debugging, then purged
+  id           bigint generated always as identity primary key,
+  message_id   text not null unique,      -- dedupes provider retries and IMAP re-reads
+  from_address citext not null,
+  subject      text not null default '',
+  in_reply_to  text,
+  references_h text,
+  thread_id    bigint references threads(id) on delete set null,
+  part_id      bigint references thread_parts(id) on delete set null,
+  status       text not null check (status in ('threaded','created','ignored_loop','ignored_autoreply','rejected')),
+  received_at  timestamptz not null default now()
+);
+create index email_inbound_thread on email_inbound(thread_id);
+create index email_inbound_part on email_inbound(part_id);
+create index email_inbound_received on email_inbound(received_at);
+
+-- ---------------------------------------------------------------- compliance
+create table audit_events (               -- append-only PHI access trail, kept 6 years
+  id            bigint generated always as identity primary key,
+  actor_type    text not null check (actor_type in ('user','contact','api_key','system')),
+  actor_id      bigint,                   -- no FK: the trail must outlive the actor
+  actor_label   text not null,            -- email / key name at the time
+  action        text not null check (action in ('view','create','update','delete','export','sign_in','sign_in_failed','assign','download')),
+  subject_type  text not null check (subject_type in ('thread','contact','upload','report','user','session')),
+  subject_id    bigint,
+  ip            inet,
+  user_agent    text,
+  detail        jsonb not null default '{}',
+  at            timestamptz not null default now()
+);
+create index audit_events_subject on audit_events(subject_type, subject_id, at);
+create index audit_events_actor on audit_events(actor_type, actor_id, at);
+create index audit_events_at on audit_events using brin (at);
+
+create function audit_events_guard() returns trigger language plpgsql as $$
+begin
+  if tg_op = 'UPDATE' then
+    raise exception 'audit_events is append-only';
+  end if;
+  if old.at > now() - interval '6 years' then
+    raise exception 'audit_events younger than 6 years cannot be deleted';
+  end if;
+  return old;
+end $$;
+create trigger audit_events_no_update before update on audit_events
+  for each row execute function audit_events_guard();
+create trigger audit_events_no_early_delete before delete on audit_events
+  for each row execute function audit_events_guard();
+
+-- ---------------------------------------------------------------- webhooks: support events
+alter table webhooks drop constraint webhooks_event_check;
+alter table webhooks add constraint webhooks_event_check check (event in (
+  'user_create','user_update','user_delete',
+  'question_create','question_update','question_delete','question_archive','question_publish',
+  'comment_create','comment_update','comment_delete',
+  'category_create','category_update','category_delete',
+  'conversation_create','conversation_reply','conversation_assign','conversation_close',
+  'ticket_create','ticket_state_change','contact_create'));
+alter table activities drop constraint activities_trackable_type_check;
+alter table activities add constraint activities_trackable_type_check check (trackable_type in (
+  'article','category','user','group','comment','review','setting','thread','contact'));
+
+-- ---------------------------------------------------------------- row-level security (backstop)
+create function app_actor_type() returns text language sql stable as
+  $$ select coalesce(current_setting('app.actor_type', true), '') $$;
+create function app_user_id() returns bigint language sql stable as
+  $$ select nullif(current_setting('app.user_id', true), '')::bigint $$;
+create function app_contact_id() returns bigint language sql stable as
+  $$ select nullif(current_setting('app.contact_id', true), '')::bigint $$;
+create function app_flag(name text) returns boolean language sql stable as
+  $$ select coalesce(current_setting('app.' || name, true), '') = 'on' $$;
+
+alter table threads enable row level security;
+create policy threads_system on threads using (app_actor_type() = 'system');
+create policy threads_agent on threads using (
+  app_actor_type() = 'user' and (
+    app_flag('see_all')
+    or assignee_user_id = app_user_id()
+    or assignee_team_id in (select team_id from team_members where user_id = app_user_id())
+    or (assignee_user_id is null and assignee_team_id is null)
+  ));
+create policy threads_contact on threads using (
+  app_actor_type() = 'contact'
+  and contact_id = app_contact_id()
+  and (kind = 'conversation' or is_shared));
+
+alter table thread_parts enable row level security;
+create policy thread_parts_system on thread_parts using (app_actor_type() = 'system');
+create policy thread_parts_agent on thread_parts using (
+  app_actor_type() = 'user' and exists (select 1 from threads t where t.id = thread_id));   -- threads RLS applies inside
+create policy thread_parts_contact on thread_parts using (
+  app_actor_type() = 'contact'
+  and kind in ('comment','rating','article','close','open','ticket_state_change')
+  and exists (select 1 from threads t where t.id = thread_id));
+
+alter table contacts enable row level security;
+create policy contacts_system on contacts using (app_actor_type() = 'system');
+create policy contacts_agent on contacts using (
+  app_actor_type() = 'user' and (
+    app_flag('see_all_contacts')
+    or exists (select 1 from threads t where t.contact_id = contacts.id)));
+create policy contacts_self on contacts using (app_actor_type() = 'contact' and id = app_contact_id());
+
+alter table uploads enable row level security;
+create policy uploads_public on uploads using (not private) with check (true);   -- help-center media, unchanged from Part 1
+create policy uploads_private on uploads using (
+  app_actor_type() = 'system'
+  or (private and exists (
+        select 1 from part_attachments pa join thread_parts p on p.id = pa.part_id
+        where pa.upload_id = uploads.id)))                                  -- thread_parts RLS applies inside
+  with check (true);
+
+alter table audit_events enable row level security;
+create policy audit_insert on audit_events for insert with check (true);
+create policy audit_read on audit_events for select using (app_flag('compliance') or app_actor_type() = 'system');
+
+-- Grants (role names are deploy config; the app role must NOT own these tables, or RLS is bypassed):
+--   grant select, insert, update, delete on all tables in schema public to helpvibe_app;
+--   revoke update, delete on audit_events from helpvibe_app;
+--   grant usage on all sequences in schema public to helpvibe_app;
+
+-- ---------------------------------------------------------------- defaults
+insert into ticket_states (category, internal_label, external_label) values
+  ('submitted','Submitted','Submitted'),
+  ('in_progress','In progress','In progress'),
+  ('waiting_on_customer','Waiting on customer','Waiting on you'),
+  ('resolved','Resolved','Resolved');
+insert into settings (key, value) values
+  ('support.email_mode', '"link_only"'),          -- notification emails: 'link_only' | 'full'
+  ('support.retention_years', '7'),
+  ('support.store_identified_searches', 'false'),
+  ('security.idle_timeout_minutes', '15'),
+  ('security.require_2fa_for_agents', 'true');

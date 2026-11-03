@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>S03 Article page</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body class="reader">
+<div class="mock"><span>S03 · Article page</span><a href="index.html">All screens</a><span class="grow"></span><button data-toggle="notes">Show notes</button><button data-toggle="theme">Theme</button></div>
+
+<header class="site-head">
+  <div class="in">
+    <a class="wordmark" href="S01-kb-home.html"><span class="mark">h</span>Help Center</a>
+    <form class="search" style="width:320px" action="S04-search.html">
+      <svg class="i"><use href="#i-search"/></svg>
+      <input class="input" name="q" placeholder="Search" aria-label="Search">
+      <span class="kbd">/</span>
+    </form>
+    <span class="grow"></span>
+    <nav class="links"><a href="#">Contact support</a></nav>
+  </div>
+</header>
+
+<div class="article">
+  <nav class="chapter-nav" aria-label="Scheduling">
+    <div class="head"><span class="code">SCH</span>Scheduling<span class="n">1</span></div>
+    <a href="#"><span class="code">SCH·01</span>Appointment types</a>
+    <a href="#"><span class="code">SCH·02</span>Weekly availability</a>
+    <a href="#"><span class="code">SCH·05</span>Book for a patient</a>
+    <a href="#" class="on"><span class="code">SCH·07</span>Reschedule or cancel</a>
+    <a href="#"><span class="code">SCH·11</span>Text reminders</a>
+    <a href="#"><span class="code">SCH·12</span>Waitlists</a>
+    <div class="sub">Calendar sync</div>
+    <a href="#"><span class="code">SCH·20</span>Google Calendar</a>
+    <a href="#"><span class="code">SCH·21</span>Outlook</a>
+  </nav>
+
+  <article class="doc">
+    <div class="crumbs"><a href="S01-kb-home.html">Help Center</a> / <a href="#">Scheduling</a></div>
+    <h1>Reschedule or cancel an appointment</h1>
+    <p class="lede">Move an appointment to a new time, or cancel it and tell the patient why.</p>
+    <div class="docmeta">
+      <span class="code">SCH·07</span>
+      <span class="meta">Updated 3 Nov 2026</span>
+      <span class="meta">4 min read</span>
+      <span class="vis"><svg class="i"><use href="#i-building"/></svg>Staff only</span><span class="n">2</span>
+    </div>
+
+    <section id="s1">
+      <h2><span class="sec">1</span>Reschedule an appointment</h2>
+      <ol class="steps">
+        <li><span>Open <b>Calendar</b> and select the appointment.</span></li>
+        <li><span>Choose <b>Reschedule</b>.</span></li>
+        <li><span>Pick a new date and time. Times are shown in your time zone.</span></li>
+        <li><span>Decide whether to notify the patient, then choose <b>Save</b>.</span></li>
+      </ol>
+      <figure class="figure">
+        <div class="frame" role="img" aria-label="Calendar week with the appointment drawer open on the right">
+          <div class="cal">
+            <div></div><div></div><div class="b"></div><div></div><div></div>
+            <div></div><div class="b"></div><div></div><div></div><div></div>
+            <div></div><div></div><div></div><div class="b"></div><div></div>
+            <div></div><div></div><div></div><div></div><div class="b"></div>
+            <div></div><div></div><div></div><div></div><div></div>
+          </div>
+          <div class="drawer"><b style="color:var(--text);font-weight:500">Thu 6 Nov · 10:30</b><div class="bar" style="width:70%"></div><div class="bar" style="width:50%"></div><div class="bar" style="width:60%"></div><span class="btn sm">Reschedule</span></div>
+        </div>
+        <figcaption>The appointment drawer, opened from the calendar.</figcaption>
+      </figure><span class="n">3</span>
+    </section>
+
+    <section id="s2">
+      <h2><span class="sec">2</span>Cancel an appointment</h2>
+      <p>Cancelling frees the slot straight away. The patient gets an email with the reason you enter.</p>
+      <div class="note caution">
+        <div class="label"><svg class="i"><use href="#i-alert"/></svg>Late cancellations</div>
+        <p>Cancelling within 24 hours of the start may apply your late-cancellation fee. See <a href="#">BIL·15</a>.</p>
+      </div>
+      <div class="note">
+        <div class="label"><svg class="i"><use href="#i-info"/></svg>Patients can do this too</div>
+        <p>If you allow it in Settings → Booking, patients can reschedule from the link in their confirmation email.</p>
+      </div>
+    </section>
+
+    <section id="s3">
+      <h2><span class="sec">3</span>Common questions</h2>
+      <div class="qa">
+        <details open><summary>Can I undo a cancellation?<svg class="i"><use href="#i-down"/></svg></summary><p>No. Book a new appointment in the same slot instead. The cancelled one stays in the patient's history.</p></details>
+        <details><summary>What does the patient see?<svg class="i"><use href="#i-down"/></svg></summary><p>An email, and a text if reminders are on, with the new time or your reason for cancelling.</p></details>
+        <details><summary>Why is Reschedule missing for me?<svg class="i"><use href="#i-down"/></svg></summary><p>Your role needs the Manage appointments permission. Ask an admin.</p></details>
+      </div>
+    </section>
+
+    <div class="helpful">
+      <b>Did this answer your question?</b><span class="n">4</span>
+      <button class="btn sm"><svg class="i"><use href="#i-up"/></svg>Yes</button>
+      <button class="btn sm"><svg class="i"><use href="#i-downvote"/></svg>No</button>
+      <span class="quote-code">Asking support? Quote <span class="code">SCH·07</span></span>
+    </div>
+
+    <div class="related">
+      <h3>Related</h3>
+      <a href="#"><span class="code">SCH·11</span>Text message reminders</a>
+      <a href="#"><span class="code">BIL·15</span>Late-cancellation fees</a>
+      <a href="#"><span class="code">SCH·14</span>Let patients book online</a>
+    </div>
+  </article>
+
+  <aside class="toc" aria-label="On this page">
+    <div class="head">On this page<span class="n">5</span></div>
+    <a href="#s1" class="on"><span class="code">1</span>Reschedule</a>
+    <a href="#s2"><span class="code">2</span>Cancel</a>
+    <a href="#s3"><span class="code">3</span>Common questions</a>
+  </aside>
+</div>
+
+<footer class="site-foot" style="margin-top:64px">Help Center · Scheduling</footer>
+
+<section class="notes">
+  <h2>Notes · S03</h2>
+  <ol>
+    <li><b>Chapter navigation</b> lists the article's own chapter with its codes, like a manual's running index. On mobile it folds into the breadcrumb.</li>
+    <li><b>"Staff only"</b> shows only to signed-in staff, so they know a patient can't see this page. Patients never see it.</li>
+    <li><b>The figure</b> is drawn in the page's own colours here. In the real product, editors upload screenshots and they're framed the same way: hairline, 12px corners, caption underneath.</li>
+    <li><b>Feedback</b>: "No" opens one optional question, "What were you looking for?". The quoted code helps support find the page in one step. <span class="q">Q: should "No" also offer Contact support?</span></li>
+    <li><b>Numbered sections</b> (1, 2, 3) come from the H2s and match the contents list, so "see SCH·07 §2" means something.</li>
+  </ol>
+</section>
+<script src="mock.js"></script>
+</body>
+</html>

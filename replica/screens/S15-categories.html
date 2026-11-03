@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>S15 Chapters</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="mock"><span>S15 · Admin · Chapters (categories)</span><a href="index.html">All screens</a><span class="grow"></span><button data-toggle="notes">Show notes</button><button data-toggle="theme">Theme</button></div>
+
+<div class="app">
+  <nav class="side">
+    <a class="wordmark" href="#"><span class="mark">h</span>helpvibe</a>
+    <a class="nav" href="#"><svg class="i"><use href="#i-home"/></svg>Overview</a>
+    <a class="nav" href="S11-articles.html"><svg class="i"><use href="#i-file"/></svg>Articles</a>
+    <a class="nav" href="#"><svg class="i"><use href="#i-inbox"/></svg>Needs my review<span class="count">2</span></a>
+    <a class="nav on" href="S15-categories.html"><svg class="i"><use href="#i-folder"/></svg>Chapters</a>
+    <a class="nav" href="#"><svg class="i"><use href="#i-image"/></svg>Files</a>
+    <a class="nav" href="S19-analytics.html"><svg class="i"><use href="#i-chart"/></svg>Analytics</a>
+    <div class="label">In our app</div>
+    <a class="nav" href="#"><svg class="i"><use href="#i-sign"/></svg>Page suggestions</a>
+    <a class="nav" href="#"><svg class="i"><use href="#i-brush"/></svg>Widget</a>
+    <div class="label">Admin</div>
+    <a class="nav" href="#"><svg class="i"><use href="#i-users"/></svg>People</a>
+    <a class="nav" href="#"><svg class="i"><use href="#i-key"/></svg>API and webhooks</a>
+    <a class="nav" href="#"><svg class="i"><use href="#i-sliders"/></svg>Settings</a>
+    <a class="nav" href="#"><svg class="i"><use href="#i-db"/></svg>Backup and import</a>
+    <div class="me"><span class="avatar">DK</span>Dana Kim</div>
+  </nav>
+
+  <main class="main">
+    <div class="head">
+      <h1>Chapters</h1><span class="count">8</span><span class="n">1</span>
+      <span class="grow"></span>
+      <button class="btn primary"><svg class="i"><use href="#i-plus"/></svg>New chapter</button>
+    </div>
+
+    <div class="cat-grid">
+      <div class="card">
+        <ul class="tree">
+          <li><div class="node"><svg class="i grip"><use href="#i-grip"/></svg><span class="code">GET</span><span class="name">Getting started</span><span class="vis"><svg class="i"><use href="#i-globe"/></svg></span><span class="count">12</span></div></li>
+          <li><div class="node sel"><svg class="i grip"><use href="#i-grip"/></svg><span class="code">SCH</span><span class="name">Scheduling</span><span class="vis"><svg class="i"><use href="#i-globe"/></svg></span><span class="count">24</span></div>
+            <ul>
+              <li><div class="node"><svg class="i grip"><use href="#i-grip"/></svg><span class="code"></span><span class="name">Availability</span><span class="count">6</span></div></li>
+              <li><div class="node"><svg class="i grip"><use href="#i-grip"/></svg><span class="code"></span><span class="name">Reminders</span><span class="count">4</span></div></li>
+              <li><div class="node drop"><svg class="i grip"><use href="#i-grip"/></svg><span class="code"></span><span class="name">Calendar sync <span class="meta">· drop to nest here</span></span><span class="count">5</span></div><span class="n">2</span></li>
+            </ul>
+          </li>
+          <li><div class="node"><svg class="i grip"><use href="#i-grip"/></svg><span class="code">PAT</span><span class="name">Patients and records</span><span class="vis"><svg class="i"><use href="#i-globe"/></svg></span><span class="count">31</span></div></li>
+          <li><div class="node"><svg class="i grip"><use href="#i-grip"/></svg><span class="code">BIL</span><span class="name">Billing and payments</span><span class="vis"><svg class="i"><use href="#i-globe"/></svg></span><span class="count">18</span></div></li>
+          <li><div class="node"><svg class="i grip"><use href="#i-grip"/></svg><span class="code">ACC</span><span class="name">Account and security</span><span class="vis"><svg class="i"><use href="#i-globe"/></svg></span><span class="count">9</span></div></li>
+          <li><div class="node"><svg class="i grip"><use href="#i-grip"/></svg><span class="code">INT</span><span class="name">Integrations</span><span class="vis"><svg class="i"><use href="#i-globe"/></svg></span><span class="count">7</span></div></li>
+          <li><div class="node"><svg class="i grip"><use href="#i-grip"/></svg><span class="code">SUP</span><span class="name">Support playbook</span><span class="vis"><svg class="i"><use href="#i-lock"/></svg>Support team</span><span class="count">27</span></div></li>
+          <li><div class="node"><svg class="i grip"><use href="#i-grip"/></svg><span class="code">REL</span><span class="name">Release notes</span><span class="vis"><svg class="i"><use href="#i-building"/></svg>Staff</span><span class="count">15</span></div></li>
+          <li><div class="node archived"><svg class="i grip"><use href="#i-grip"/></svg><span class="code">OLD</span><span class="name">Legacy, archived</span><span class="count">4</span></div></li>
+        </ul>
+      </div>
+
+      <div class="card form-card">
+        <h2><span class="code" style="color:var(--ink)">SCH</span>Scheduling</h2>
+        <label class="field"><span>Name</span><input class="input" value="Scheduling"></label>
+        <label class="field"><span>Code</span><input class="input mono" value="SCH" style="width:120px"><div class="hint">Changing it renumbers all 24 articles, and old codes keep working</div></label><span class="n">3</span>
+        <label class="field"><span>Description</span><textarea class="input" rows="2">Appointments, availability and reminders.</textarea></label>
+        <label class="field"><span>Who can see it</span><select class="input"><option>Everyone</option><option>Staff</option><option>Specific people</option></select>
+          <div class="hint">Articles inside can be more restricted, never less</div></label><span class="n">4</span>
+        <div class="acts"><button class="btn primary">Save</button><span class="grow"></span><button class="btn quiet">Archive</button><button class="btn quiet" disabled title="Move its 24 articles and 3 sub-chapters first">Delete</button><span class="n">5</span></div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<section class="notes">
+  <h2>Notes · S15</h2>
+  <ol>
+    <li><b>"Chapters" instead of "categories"</b>, to fit the handbook idea. It's the same thing as Helpjuice categories, only the label changes. <span class="q">Q: keep "Chapters", or stay with "Categories"?</span></li>
+    <li><b>Drag to reorder or nest</b>, with keyboard alternatives. Dropping a chapter into its own sub-chapter is refused.</li>
+    <li><b>Codes</b> belong to top-level chapters. Sub-chapters share their parent's code, so SCH·20 is the Google Calendar article inside Calendar sync.</li>
+    <li><b>The most restrictive setting wins.</b> An "Everyone" article inside a staff-only chapter is staff-only, and the editor warns about it.</li>
+    <li><b>Delete is blocked</b> while the chapter still has articles or sub-chapters, and the database enforces it too. Archive hides everything from readers but keeps it.</li>
+  </ol>
+</section>
+<script src="mock.js"></script>
+</body>
+</html>

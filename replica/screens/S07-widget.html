@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>S07 In-app help widget</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="mock"><span>S07 · In-app help widget</span><a href="index.html">All screens</a><span class="grow"></span><button data-toggle="notes">Show notes</button><button data-toggle="theme">Theme</button></div>
+
+<div class="host">
+  <div class="host-top"><b>Our app</b><span>Calendar</span><span>Patients</span><span class="on">Billing</span><span>Reports</span><span class="tag-host">stand-in for our product</span></div>
+  <div class="host-body">
+    <div class="host-side"><div>Overview</div><div class="on">Invoices</div><div>Claims</div><div>Payouts</div><div>Settings</div></div>
+    <div class="host-main"><div class="ph"></div><div class="ph t"></div><div class="ph"></div></div>
+  </div>
+
+  <div class="widget" role="dialog" aria-label="Help">
+    <div class="w-head"><b>Help</b><span class="n">1</span><button class="x" aria-label="Close"><svg class="i"><use href="#i-x"/></svg></button></div>
+    <div class="w-search"><div class="search"><svg class="i"><use href="#i-search"/></svg><input class="input" placeholder="Search help" aria-label="Search help"></div></div>
+    <div class="w-body">
+      <div class="w-label">For this page<span class="mono t3">/billing/invoices</span><span class="n">2</span></div>
+      <div class="answer">
+        <span class="code">BIL·07</span>
+        <h3>Send an invoice to a patient</h3>
+        <ol><li>Open the invoice and check the line items.</li><li>Choose Send, then pick email or text.</li><li>The patient can pay from the link straight away.</li></ol>
+        <a class="more" href="#">Read the full article</a>
+      </div><span class="n">3</span>
+      <div class="w-label" style="margin-top:16px">Also on this page</div>
+      <ul class="w-list">
+        <li><a href="#"><span class="code">BIL·09</span><span>Mark an invoice as paid</span><svg class="i"><use href="#i-right"/></svg></a></li>
+        <li><a href="#"><span class="code">BIL·12</span><span>Refund a payment</span><svg class="i"><use href="#i-right"/></svg></a></li>
+        <li><a href="#"><span class="code">BIL·03</span><span>Add a discount or write-off</span><svg class="i"><use href="#i-right"/></svg></a></li>
+      </ul>
+    </div>
+    <div class="w-foot"><a href="#" class="quiet">Open help center<svg class="i"><use href="#i-out"/></svg></a><a class="btn sm" href="#">Contact support</a></div>
+  </div>
+  <button class="launcher"><svg class="i"><use href="#i-help"/></svg>Help<span class="n">4</span></button>
+</div>
+
+<main class="wrap" style="padding:48px 24px 0">
+  <p class="section-title" style="margin-top:0">Other states</p>
+  <div class="states">
+    <div>
+      <p class="cap">Searching<span class="n">5</span></p>
+      <div class="widget">
+        <div class="w-head"><b>Help</b><button class="x"><svg class="i"><use href="#i-x"/></svg></button></div>
+        <div class="w-search"><div class="search"><svg class="i"><use href="#i-search"/></svg><input class="input" value="refund"></div></div>
+        <div class="w-body">
+          <div class="w-label">3 results</div>
+          <ul class="w-list">
+            <li><a href="#"><span class="code">BIL·12</span><span><mark>Refund</mark> a payment<p>Issue a full or partial <mark>refund</mark> from the invoice</p></span><svg class="i"><use href="#i-right"/></svg></a></li>
+            <li><a href="#"><span class="code">BIL·15</span><span>Late-cancellation fees<p>Fees can be <mark>refunded</mark> by an admin</p></span><svg class="i"><use href="#i-right"/></svg></a></li>
+            <li><a href="#"><span class="code">BIL·20</span><span>Payout schedule<p><mark>Refunds</mark> come out of the next payout</p></span><svg class="i"><use href="#i-right"/></svg></a></li>
+          </ul>
+        </div>
+        <div class="w-foot"><a href="#" class="quiet">Open help center<svg class="i"><use href="#i-out"/></svg></a><a class="btn sm" href="#">Contact support</a></div>
+      </div>
+    </div>
+
+    <div>
+      <p class="cap">Reading an article<span class="n">6</span></p>
+      <div class="widget">
+        <div class="w-head"><button class="x" style="margin:0 0 0 -8px" aria-label="Back"><svg class="i"><use href="#i-back"/></svg></button><span class="code">BIL·12</span><button class="x" aria-label="Close"><svg class="i"><use href="#i-x"/></svg></button></div>
+        <div class="w-body" style="padding-top:16px">
+          <h3 style="font:400 22px/28px var(--serif)">Refund a payment</h3>
+          <p class="meta" style="margin-top:4px">Billing and payments · Updated 2 days ago</p>
+          <ol class="steps" style="margin-top:16px"><li><span style="font-size:14px;line-height:22px">Open the invoice.</span></li><li><span style="font-size:14px;line-height:22px">Choose Refund.</span></li><li><span style="font-size:14px;line-height:22px">Pick full or partial, then confirm.</span></li></ol>
+          <div class="note" style="margin:16px 0"><p style="font-size:14px !important;line-height:22px !important">Card refunds take 5 to 10 business days to reach the patient.</p></div>
+          <div class="row" style="font-size:13px;color:var(--text-2)">Did this help?<button class="btn sm quiet"><svg class="i"><use href="#i-up"/></svg>Yes</button><button class="btn sm quiet"><svg class="i"><use href="#i-downvote"/></svg>No</button></div>
+        </div>
+        <div class="w-foot"><a href="#" class="quiet">Open in new tab<svg class="i"><use href="#i-out"/></svg></a><a class="btn sm" href="#">Contact support</a></div>
+      </div>
+    </div>
+
+    <div>
+      <p class="cap">No results<span class="n">7</span></p>
+      <div class="widget">
+        <div class="w-head"><b>Help</b><button class="x"><svg class="i"><use href="#i-x"/></svg></button></div>
+        <div class="w-search"><div class="search"><svg class="i"><use href="#i-search"/></svg><input class="input" value="medicare crossover"></div></div>
+        <div class="w-body">
+          <div style="padding:32px 0 0">
+            <h3 style="font:400 20px/26px var(--serif)">Nothing on that yet</h3>
+            <p class="t2" style="font-size:14px;margin-top:8px">We've noted the search so an article gets written. Support can answer it today.</p>
+            <a class="btn primary sm" href="#" style="margin-top:16px">Ask support</a>
+            <p class="meta" style="margin-top:24px">Or browse <a href="#">Billing</a>, <a href="#">Claims</a></p>
+          </div>
+        </div>
+        <div class="w-foot"><a href="#" class="quiet">Open help center<svg class="i"><use href="#i-out"/></svg></a><span></span></div>
+      </div>
+    </div>
+
+    <div>
+      <p class="cap">Signed-in staff see internal articles<span class="n">8</span></p>
+      <div class="widget">
+        <div class="w-head"><b>Help</b><button class="x"><svg class="i"><use href="#i-x"/></svg></button></div>
+        <div class="w-search"><div class="search"><svg class="i"><use href="#i-search"/></svg><input class="input" placeholder="Search help"></div></div>
+        <div class="w-body">
+          <div class="w-label">For this page</div>
+          <ul class="w-list">
+            <li><a href="#"><span class="code">BIL·07</span><span>Send an invoice to a patient</span><svg class="i"><use href="#i-right"/></svg></a></li>
+            <li><a href="#"><span class="code">SUP·04</span><span>Handling disputed invoices<p class="vis" style="margin:2px 0 0"><svg class="i"><use href="#i-lock"/></svg>Support team only</p></span><svg class="i"><use href="#i-right"/></svg></a></li>
+            <li><a href="#"><span class="code">SUP·09</span><span>Issuing goodwill credits<p class="vis" style="margin:2px 0 0"><svg class="i"><use href="#i-building"/></svg>Staff only</p></span><svg class="i"><use href="#i-right"/></svg></a></li>
+          </ul>
+        </div>
+        <div class="w-foot"><span class="meta">Signed in as dana@ourcompany.com</span><span></span></div>
+      </div>
+    </div>
+  </div>
+
+  <p class="section-title">How our app adds it<span class="n">9</span></p>
+  <div class="card"><pre class="snippet">&lt;script src="https://help.ourcompany.com/embed.js" async&gt;&lt;/script&gt;
+
+<span class="c">// optional: show internal articles to signed-in staff</span>
+HelpVibe.identify(tokenFromOurBackend)
+
+<span class="c">// optional: open one article from our own "?" button</span>
+HelpVibe.open({ article: 'BIL·07' })</pre></div>
+</main>
+
+<section class="notes">
+  <h2>Notes · S07</h2>
+  <ol>
+    <li><b>Panel</b> is 384 × 600 in the bottom-right and full width on phones. It runs in an iframe, so our app's styles can't break it and its styles can't break our app. It uses the neutral palette, so it sits comfortably on any of our screens.</li>
+    <li><b>For this page</b>: admins map a page pattern (<span class="mono">/billing/*</span>) to an ordered list of articles. With no matching rule, it falls back to the most-read articles. <span class="q">Q: do we do page-based help in Helpjuice today, or is this new?</span></li>
+    <li><b>The answer card</b> is this screen's one rich moment: the top suggestion's first steps, set like the article, so most people never need to click through.</li>
+    <li><b>Launcher</b> can be hidden if our app has its own "?" button that calls <span class="mono">HelpVibe.open()</span>.</li>
+    <li><b>Live results</b> as you type, using the same engine and ranking as S04.</li>
+    <li><b>Reading stays in the panel.</b> Links to other help articles stay inside it, and links into our app move the page behind it.</li>
+    <li><b>No results</b> is logged as a dead end along with the page it happened on. <span class="q">Q: should "Ask support" open our own chat or ticket form instead?</span></li>
+    <li><b>Internal and private articles</b> appear only when our backend passes a short-lived signed token. Patients never see them.</li>
+    <li><b>One script tag</b>; the rest is optional. <span class="q">Please send how our app embeds Helpjuice today so we can match it.</span></li>
+  </ol>
+</section>
+<script src="mock.js"></script>
+</body>
+</html>

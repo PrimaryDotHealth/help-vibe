@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>S11 Article list</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="mock"><span>S11 · Admin · Articles</span><a href="index.html">All screens</a><span class="grow"></span><button data-toggle="notes">Show notes</button><button data-toggle="theme">Theme</button></div>
+
+<div class="app">
+  <nav class="side">
+    <a class="wordmark" href="#"><span class="mark">h</span>helpvibe</a>
+    <a class="nav" href="#"><svg class="i"><use href="#i-home"/></svg>Overview</a>
+    <a class="nav on" href="S11-articles.html"><svg class="i"><use href="#i-file"/></svg>Articles</a>
+    <a class="nav" href="#"><svg class="i"><use href="#i-inbox"/></svg>Needs my review<span class="count">2</span></a>
+    <a class="nav" href="S15-categories.html"><svg class="i"><use href="#i-folder"/></svg>Chapters</a>
+    <a class="nav" href="#"><svg class="i"><use href="#i-image"/></svg>Files</a>
+    <a class="nav" href="S19-analytics.html"><svg class="i"><use href="#i-chart"/></svg>Analytics</a>
+    <div class="label">In our app</div>
+    <a class="nav" href="#"><svg class="i"><use href="#i-sign"/></svg>Page suggestions</a>
+    <a class="nav" href="#"><svg class="i"><use href="#i-brush"/></svg>Widget</a>
+    <div class="label">Admin</div>
+    <a class="nav" href="#"><svg class="i"><use href="#i-users"/></svg>People</a>
+    <a class="nav" href="#"><svg class="i"><use href="#i-key"/></svg>API and webhooks</a>
+    <a class="nav" href="#"><svg class="i"><use href="#i-sliders"/></svg>Settings</a>
+    <a class="nav" href="#"><svg class="i"><use href="#i-db"/></svg>Backup and import</a>
+    <div class="me"><span class="avatar">DK</span>Dana Kim</div>
+  </nav>
+
+  <main class="main">
+    <div class="head">
+      <h1>Articles</h1><span class="count">142</span>
+      <span class="grow"></span>
+      <a class="btn quiet" href="#">Import</a>
+      <a class="btn primary" href="S12-editor.html"><svg class="i"><use href="#i-plus"/></svg>New article</a>
+    </div>
+
+    <div class="toolbar-row">
+      <div class="seg"><a href="#" class="on">All <span class="code">142</span></a><a href="#">Drafts <span class="code">9</span></a><a href="#">In review <span class="code">3</span></a><a href="#">Scheduled <span class="code">1</span></a><a href="#">Archived <span class="code">4</span></a></div><span class="n">1</span>
+      <span class="grow"></span>
+      <div class="search"><svg class="i"><use href="#i-search"/></svg><input class="input" style="height:32px;font-size:13px" placeholder="Search or code"></div>
+      <select class="input"><option>Any chapter</option></select>
+      <select class="input"><option>Anyone</option></select>
+    </div>
+
+    <div class="card">
+      <div class="selection"><b style="font-weight:500">2 selected</b><a href="#">Move</a><a href="#">Change visibility</a><a href="#">Archive</a><span class="n">2</span></div>
+      <div class="table-wrap">
+      <table class="data">
+        <thead><tr><th style="width:40px"><input type="checkbox" aria-label="Select all"></th><th>Article</th><th>Status</th><th>Who can see it</th><th>Updated</th><th class="num">Views, 30 days</th><th class="num">Helpful</th></tr></thead>
+        <tbody>
+          <tr><td><input type="checkbox" checked aria-label="Select"></td><td><div class="title-cell"><span class="code">SCH·07</span><a href="S12-editor.html">Reschedule or cancel an appointment</a></div></td><td><span class="status live">Live, editing v3</span><span class="n">3</span></td><td><span class="vis"><svg class="i"><use href="#i-building"/></svg>Staff</span></td><td class="meta">Today · Dana</td><td class="num">1,204</td><td class="num">92%</td></tr>
+          <tr><td><input type="checkbox" checked aria-label="Select"></td><td><div class="title-cell"><span class="code">BIL·07</span><a href="#">Send an invoice to a patient</a></div></td><td><span class="status live">Live</span></td><td><span class="vis"><svg class="i"><use href="#i-globe"/></svg>Everyone</span></td><td class="meta">2 days · Sam</td><td class="num">988</td><td class="num">88%</td></tr>
+          <tr><td><input type="checkbox" aria-label="Select"></td><td><div class="title-cell"><span class="code">SCH·11</span><a href="#">Text message reminders</a></div></td><td><span class="status review">In review</span></td><td><span class="vis"><svg class="i"><use href="#i-globe"/></svg>Everyone</span></td><td class="meta">2 days · Lee</td><td class="num t3">–</td><td class="num t3">–</td></tr>
+          <tr><td><input type="checkbox" aria-label="Select"></td><td><div class="title-cell"><span class="code">SUP·04</span><a href="#">Handling disputed invoices</a></div></td><td><span class="status changes">Changes requested</span></td><td><span class="vis"><svg class="i"><use href="#i-lock"/></svg>Support team</span></td><td class="meta">3 days · Dana</td><td class="num">41</td><td class="num t3">–</td></tr>
+          <tr><td><input type="checkbox" aria-label="Select"></td><td><div class="title-cell"><span class="code">BIL·21</span><a href="#">2027 fee schedule</a></div></td><td><span class="status scheduled">Goes live 1 Jan</span></td><td><span class="vis"><svg class="i"><use href="#i-globe"/></svg>Everyone</span></td><td class="meta">5 days · Sam</td><td class="num t3">–</td><td class="num t3">–</td></tr>
+          <tr><td><input type="checkbox" aria-label="Select"></td><td><div class="title-cell"><span class="code">INT·06</span><a href="#">Connect Outlook calendar</a></div></td><td><span class="status draft">Draft</span></td><td><span class="vis"><svg class="i"><use href="#i-globe"/></svg>Everyone</span></td><td class="meta">1 week · Lee</td><td class="num t3">–</td><td class="num t3">–</td></tr>
+          <tr><td><input type="checkbox" aria-label="Select"></td><td><div class="title-cell"><span class="code">REP·02</span><a href="#">Export your reports to CSV</a></div></td><td><span class="status live">Live</span></td><td><span class="vis"><svg class="i"><use href="#i-globe"/></svg>Everyone</span></td><td class="meta">1 week · Sam</td><td class="num">402</td><td class="num" style="color:var(--neg)">61%<span class="n">4</span></td></tr>
+        </tbody>
+      </table>
+      </div>
+      <div class="pager"><span>1–25 of 142</span><span class="grow"></span><a class="btn sm quiet" href="#">Previous</a><a class="btn sm" href="#">Next</a></div>
+    </div>
+
+    <p class="section-title">Before anything is written<span class="n">5</span></p>
+    <div class="card blank">
+      <h2>No articles yet</h2>
+      <p>Write the first one, or bring everything across from Helpjuice, including chapters, images and redirects for old links.</p>
+      <div class="row"><a class="btn primary" href="#">Import from Helpjuice</a><a class="btn quiet" href="#">Write an article</a></div>
+    </div>
+  </main>
+</div>
+
+<section class="notes">
+  <h2>Notes · S11</h2>
+  <ol>
+    <li><b>Status is the main filter.</b> Chapter and author narrow it further. Filters are kept in the URL, so a view can be shared.</li>
+    <li><b>Bulk actions</b> appear only when rows are selected. Draft writers only get "Move".</li>
+    <li><b>"Live, editing v3"</b> means the published article is unchanged while someone works on a new version. This is the status that most needs to be clear. <span class="q">Q: does that wording read right to the team?</span></li>
+    <li><b>Helpful</b> turns red below 70%, the one place this table uses colour, so weak articles stand out.</li>
+    <li><b>Empty state</b> leads with the Helpjuice import, since that's how day one will actually start.</li>
+  </ol>
+</section>
+<script src="mock.js"></script>
+</body>
+</html>
