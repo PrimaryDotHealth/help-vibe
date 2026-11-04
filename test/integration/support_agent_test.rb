@@ -75,8 +75,9 @@ class SupportAgentTest < ActionDispatch::IntegrationTest
     part = @billing_thread.reply!(user: users(:two), body: "See BIL·01 and BIL·02")
     helper = ApplicationController.new.tap { _1.request = ActionDispatch::TestRequest.create }.helpers
     html = helper.render_message(part, for_contact: true, widget: true)
-    assert_includes html, ">BIL·01</a>"
-    assert_not_includes html, ">BIL·02</a>", "staff-only articles aren't linked for contacts"
+    assert_includes html, ">Refunds</a>", "patients see the article's title, not its code"
+    assert_not_includes html, "Staff refund rules", "staff-only articles aren't linked for contacts"
+    assert_includes helper.render_message(part), ">BIL·01</a>", "agents still see the code"
   end
 
   test "new parts are broadcast to agents, and comments to the contact" do

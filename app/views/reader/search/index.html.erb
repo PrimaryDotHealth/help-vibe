@@ -11,8 +11,7 @@
   <% elsif @results.any? %>
     <div class="summary"><span class="meta"><%= pluralize(@results.size, "result") %> for <b class="t2" style="font-weight:500"><%= @query %></b><%= ", using close matches" if @fuzzy %></span></div>
     <% @results.each do |r| %>
-      <div class="hit">
-        <span class="code"><%= r.code %></span>
+      <div class="hit plain">
         <div>
           <h2><%= link_to r.title, article_path(r.slug, sid: @event&.id) %></h2>
           <div class="path"><%= r.chapter %></div>

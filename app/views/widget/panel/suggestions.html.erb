@@ -3,7 +3,7 @@
     <div class="w-label" style="margin-top:12px">These might answer it</div>
     <ul class="w-list">
       <% @results.each do |r| %>
-        <li><%= link_to widget_article_path(r.slug, page: params[:page]), target: "_top" do %><%= code_tag r.code %><span><%= r.title %></span><%= icon "right" %><% end %></li>
+        <li><%= link_to widget_article_path(r.slug, page: params[:page]), target: "_top" do %><span><%= r.title %></span><%= icon "right" %><% end %></li>
       <% end %>
     </ul>
   <% end %>

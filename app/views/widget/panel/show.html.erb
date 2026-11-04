@@ -4,7 +4,6 @@
   <div class="w-label"><%= label %><% if @page.present? %><span class="mono t3"><%= @page %></span><% end %></div>
   <% if (top = featured.first) && (v = top.live_version) %>
     <div class="answer">
-      <%= code_tag top.code %>
       <h3><%= v.title %></h3>
       <% steps = v.current_revision&.body&.body&.to_html.to_s.then { Nokogiri::HTML5.fragment(_1).css("ol > li").first(3).map { |li| li.text.squish } } %>
       <% if steps.present? %>
@@ -19,7 +18,7 @@
       <% if @suggested.present? %><div class="w-label" style="margin-top:16px">Also on this page</div><% end %>
       <ul class="w-list" style="margin-top:<%= @suggested.present? ? 0 : 12 %>px">
         <% rest.each do |a| %>
-          <li><%= link_to widget_article_path(a, page: @page) do %><%= code_tag a.code %><span><%= a.live_version.title %></span><%= icon "right" %><% end %></li>
+          <li><%= link_to widget_article_path(a, page: @page) do %><span><%= a.live_version.title %></span><%= icon "right" %><% end %></li>
         <% end %>
       </ul>
     <% end %>
@@ -27,7 +26,7 @@
       <div class="w-label" style="margin-top:16px">Most read</div>
       <ul class="w-list">
         <% @popular.first(3).each do |a| %>
-          <li><%= link_to widget_article_path(a, page: @page) do %><%= code_tag a.code %><span><%= a.live_version.title %></span><%= icon "right" %><% end %></li>
+          <li><%= link_to widget_article_path(a, page: @page) do %><span><%= a.live_version.title %></span><%= icon "right" %><% end %></li>
         <% end %>
       </ul>
     <% end %>

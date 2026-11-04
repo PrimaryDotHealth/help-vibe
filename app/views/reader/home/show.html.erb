@@ -9,7 +9,7 @@
     <div>
       <%= form_with url: search_path, method: :get, class: "search lg" do %>
         <%= icon "search" %>
-        <%= search_field_tag :q, nil, class: "input", placeholder: "Search or enter a code like SCH·07", "aria-label": "Search", autofocus: true %>
+        <%= search_field_tag :q, nil, class: "input", placeholder: "Search for an answer, e.g. reset password", "aria-label": "Search", autofocus: true %>
       <% end %>
       <% if @popular.any? %>
         <p class="popular">Most read: <% @popular.each do |a| %><%= link_to a.live_version.title, article_path(a) %><% end %></p>
@@ -24,11 +24,11 @@
       <% @chapters.each do |chapter| %>
         <% articles = @by_chapter.fetch(chapter.id, []) %>
         <section class="chapter">
-          <div class="chapter-head"><%= code_tag chapter.code %><h2><%= link_to chapter.name, chapter_path(chapter), style: "color:inherit" %></h2><span class="meta count"><%= pluralize(articles.size, "article") %></span></div>
+          <div class="chapter-head"><h2><%= link_to chapter.name, chapter_path(chapter), style: "color:inherit" %></h2><span class="meta count"><%= pluralize(articles.size, "article") %></span></div>
           <% if chapter.description.present? %><p><%= chapter.description %></p><% end %>
           <ul>
             <% articles.sort_by { [ -_1.views, _1.code ] }.first(3).each do |a| %>
-              <li><%= code_tag a.code %><%= link_to a.live_version.title, article_path(a) %></li>
+              <li><%= link_to a.live_version.title, article_path(a) %></li>
             <% end %>
           </ul>
           <% if articles.size > 3 %><%= link_to "All #{articles.size} in #{chapter.name}", chapter_path(chapter), class: "all" %><% end %>

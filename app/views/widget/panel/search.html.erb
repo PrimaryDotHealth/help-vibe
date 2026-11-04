@@ -3,7 +3,7 @@
     <div class="w-label"><%= pluralize(@results.size, "result") %><%= ", close matches" if @fuzzy %></div>
     <ul class="w-list">
       <% @results.each do |r| %>
-        <li><%= link_to widget_article_path(r.slug, sid: @event&.id, page: params[:page]) do %><%= code_tag r.code %><span><%= r.title %><% if r.snippet.present? %><p><%= sanitize r.snippet, tags: %w[mark] %></p><% end %></span><%= icon "right" %><% end %></li>
+        <li><%= link_to widget_article_path(r.slug, sid: @event&.id, page: params[:page]) do %><span><%= r.title %><% if r.snippet.present? %><p><%= sanitize r.snippet, tags: %w[mark] %></p><% end %></span><%= icon "right" %><% end %></li>
       <% end %>
     </ul>
   <% elsif @query.present? %>

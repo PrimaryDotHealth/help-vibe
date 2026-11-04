@@ -1,40 +1,42 @@
 <% content_for :title, @version.title %>
 <% body, toc = article_body_with_toc(@version.current_revision) %>
-<div class="article">
-  <nav class="chapter-nav" aria-label="<%= @chapter.name %>">
-    <div class="head"><%= code_tag @chapter.code %><%= @chapter.name %></div>
-    <% @siblings.each do |a| %>
-      <%= link_to article_path(a), class: ("on" if a == @article) do %><%= code_tag a.code %><%= a.live_version&.title %><% end %>
-    <% end %>
-  </nav>
+<% others = @siblings.reject { _1 == @article } %>
+<div class="article <%= "has-toc" if toc.size > 1 %> <%= "no-nav" if others.empty? %>">
+  <% if others.any? %>
+    <nav class="chapter-nav" aria-label="<%= @chapter.name %>">
+      <div class="head"><%= link_to @chapter.name, chapter_path(@chapter), style: "color:inherit" %></div>
+      <% @siblings.each do |a| %>
+        <%= link_to a.live_version&.title, article_path(a), class: ("on" if a == @article) %>
+      <% end %>
+    </nav>
+  <% end %>
 
   <article class="doc">
     <% if @preview %><div class="flash" style="margin:0 0 16px">Preview of an unpublished version. Readers can't see this yet.</div><% end %>
     <% if @older %><div class="flash" style="margin:0 0 16px">You're reading version <%= @version.number %>. <%= link_to "Read the current version", article_path(@article) %></div><% end %>
-    <div class="crumbs"><%= link_to "Help Center", root_path %> / <%= link_to @chapter.name, chapter_path(@chapter) %></div>
+    <div class="crumbs"><%= link_to "Help Center", root_path %> <span aria-hidden="true">›</span> <%= link_to @chapter.name, chapter_path(@chapter) %></div>
     <h1><%= @version.title %></h1>
     <% if @version.subtitle.present? %><p class="lede"><%= @version.subtitle %></p><% end %>
     <div class="docmeta">
-      <%= code_tag @article.code %>
-      <span class="meta">Updated <%= (@version.published_at || @version.updated_at).strftime("%-d %b %Y") %></span>
+      <span class="meta">Updated <%= (@version.published_at || @version.updated_at).strftime("%-d %B %Y") %></span>
       <% if viewer && @article.accessibility != "public" %><%= visibility_tag @article.accessibility %><% end %>
     </div>
-    <div class="rich numbered"><%= body %></div>
+    <div class="rich"><%= body %></div>
 
     <%= render "reader/articles/helpful", article: @article, vote: nil, source: "kb" unless @preview %>
 
     <% if @related.any? %>
       <div class="related">
-        <h3>Related</h3>
-        <% @related.each do |a| %><%= link_to article_path(a) do %><%= code_tag a.code %><%= a.live_version.title %><% end %><% end %>
+        <h3>Related articles</h3>
+        <% @related.each do |a| %><%= link_to a.live_version.title, article_path(a) %><% end %>
       </div>
     <% end %>
   </article>
 
-  <aside class="toc" aria-label="On this page">
-    <% if toc.size > 1 %>
+  <% if toc.size > 1 %>
+    <aside class="toc" aria-label="On this page">
       <div class="head">On this page</div>
-      <% toc.each_with_index do |(id, text), i| %><a href="#<%= id %>"><span class="code"><%= i + 1 %></span><%= text %></a><% end %>
-    <% end %>
-  </aside>
+      <% toc.each do |id, text| %><a href="#<%= id %>"><%= text %></a><% end %>
+    </aside>
+  <% end %>
 </div>

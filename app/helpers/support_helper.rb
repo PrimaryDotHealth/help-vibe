@@ -11,7 +11,9 @@ module SupportHelper
       articles = Article.where(code: codes).select { _1.visible_to?(viewer) }.index_by(&:code)
       html = html.gsub(CODE) do
         code = Regexp.last_match(0)
-        (a = articles[code]) ? link_to(code, widget ? widget_article_path(a) : article_path(a), class: "code-link", target: (widget ? nil : "_blank")) : code
+        next code unless (a = articles[code])
+        label = for_contact ? a.live_version&.title || code : code   # patients see the title, staff the code
+        link_to(label, widget ? widget_article_path(a) : article_path(a), class: (for_contact ? nil : "code-link"), target: (widget ? nil : "_blank"))
       end
     end
     auto_link_urls(html).html_safe

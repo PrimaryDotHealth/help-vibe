@@ -575,3 +575,36 @@ lexxy-editor, .lexxy-content {
 .toast .x:hover { background: var(--raised); color: var(--text); }
 .toast.leaving { opacity: 0; transform: translateY(-4px); transition: opacity 200ms var(--ease), transform 200ms var(--ease); }
 @keyframes toast-in { from { opacity: 0; transform: translateY(-6px); } }
+
+/* ---------- article page, reader-friendly (2026-11-04) ---------- */
+.article { grid-template-columns: 220px minmax(0, 720px); justify-content: center; gap: 64px; padding-top: 56px; }
+.article.has-toc { grid-template-columns: 220px minmax(0, 720px) 200px; }
+.chapter-nav .head { font-weight: 500; padding: 0 8px 12px; }
+.chapter-nav a { display: block; padding: 6px 8px; line-height: 20px; }
+.doc .crumbs a:hover { color: var(--text-2); }
+.doc .docmeta { margin-top: 16px; }
+.toc a { display: block; padding: 4px 0 4px 12px; border-left: 1px solid var(--line); }
+.toc a:hover { color: var(--text); text-decoration: none; border-color: var(--text-3); }
+.doc .rich h2 { display: block; margin: 40px 0 12px; }
+.doc .rich h2::before { content: none; }
+/* numbered lists read as steps */
+.doc .rich ol { list-style: none; counter-reset: step; padding: 0; margin: 16px 0; }
+.doc .rich ol > li { counter-increment: step; position: relative; padding: 10px 0 10px 44px; border-top: 1px solid var(--line); }
+.doc .rich ol > li:last-child { border-bottom: 1px solid var(--line); }
+.doc .rich ol > li::before { content: counter(step); position: absolute; left: 0; top: 10px; width: 26px; height: 26px; border-radius: 13px;
+  display: grid; place-items: center; font: 500 13px/1 var(--sans); background: var(--paper-raised); color: var(--text-2); }
+.doc .rich ul { padding-left: 22px; }
+.doc .rich ul > li { margin: 4px 0; }
+.helpful { border-top: 0; margin-top: 56px; padding: 20px 24px; border-radius: var(--r-card); background: var(--paper-raised); }
+.related { margin-top: 40px; }
+.related h3 { font-size: 13px; color: var(--text-3); font-weight: 400; margin-bottom: 8px; }
+.related a { display: block; padding: 6px 0; }
+.hit.plain { display: block; }
+.site-foot { display: none; }
+@media (max-width: 1100px) { .article, .article.has-toc { grid-template-columns: minmax(0, 1fr); gap: 0; } .article > div:empty { display: none; } }
+.w-list a { display: flex; align-items: center; gap: 10px; }
+.w-list a > span:not(.code) { flex: 1; min-width: 0; }
+.w-list a > .i { flex: none; }
+.article.no-nav { grid-template-columns: minmax(0, 720px); }
+.article.no-nav.has-toc { grid-template-columns: minmax(0, 720px) 200px; }
+.chapter-nav .head a { display: inline; padding: 0; }
