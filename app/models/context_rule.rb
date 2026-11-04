@@ -5,7 +5,7 @@ class ContextRule < ApplicationRecord
   has_many :articles, through: :rule_articles
 
   validates :name, :url_pattern, presence: true
-  validates :url_pattern, format: { with: %r{\A/}, message: "starts with /" }
+  validates :url_pattern, format: { with: %r{\A/[A-Za-z0-9_\-./:*~%]*\z}, message: "starts with / and uses path characters and * only" }
 
   # * matches within one path segment, ** matches across segments.
   def matches?(path)

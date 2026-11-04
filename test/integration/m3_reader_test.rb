@@ -46,6 +46,12 @@ class M3ReaderTest < ActionDispatch::IntegrationTest
     assert_select ".w-label", /Most read/
   end
 
+  test "page rule patterns must be paths" do
+    assert_not ContextRule.new(name: "x", url_pattern: "billing").valid?
+    assert_not ContextRule.new(name: "x", url_pattern: "/billing\n/x").valid?
+    assert ContextRule.new(name: "x", url_pattern: "/billing/**").valid?
+  end
+
   test "page rules reject unknown codes" do
     rule = ContextRule.new(name: "x", url_pattern: "/x", article_codes: "BIL·01, ZZZ·99")
     assert_not rule.valid?
