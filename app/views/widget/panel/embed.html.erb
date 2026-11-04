@@ -1,0 +1,6 @@
+<% body, _toc = article_body_with_toc(@version.current_revision) %>
+<div class="doc" style="padding:16px 20px">
+  <h3 style="font:400 22px/28px var(--serif)"><%= @version.title %></h3>
+  <p class="meta" style="margin-top:4px"><%= code_tag @article.code %> · Updated <%= relative_day(@version.published_at || @version.updated_at).downcase %></p>
+  <div class="rich" style="margin-top:16px;font-size:14px"><%= body %></div>
+</div>

@@ -1,0 +1,16 @@
+<div class="card form-card" style="max-width:560px">
+  <%= form_with model: [ :admin, group ] do |f| %>
+    <% if group.errors.any? %><div class="errors"><%= group.errors.full_messages.to_sentence %></div><% end %>
+    <label class="field"><span>Name</span><%= f.text_field :name, class: "input", required: true %></label>
+    <div class="field"><span>Members</span>
+      <% User.active.order(:first_name, :email_address).each do |u| %>
+        <label class="row" style="font-size:14px;padding:4px 0"><%= check_box_tag "group[user_ids][]", u.id, group.user_ids.include?(u.id), style: "accent-color:var(--ink)" %><%= u.name %> <span class="meta"><%= u.email_address %></span></label>
+      <% end %>
+      <%= hidden_field_tag "group[user_ids][]", "" %>
+    </div>
+    <label class="field"><span>Auto-join by email domain</span><%= f.text_field :domain_list, class: "input mono", placeholder: "primary.health" %><div class="hint">New people invited with these domains join automatically</div></label>
+    <div class="acts"><%= f.submit "Save", class: "btn primary" %><%= link_to "Cancel", admin_groups_path, class: "btn quiet" %>
+      <% if group.persisted? %><span class="grow"></span><% end %></div>
+  <% end %>
+  <% if group.persisted? %><%= button_to "Delete group", admin_group_path(group), method: :delete, class: "btn quiet", form: { style: "margin-top:12px" }, data: { turbo_confirm: "Delete #{group.name}? Private articles shared with it lose that access." } %><% end %>
+</div>

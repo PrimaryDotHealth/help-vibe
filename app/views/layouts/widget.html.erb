@@ -7,7 +7,7 @@
     <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
     <%= javascript_importmap_tags %>
   </head>
-  <body class="widget-page">
+  <body class="widget-page" data-controller="widget-identity" data-widget-identity-kind-value="<%= widget_identity&.kind %>" data-widget-identity-url-value="<%= widget_session_path %>">
     <%= render "shared/icons" %>
     <%= yield %>
   </body>

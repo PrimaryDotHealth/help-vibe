@@ -29,7 +29,7 @@
         </div>
       </div>
       <aside class="panel">
-        <div class="tabs"><a href="#" class="on">Details</a></div>
+        <div class="tabs"><a href="#" class="on">Details</a><%= link_to "History", admin_article_history_path(@article) %></div>
         <section>
           <h3>Where it lives</h3>
           <label class="field"><span>Chapter</span>
@@ -41,6 +41,13 @@
           <% ApplicationHelper::VISIBILITY.each do |key, (ico, label, hint)| %>
             <label class="radio"><%= f.radio_button :accessibility, key, checked: @article.accessibility == key %><%= icon ico %><span><%= label %><span><%= hint %></span></span></label>
           <% end %>
+          <div class="field" style="margin-top:8px"><span>Shared with (for "Specific people")</span>
+            <%= f.select :accessor_keys,
+                  grouped_options_for_select({ "Groups" => Group.order(:name).map { [ _1.name, "group:#{_1.id}" ] },
+                                               "People" => User.active.order(:first_name).map { [ _1.name, "user:#{_1.id}" ] } }, @article.accessor_keys),
+                  {}, multiple: true, class: "input", style: "height:auto;min-height:96px;padding:4px" %>
+            <div class="hint">Superadmins always see private articles. Hold ⌘ or Ctrl to pick several.</div>
+          </div>
         </section>
         <section>
           <h3>Found by</h3>

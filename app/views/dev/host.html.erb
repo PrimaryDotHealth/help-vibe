@@ -14,7 +14,7 @@
   </style>
 </head>
 <body>
-  <div class="top"><b>Our app</b><span>Calendar</span><span>Patients</span><span style="color:#111827">Billing</span><span style="margin-left:auto;font:11px ui-monospace,monospace;color:#9ca3af">stand-in for our product · development only</span></div>
+  <div class="top"><b>Our app</b><span>Calendar</span><span>Patients</span><span style="color:#111827">Billing</span><span style="margin-left:auto;font:11px ui-monospace,monospace;color:#9ca3af">stand-in for our product · development only · <%= params[:staff] ? link_to("view as patient", dev_host_path) : link_to("view as staff", dev_host_path(staff: 1)) %></span></div>
   <div class="grid">
     <div class="side"><div>Overview</div><div class="on">Invoices</div><div>Claims</div><div>Settings</div></div>
     <div class="main">
@@ -22,7 +22,11 @@
       <div class="ph"></div><div class="ph t"></div><div class="ph"></div>
     </div>
   </div>
-  <script src="<%= embed_script_path %>" async></script>
+  <script src="<%= embed_script_path %>"></script>
+  <% if params[:staff] %>
+    <%# Development only: what our app's backend would do for a signed-in staff member %>
+    <script>HelpVibe.identify(<%= raw WidgetIdentity.issue(sub: "dev-staff", kind: "staff", name: "Dana (staff)").to_json %>)</script>
+  <% end %>
   <script>addEventListener("load", function () { if (/[?&]open/.test(location.search)) setTimeout(function () { HelpVibe.open() }, 200) })</script>
 </body>
 </html>

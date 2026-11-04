@@ -15,6 +15,6 @@
   <div class="w-body"><%= yield %></div>
   <div class="w-foot">
     <%= link_to (local_assigns[:full_url] || root_url), target: "_blank", class: "quiet" do %><%= local_assigns[:full_url] ? "Open in new tab" : "Open help center" %><%= icon "out" %><% end %>
-    <span></span>
+    <span class="meta"><%= "Signed in#{" as #{widget_identity.name}" if widget_identity&.name.present?}" if widget_identity&.staff? %></span>
   </div>
 </div>

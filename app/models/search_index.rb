@@ -75,8 +75,7 @@ class SearchIndex < ApplicationRecord
   end
 
   def self.visibility_sql(viewer)
-    list = Visibility.listed(viewer).map { connection.quote(_1) }.join(", ")
-    "a.archived_at is null and c.archived_at is null and a.accessibility in (#{list}) and c.accessibility in (#{list})"
+    Visibility.sql(viewer, article: "a", category: "c")
   end
 
   def self.to_result(row)

@@ -4,6 +4,13 @@ class User < ApplicationRecord
 
   has_secure_password
   has_many :sessions, dependent: :destroy
+  has_many :group_members, dependent: :delete_all
+  has_many :groups, through: :group_members
+
+  # Invitations: a signed link to choose a first password, valid for a week.
+  generates_token_for :invitation, expires_in: 7.days do
+    password_salt&.last(10)
+  end
 
   normalizes :email_address, with: ->(e) { e.strip.downcase }
 

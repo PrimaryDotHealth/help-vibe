@@ -1,0 +1,23 @@
+<div class="card form-card" style="max-width:560px">
+  <%= form_with model: [ :admin, user ] do |f| %>
+    <% if user.errors.any? %><div class="errors"><%= user.errors.full_messages.to_sentence %></div><% end %>
+    <label class="field"><span>Email</span><%= f.email_field :email_address, class: "input", required: true, disabled: user.persisted? %></label>
+    <div class="row"><label class="field grow"><span>First name</span><%= f.text_field :first_name, class: "input" %></label>
+      <label class="field grow" style="margin-top:0"><span>Last name</span><%= f.text_field :last_name, class: "input" %></label></div>
+    <label class="field"><span>Role</span>
+      <%= f.select :role, User::ROLES.reject { _1 == "superadmin" && !Current.user.superadmin? }.map { [ _1.humanize, _1 ] }, {}, class: "input" %>
+      <div class="hint">Viewers read staff-only articles. Draft writers write but can't publish. Collaborators publish. Admins manage people and settings.</div></label>
+    <% if Group.any? %>
+      <div class="field"><span>Groups</span>
+        <% Group.order(:name).each do |g| %>
+          <label class="row" style="font-size:14px;padding:4px 0"><%= check_box_tag "user[group_ids][]", g.id, user.group_ids.include?(g.id), style: "accent-color:var(--ink)" %><%= g.name %></label>
+        <% end %>
+        <%= hidden_field_tag "user[group_ids][]", "" %>
+      </div>
+    <% end %>
+    <% if user.persisted? %>
+      <label class="row field" style="font-size:14px"><%= f.check_box :active %> Active (unticking signs them out everywhere)</label>
+    <% end %>
+    <div class="acts"><%= f.submit(user.persisted? ? "Save" : "Send invitation", class: "btn primary") %><%= link_to "Cancel", admin_users_path, class: "btn quiet" %></div>
+  <% end %>
+</div>

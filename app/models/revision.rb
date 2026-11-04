@@ -11,4 +11,8 @@ class Revision < ApplicationRecord
   before_save { self.body_text = body.to_plain_text.squish }
 
   scope :meaningful, -> { where(autosave: false) }
+
+  # The stored (canonical) HTML, for copying into a new revision. Not
+  # `body.to_s`, which wraps it in a display layout.
+  def body_html = body&.body&.to_html.to_s
 end

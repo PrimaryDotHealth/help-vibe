@@ -65,3 +65,7 @@ end
 gem "lexxy", "~> 1.0"
 
 gem "cuprite", "~> 0.20", group: :test
+
+gem "diff-lcs", "~> 2.0"
+
+gem "jwt", "~> 3.3"

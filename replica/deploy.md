@@ -1,0 +1,112 @@
+# Deploying helpvibe
+
+One AWS server running the app and Postgres, about $15/month. Kamal builds the
+image on your Mac and ships it over SSH.
+
+> **Before any patient data exists (Part 1, the help center only),** you can
+> skip the BAA steps. **Before Part 2 (support desk) goes live,** every box
+> below marked BAA is required.
+
+## Once: AWS
+
+1. **BAA.** In the AWS console, open AWS Artifact → Agreements and accept the AWS Business Associate Addendum for the account. Free.
+2. **Server.** Launch an EC2 instance:
+   - **type:** `t4g.small` (2 GB, arm64), or `t4g.micro` while it's just the help center
+   - **image:** Ubuntu 24.04 LTS (arm64)
+   - **disk:** 20 GB gp3, **encrypted** (KMS default key). This holds Postgres and uploaded files.
+   - **security group:** inbound 22 (your IP only), 80 and 443 (anywhere)
+   - **key pair:** your SSH key. Kamal connects as `root` by default, so either allow root over SSH with your key, or set `ssh: user: ubuntu` in `config/deploy.yml` and give that user passwordless sudo plus docker.
+3. **Address.** Attach an Elastic IP, then point DNS for `help.ourcompany.com` (an A record) at it.
+
+## Once: your Mac
+
+- Docker (Docker Desktop, OrbStack or colima) for building the image. Apple Silicon builds arm64 natively.
+- Secrets in your shell. Generate them once and keep them in a password manager:
+
+```bash
+export HELPVIBE_DATABASE_PASSWORD="$(openssl rand -hex 24)"
+export HELPVIBE_WIDGET_SECRET="$(openssl rand -hex 32)"   # also given to our app's backend (signs widget tokens)
+export HELPVIBE_HOST=<elastic ip>
+export HELPVIBE_DOMAIN=help.ourcompany.com
+export HELPVIBE_FRAME_ANCESTORS="https://app.ourcompany.com"   # where the widget may be embedded
+```
+
+`config/master.key` must exist (it's created by `rails new` and is never committed).
+
+## First deploy
+
+```bash
+bin/kamal setup          # installs Docker on the server, starts Postgres, builds, migrates, starts the app
+bin/kamal app exec 'bin/rails "helpvibe:user[you@ourcompany.com,superadmin]"'   # prints a password
+```
+
+Then open https://help.ourcompany.com/session/new.
+
+## Every deploy after that
+
+```bash
+bin/kamal deploy         # zero-downtime: new container, health check on /up, switch, migrate on boot
+bin/kamal logs           # tail the logs
+bin/kamal console        # rails console on the server
+```
+
+## Importing from Helpjuice
+
+On the server's environment (add to `env.clear` and `.kamal/secrets`, then `bin/kamal deploy`):
+
+```
+HELPJUICE_SUBDOMAIN=yourcompany
+HELPJUICE_API_KEY=…            # Helpjuice → Settings → API credentials
+```
+
+Then Admin → Import → Start import, or from a terminal:
+
+```bash
+bin/kamal app exec 'bin/rails helpvibe:import:helpjuice'
+```
+
+It's safe to run again. Private articles come across visible to superadmins only, and the run lists them so you can share each with the right people or groups.
+
+## Email (BAA)
+
+Amazon SES in the same AWS account:
+1. Verify the domain.
+2. Create SMTP credentials.
+3. Request production access.
+4. Set these:
+
+```
+SMTP_ADDRESS=email-smtp.<region>.amazonaws.com
+SMTP_USERNAME=…  SMTP_PASSWORD=…
+HELPVIBE_MAIL_FROM=help@ourcompany.com
+```
+
+Without them, emails are written to the log instead of being sent.
+
+## Embedding in our app
+
+```html
+<script src="https://help.ourcompany.com/embed.js" async></script>
+<script>
+  // optional, for signed-in staff: a token from our backend (HS256 with HELPVIBE_WIDGET_SECRET,
+  // claims: sub, kind: "staff" | "patient", name, iat, exp <= 10 minutes)
+  HelpVibe.identify(tokenFromOurBackend)
+</script>
+```
+
+Our app's Content-Security-Policy must allow `script-src` and `frame-src` for `https://help.ourcompany.com`.
+
+## Backups (BAA)
+
+**Until the nightly backup job lands (M3),** take a manual backup before risky changes:
+
+```bash
+bin/kamal accessory exec db 'pg_dump -U helpvibe helpvibe_production' > helpvibe-$(date +%F).sql
+```
+
+Uploaded files live in the `helpvibe_storage` Docker volume on the encrypted disk. An EBS snapshot schedule (Data Lifecycle Manager, daily, keep 14) covers both the database and the files at the disk level.
+
+## Sizing
+
+- **RAM.** One Puma process with 3 threads (YJIT and jemalloc), jobs in-process, and Postgres with 256 MB of shared buffers. Expect about 500–700 MB in use on the 2 GB box.
+- **When to scale up.** If `bin/kamal app exec 'ps -o rss= -p 1'` creeps past about 700 MB, move to `t4g.medium`.

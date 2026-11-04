@@ -266,6 +266,11 @@ authenticate with the staff session or the contact session.
 
 ## Build order
 
+**Status (2026-11-03): M0, M1 and M2 are done.** Notes on what was built:
+- **Deploy.** Configured (Kamal, `replica/deploy.md`) but not yet run. It needs an AWS account and Docker on the Mac.
+- **Cross-origin widget cookie.** The partitioned cookie for staff in the widget is tested same-origin only. The real cross-domain case gets checked on the first deploy.
+- **Private articles from the Helpjuice import.** They arrive visible to superadmins only, because Helpjuice's API doesn't expose who they're shared with. The import run lists each one.
+
 **M0. Spikes (2–3 days).**
 - The editor choice, with the block round-trips listed above.
 - Postgres search ranking on a sample of our real articles.

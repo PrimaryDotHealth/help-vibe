@@ -17,7 +17,13 @@ class Category < ApplicationRecord
   validates :code, absence: true, if: -> { parent_id.present? }
   validates :accessibility, inclusion: { in: ACCESSIBILITY }
 
+  has_many :access_grants, class_name: "CategoryAccess", dependent: :delete_all
+
   before_validation { self.slug = name if slug.blank? && name.present? }
+  validate :not_less_restricted_than_parent
+  after_update :tighten_children, if: :saved_change_to_accessibility?
+
+  def restrictiveness = ACCESSIBILITY.index(accessibility)
 
   scope :chapters, -> { where(parent_id: nil, archived_at: nil).order(:position, :name) }
   scope :live, -> { where(archived_at: nil) }
@@ -27,6 +33,19 @@ class Category < ApplicationRecord
   def chapter
     parent ? parent.chapter : self
   end
+
+  private
+    # A sub-chapter can't be more visible than its parent.
+    def not_less_restricted_than_parent
+      return unless parent && restrictiveness < parent.restrictiveness
+      errors.add(:accessibility, "can't be more open than its parent chapter (#{parent.accessibility})")
+    end
+
+    def tighten_children
+      children.each { _1.update!(accessibility: accessibility) if _1.restrictiveness < restrictiveness }
+    end
+
+  public
 
   # The most restrictive accessibility on the way up the tree wins.
   def effective_accessibility

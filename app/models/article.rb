@@ -22,17 +22,29 @@ class Article < ApplicationRecord
   scope :live, -> { where(archived_at: nil) }
   scope :published, -> { where(id: ArticleVersion.where(is_default: true).select(:article_id)) }
 
+  has_many :access_grants, class_name: "ArticleAccess", dependent: :delete_all
+
   # Articles a viewer may see in lists (contents page, chapter pages).
   def self.listed_for(viewer)
-    allowed = Visibility.listed(viewer)
-    live.published.where(accessibility: allowed)
-        .joins(:main_category).where(categories: { archived_at: nil, accessibility: allowed })
+    live.published.joins(:main_category).where(Visibility.sql(viewer))
   end
 
   # Opening an article by its link also allows "url_only".
   def visible_to?(viewer)
-    archived_at.nil? && Visibility.by_link(viewer).include?(accessibility) &&
-      Visibility.listed(viewer).include?(main_category.effective_accessibility)
+    Article.joins(:main_category).where(id: id).where(Visibility.sql(viewer, by_link: true)).exists?
+  end
+
+  # Who may see it when it's private: [[:user, id], [:group, id]]
+  def accessor_keys
+    access_grants.map { _1.user_id ? "user:#{_1.user_id}" : "group:#{_1.group_id}" }
+  end
+
+  def accessor_keys=(keys)
+    pairs = Array(keys).compact_blank.map { _1.split(":") }.select { %w[user group].include?(_1.first) }
+    transaction do
+      access_grants.delete_all
+      pairs.each { |kind, id| access_grants.create!("#{kind}_id" => id.to_i) }
+    end
   end
 
   def to_param = slug
@@ -79,7 +91,7 @@ class Article < ApplicationRecord
         draft = versions.create!(number: (versions.maximum(:number) || 0) + 1, language: live.language,
                                  title: live.title, subtitle: live.subtitle, created_by: author)
         if (rev = live.current_revision)
-          draft.save_revision!(body: rev.body.to_s, author: author, base_revision_id: nil)
+          draft.save_revision!(body: rev.body_html, author: author, base_revision_id: nil)
         end
         draft
       end

@@ -1,6 +1,7 @@
 // helpvibe widget loader. Add to our app with one tag:
 //   <script src="<%= embed_script_url %>" async></script>
-// API: HelpVibe.open(), HelpVibe.open({ article: "slug-or-code" }), HelpVibe.close(), HelpVibe.setPage("/billing")
+// API: HelpVibe.open(), HelpVibe.open({ article: "slug-or-code" }), HelpVibe.close(), HelpVibe.setPage("/billing"),
+//      HelpVibe.identify(tokenFromOurBackend)  (staff then see staff-only articles)
 (function () {
   if (window.HelpVibe && window.HelpVibe.loaded) return;
   var BASE = <%= raw root_url.chomp("/").to_json %>;
@@ -8,7 +9,7 @@
   var label = (script && script.dataset.label) || "Help";
   var showLauncher = !(script && script.dataset.launcher === "none");
   var page = location.pathname;
-  var iframe, launcher, open = false;
+  var iframe, launcher, open = false, identity = null;
 
   var host = document.createElement("div");
   host.id = "helpvibe";
@@ -49,12 +50,19 @@
       iframe.style.display = "block"; open = true;
     },
     close: function () { iframe.style.display = "none"; open = false; },
-    setPage: function (path) { page = path; }
+    setPage: function (path) { page = path; },
+    identify: function (token) { identity = token; sendIdentity(); }
   };
+
+  function sendIdentity() {
+    if (identity && iframe.src && iframe.contentWindow) iframe.contentWindow.postMessage({ helpvibe: "identify", token: identity }, BASE);
+  }
   window.HelpVibe = api;
 
   window.addEventListener("message", function (e) {
-    if (e.origin === BASE && e.data && e.data.helpvibe === "close") api.close();
+    if (e.origin !== BASE || !e.data) return;
+    if (e.data.helpvibe === "close") api.close();
+    if (e.data.helpvibe === "ready") sendIdentity();
   });
   // Single-page apps: keep the page context current.
   window.addEventListener("popstate", function () { page = location.pathname; });

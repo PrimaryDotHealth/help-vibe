@@ -1,0 +1,31 @@
+<% content_for :title, "Import" %>
+<div class="head"><h1>Import from Helpjuice</h1></div>
+<div class="card form-card" style="max-width:720px">
+  <% if @configured %>
+    <p class="t2">Brings across chapters (with new codes), articles and their images, keywords and old Helpjuice links (as redirects). Safe to run again: it updates what it imported before.</p>
+    <%= form_with url: admin_import_path, style: "margin-top:16px" do %>
+      <label class="row" style="font-size:14px"><%= check_box_tag :images, "1", true, style: "accent-color:var(--ink)" %>Download images into helpvibe</label>
+      <label class="row" style="font-size:14px;margin-top:8px"><%= check_box_tag :users, "1", false, style: "accent-color:var(--ink)" %>Also create accounts for Helpjuice users (no emails are sent)</label>
+      <div class="acts"><%= submit_tag "Start import", class: "btn primary" %></div>
+    <% end %>
+  <% else %>
+    <p class="t2">Set these on the server, then reload this page:</p>
+    <pre class="snippet card" style="margin-top:12px">HELPJUICE_SUBDOMAIN=yourcompany   # the part before .helpjuice.com
+HELPJUICE_API_KEY=…               # Helpjuice → Settings → API credentials</pre>
+    <p class="meta" style="margin-top:12px">Or run it from a terminal: <span class="mono">bin/rails helpvibe:import:helpjuice</span></p>
+  <% end %>
+  <p class="meta" style="margin-top:16px">Not available from Helpjuice's API, so not imported: who private articles are shared with, comments, version history, analytics.</p>
+</div>
+
+<% if @runs.any? %>
+  <p class="section-title">Runs</p>
+  <div class="card"><div class="table-wrap"><table class="data">
+    <thead><tr><th>Started</th><th>Status</th><th>Result</th></tr></thead>
+    <tbody><% @runs.each do |r| %>
+      <tr><td class="meta"><%= r.started_at.strftime("%-d %b %H:%M") %><%= " · #{r.started_by.name}" if r.started_by %></td>
+        <td><span class="status <%= { "done" => "live", "running" => "review", "failed" => "changes" }[r.status] %>"><%= r.status.capitalize %></span></td>
+        <td class="meta"><%= r.error.presence || r.stats.except("warnings").map { "#{_2} #{_1.tr("_", " ")}" }.join(" · ") %>
+          <% if Array(r.stats["warnings"]).any? %><details><summary><%= pluralize(r.stats["warnings"].size, "warning") %></summary><% r.stats["warnings"].each do |w| %><div><%= w %></div><% end %></details><% end %></td></tr>
+    <% end %></tbody>
+  </table></div></div>
+<% end %>

@@ -1,0 +1,53 @@
+<% content_for :title, "History · #{@version.title}" %>
+<div class="head">
+  <%= link_to edit_admin_article_path(@article), class: "btn quiet sm" do %><%= icon "back" %>Back to editor<% end %>
+  <h1 style="font-size:18px"><%= code_tag @article.code, style: "color:var(--ink);margin-right:8px" %><%= @version.title %></h1>
+</div>
+
+<div style="display:grid;grid-template-columns:280px minmax(0,1fr);gap:24px;align-items:start">
+  <nav class="card" style="padding:12px">
+    <%= form_with url: admin_article_history_path(@article), method: :get do %>
+      <%= select_tag :version_id, options_for_select(@versions.map { [ "v#{_1.number} · #{_1.is_default ? "live" : _1.status}", _1.id ] }, @version.id), class: "input", onchange: "this.form.requestSubmit()" %>
+    <% end %>
+    <div style="margin-top:12px">
+      <% @listed.each do |r| %>
+        <% on = r == @current; cmp = r == @compare %>
+        <%= link_to admin_article_history_path(@article, version_id: @version.id, revision_id: (r.id unless on), autosaves: params[:autosaves]), class: "rev #{"on" if on} #{"cmp" if cmp}" do %>
+          <div class="when"><%= on ? "Current" : r.created_at.strftime("%-d %b %H:%M") %></div>
+          <div class="who"><%= r.author&.name || "Unknown" %><%= " · autosave" if r.autosave %><%= " · comparing" if cmp %></div>
+        <% end %>
+      <% end %>
+      <% if @hidden_autosaves.positive? %>
+        <%= link_to "#{@hidden_autosaves} more autosaves", admin_article_history_path(@article, version_id: @version.id, autosaves: 1), class: "rev meta" %>
+      <% end %>
+    </div>
+  </nav>
+
+  <main>
+    <div class="head" style="margin-bottom:12px">
+      <span class="meta">
+        <% if params[:against] == "live" %>Live version compared with this version's current text
+        <% elsif @compare %><%= @compare.created_at.strftime("%-d %b %H:%M") %> compared with the current text
+        <% else %>Only one save so far<% end %>
+      </span>
+      <span class="grow"></span>
+      <% if @article.live_version && @article.live_version != @version %>
+        <%= link_to "Against live", admin_article_history_path(@article, version_id: @version.id, against: "live"), class: "btn sm quiet" %>
+      <% end %>
+      <% if @compare && params[:against] != "live" %>
+        <%= button_to "Restore this copy", restore_admin_article_history_path(@article, revision_id: @compare.id), class: "btn sm", data: { turbo_confirm: "Copy this text into the working draft? Nothing is deleted; you can restore again." } %>
+      <% end %>
+    </div>
+    <div class="diff">
+      <div class="paper">
+        <% if @diff %>
+          <% stats = Helpvibe::WordDiff.stats(@diff) %>
+          <p style="white-space:pre-wrap"><% @diff.each do |kind, text| %><% if kind == :ins %><ins><%= text %></ins><% elsif kind == :del %><del><%= text %></del><% else %><%= text %><% end %><% end %></p>
+        <% else %>
+          <p class="t3">Nothing to compare yet.</p>
+        <% end %>
+      </div>
+      <% if @diff %><p class="meta" style="margin-top:12px"><%= pluralize(stats[:added], "addition") %> · <%= pluralize(stats[:removed], "removal") %></p><% end %>
+    </div>
+  </main>
+</div>

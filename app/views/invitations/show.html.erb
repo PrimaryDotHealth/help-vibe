@@ -1,0 +1,12 @@
+<% content_for :title, "Welcome" %>
+<% content_for :hide_header_search, true %>
+<div class="auth">
+  <h1>Welcome, <%= @user.first_name.presence || @user.email_address %></h1>
+  <div class="card">
+    <%= form_with url: invitation_path(params[:token]), method: :patch do |form| %>
+      <label class="field"><span>Choose a password</span><%= form.password_field :password, required: true, autocomplete: "new-password", minlength: 10, maxlength: 72, class: "input" %></label>
+      <label class="field"><span>Repeat it</span><%= form.password_field :password_confirmation, required: true, autocomplete: "new-password", maxlength: 72, class: "input" %></label>
+      <%= form.submit "Start", class: "btn primary" %>
+    <% end %>
+  </div>
+</div>

@@ -22,6 +22,12 @@
           <% nav = ->(label, ico, path, on) { link_to(safe_join([ icon(ico), label ]), path, class: [ "nav", ("on" if on) ]) } %>
           <%= nav.("Articles", "file", admin_articles_path, controller_name == "articles") %>
           <%= nav.("Chapters", "folder", admin_chapters_path, controller_name == "chapters") %>
+          <% if Current.user.admin? %>
+            <div class="label">Admin</div>
+            <%= nav.("People", "users", admin_users_path, %w[users groups].include?(controller_name)) %>
+            <%= nav.("API keys", "key", admin_api_keys_path, controller_name == "api_keys") %>
+            <%= nav.("Import", "db", admin_import_path, controller_name == "import") %>
+          <% end %>
           <div class="label">Readers</div>
           <%= nav.("Help center", "globe", root_path, false) %>
           <%= nav.("Widget preview", "help", (Rails.env.development? ? dev_host_path : widget_root_path), false) %>

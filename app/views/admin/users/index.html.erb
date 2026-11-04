@@ -1,0 +1,21 @@
+<% content_for :title, "People" %>
+<div class="head">
+  <h1>People</h1><span class="count"><%= @users.size %></span>
+  <span class="grow"></span>
+  <%= link_to "Groups", admin_groups_path, class: "btn quiet" %>
+  <%= link_to new_admin_user_path, class: "btn primary" do %><%= icon "plus" %>Invite<% end %>
+</div>
+<div class="card"><div class="table-wrap"><table class="data">
+  <thead><tr><th>Person</th><th>Role</th><th>Groups</th><th>Last signed in</th><th></th></tr></thead>
+  <tbody>
+    <% @users.each do |u| %>
+      <tr style="<%= "opacity:.55" unless u.active? %>">
+        <td><div class="row"><span class="avatar"><%= u.initials %></span><span><%= u.name %><br><span class="meta"><%= u.email_address %></span></span></div></td>
+        <td><%= u.role.humanize %><%= " · deactivated" unless u.active? %></td>
+        <td class="meta"><%= u.groups.map(&:name).join(", ").presence || "–" %></td>
+        <td class="meta"><%= u.last_sign_in_at ? relative_day(u.last_sign_in_at) : "Invited" %></td>
+        <td style="text-align:right"><%= link_to "Edit", edit_admin_user_path(u) %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table></div></div>

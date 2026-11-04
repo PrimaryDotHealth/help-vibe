@@ -33,10 +33,11 @@ class Admin::ArticlesController < Admin::BaseController
   # Manual save (and optionally publish). Autosave goes through RevisionsController.
   def update
     @article = Article.find_by!(slug: params[:id])
-    attrs = params.require(:editor).permit(:title, :subtitle, :body, :base_revision_id, :main_category_id, :accessibility, :keywords)
+    attrs = params.require(:editor).permit(:title, :subtitle, :body, :base_revision_id, :main_category_id, :accessibility, :keywords, accessor_keys: [])
 
     ActiveRecord::Base.transaction do
       @article.update!(main_category_id: attrs[:main_category_id], accessibility: attrs[:accessibility], keyword_list: attrs[:keywords])
+      @article.accessor_keys = attrs[:accessor_keys] if attrs.key?(:accessor_keys)
       version = editable_version
       version.save_revision!(body: attrs[:body], author: Current.user, base_revision_id: attrs[:base_revision_id],
                              title: attrs[:title], subtitle: attrs[:subtitle])

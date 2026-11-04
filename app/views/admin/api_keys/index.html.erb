@@ -1,0 +1,30 @@
+<% content_for :title, "API keys" %>
+<div class="head"><h1>API keys</h1><span class="count"><%= @keys.count { _1.revoked_at.nil? } %></span></div>
+<% if @new_token %>
+  <div class="card form-card" style="margin-bottom:16px;border-color:var(--ink)">
+    <h2>Copy this key now. It won't be shown again</h2>
+    <div class="mono" style="padding:12px;background:var(--raised);border-radius:var(--r-md);word-break:break-all"><%= @new_token %></div>
+    <p class="meta" style="margin-top:8px">Send it as <span class="mono">Authorization: <%= @new_token.first(11) %>…</span> to <span class="mono"><%= request.base_url %>/api/v3/articles</span></p>
+  </div>
+<% end %>
+<div class="card form-card" style="margin-bottom:16px">
+  <%= form_with scope: :api_key, url: admin_api_keys_path, class: "row" do |f| %>
+    <%= f.text_field :name, class: "input", placeholder: "What it's for, e.g. Our app's help links", style: "max-width:400px" %>
+    <%= f.submit "Create read-only key", class: "btn primary" %>
+  <% end %>
+  <p class="hint">Keys read public and staff-only articles and chapters. Private articles are never returned. 100 requests per minute.</p>
+</div>
+<div class="card"><div class="table-wrap"><table class="data">
+  <thead><tr><th>Name</th><th>Key</th><th>Created</th><th>Last used</th><th></th></tr></thead>
+  <tbody>
+    <% @keys.each do |k| %>
+      <tr style="<%= "opacity:.5" if k.revoked_at %>">
+        <td><%= k.name %></td><td class="mono"><%= k.prefix %>…</td>
+        <td class="meta"><%= relative_day(k.created_at) %><%= " · #{k.created_by.name}" if k.created_by %></td>
+        <td class="meta"><%= k.last_used_at ? relative_day(k.last_used_at) : "Never" %></td>
+        <td style="text-align:right"><% if k.revoked_at %>Revoked<% else %><%= button_to "Revoke", admin_api_key_path(k), method: :delete, class: "link", form_class: "inline", data: { turbo_confirm: "Revoke #{k.name}? Anything using it stops working." } %><% end %></td>
+      </tr>
+    <% end %>
+    <% if @keys.empty? %><tr><td colspan="5" class="meta">No keys yet</td></tr><% end %>
+  </tbody>
+</table></div></div>
