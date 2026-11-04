@@ -20,7 +20,10 @@
         <nav class="side">
           <%= link_to admin_root_path, class: "wordmark" do %><span class="mark">h</span>helpvibe<% end %>
           <% nav = ->(label, ico, path, on) { link_to(safe_join([ icon(ico), label ]), path, class: [ "nav", ("on" if on) ]) } %>
-          <%= nav.("Articles", "file", admin_articles_path, controller_name == "articles") %>
+          <%= nav.("Articles", "file", admin_articles_path, controller_name == "articles" && params[:status] != "review") %>
+          <% awaiting = Review.awaiting(Current.user).count %>
+          <%= link_to admin_articles_path(status: "review"), class: [ "nav", ("on" if params[:status] == "review") ] do %><%= icon "inbox" %>Needs my review<% if awaiting.positive? %><span class="count"><%= awaiting %></span><% end %><% end %>
+          <%= nav.("Analytics", "chart", admin_analytics_path, controller_name == "analytics") %>
           <%= nav.("Chapters", "folder", admin_chapters_path, controller_name == "chapters") %>
           <% if Current.user.admin? %>
             <div class="label">Admin</div>

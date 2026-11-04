@@ -70,7 +70,9 @@ class KnowledgeBaseFlowTest < ActionDispatch::IntegrationTest
     article = Article.start!(title: "Draft", category: @chapter, author: users(:writer))
     sign_in_as users(:writer)
     post admin_article_publication_path(article)
-    assert_response :forbidden
+    assert_redirected_to edit_admin_article_path(article)
+    assert_match "Request a review", flash[:alert]
+    assert_nil article.reload.live_version
   end
 
   test "readers and viewers can't open the admin" do

@@ -1,0 +1,7 @@
+<%= @review.requested_by&.name || "Someone" %> asked you to review <%= @article.code %> "<%= @review.version.title %>".
+<% if @review.note.present? %>
+
+"<%= @review.note %>"
+<% end %>
+
+Open it: <%= @url %>

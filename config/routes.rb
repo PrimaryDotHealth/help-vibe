@@ -25,13 +25,20 @@ Rails.application.routes.draw do
     end
     resources :versions, only: [] do
       resources :revisions, only: :create
+      resources :reviews, only: :create
+      resources :comments, only: :create
     end
+    resources :reviews, only: :destroy do
+      post :decide, on: :member
+    end
+    resources :comments, only: :update
     resources :chapters, except: %i[show destroy]
     resources :users, except: %i[show destroy]
     resources :groups, except: :show
     resources :api_keys, only: %i[index create destroy]
     resource :import, only: %i[show create], controller: "import"
     resources :context_rules, except: :show
+    resource :analytics, only: :show
   end
 
   # Embeddable help widget (S07) and chromeless article for iframes (S08)

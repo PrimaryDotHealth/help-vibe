@@ -1,15 +1,17 @@
 # S11 article list and S12 editor.
 class Admin::ArticlesController < Admin::BaseController
-  STATUSES = %w[all drafts live].freeze
+  STATUSES = %w[all drafts live review].freeze
 
   def index
     @status = STATUSES.include?(params[:status]) ? params[:status] : "all"
     scope = Article.live.includes(:versions, :main_category, :created_by).order(updated_at: :desc)
     scope = scope.published if @status == "live"
     scope = scope.where(id: ArticleVersion.where(status: "draft").select(:article_id)) if @status == "drafts"
+    scope = scope.where(id: ArticleVersion.where(id: Review.awaiting(Current.user).select(:version_id)).select(:article_id)) if @status == "review"
     scope = scope.where("articles.code ilike :q or articles.slug ilike :q", q: "%#{Article.sanitize_sql_like(params[:q])}%") if params[:q].present?
     @articles = scope.limit(200)
-    @counts = { "all" => Article.live.count, "drafts" => Article.live.where(id: ArticleVersion.where(status: "draft").select(:article_id)).count, "live" => Article.live.published.count }
+    @counts = { "all" => Article.live.count, "drafts" => Article.live.where(id: ArticleVersion.where(status: "draft").select(:article_id)).count, "live" => Article.live.published.count,
+                "review" => Review.awaiting(Current.user).count }
   end
 
   def new
@@ -47,8 +49,9 @@ class Admin::ArticlesController < Admin::BaseController
         version.update!(publish_at: Time.zone.parse(attrs[:publish_at].to_s), expire_at: Time.zone.parse(attrs[:expire_at].to_s))
       end
       if params[:publish].present?
-        raise ActionController::BadRequest, "Draft writers can't publish" unless Current.user.can_publish?
-        if version.scheduled?
+        if (reason = version.publish_blocked_for(Current.user))
+          notice = "Saved. #{reason}"
+        elsif version.scheduled?
           notice = "Scheduled to go live #{version.publish_at.strftime("%-d %b %H:%M %Z")}"
         else
           version.publish!(by: Current.user)

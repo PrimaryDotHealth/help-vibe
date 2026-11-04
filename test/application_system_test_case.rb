@@ -1,6 +1,8 @@
 require "test_helper"
 require "capybara/cuprite"
 
+Capybara.enable_aria_label = true
+
 # Cuprite drives Chrome over the DevTools protocol (no chromedriver). With
 # Selenium + chromedriver on Chrome 156/macOS, real clicks stopped reaching the
 # page after a few idle seconds, which broke the autosave-then-publish test.
