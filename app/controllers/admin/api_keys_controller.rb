@@ -8,7 +8,8 @@ class Admin::ApiKeysController < Admin::BaseController
   end
 
   def create
-    key = ApiKey.create!(name: params.require(:api_key)[:name].presence || "Unnamed key", scope: "read", created_by: Current.user)
+    scope = params[:api_key][:scope] == "write" && Current.user.superadmin? ? "write" : "read"
+    key = ApiKey.create!(name: params.require(:api_key)[:name].presence || "Unnamed key", scope: scope, created_by: Current.user)
     flash[:api_token] = key.token
     redirect_to admin_api_keys_path
   end

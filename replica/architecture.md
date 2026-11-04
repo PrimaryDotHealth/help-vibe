@@ -266,7 +266,13 @@ authenticate with the staff session or the contact session.
 
 ## Build order
 
-**Status (2026-11-03): M0, M1 and M2 are done.** Notes on what was built:
+**Status (2026-11-03): M0, M1, M2 and M3 are done.** Notes on what was built:
+- **Callouts and Q&A (M3)** are conventions authors type, not editor plugins:
+  - A quote starting "Note:", "Tip:", "Caution:" or "Warning:" renders as a callout.
+  - H3s under a "Common questions" or "FAQ" H2 render as collapsible questions.
+- **Tabs (M3)** aren't built.
+- **Markdown mode (M3)** is "Paste Markdown", which converts into the draft, rather than a second live editor.
+- **Backups (M3)** are AES-256-GCM-encrypted `pg_dump`s on the server's encrypted disk. Copying them off-box to S3 is still a manual step: EBS snapshots cover the disk.
 - **Deploy.** Configured (Kamal, `replica/deploy.md`) but not yet run. It needs an AWS account and Docker on the Mac.
 - **Cross-origin widget cookie.** The partitioned cookie for staff in the widget is tested same-origin only. The real cross-domain case gets checked on the first deploy.
 - **Private articles from the Helpjuice import.** They arrive visible to superadmins only, because Helpjuice's API doesn't expose who they're shared with. The import run lists each one.

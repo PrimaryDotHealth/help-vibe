@@ -48,3 +48,10 @@
   <textarea name="body" form="comment-form" class="input" rows="2" placeholder="Comment. Select text in the article first to quote it"></textarea>
   <button type="submit" form="comment-form" class="btn sm" style="margin-top:8px">Comment</button>
 </section>
+
+<section>
+  <h3>Paste Markdown</h3>
+  <textarea name="markdown" form="markdown-form" class="input mono" rows="3" placeholder="# Heading&#10;1. A step"></textarea>
+  <div class="hint">Replaces the draft's text with this, converted. History keeps the previous text.</div>
+  <button type="submit" form="markdown-form" class="btn sm" style="margin-top:8px" data-turbo-confirm="Replace the draft's text with this Markdown?">Convert into the draft</button>
+</section>

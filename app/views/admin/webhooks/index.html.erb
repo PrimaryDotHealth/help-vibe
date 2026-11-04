@@ -1,0 +1,15 @@
+<% content_for :title, "Webhooks" %>
+<div class="head"><h1>Webhooks</h1><span class="count"><%= @webhooks.size %></span><span class="grow"></span>
+  <%= link_to "API keys", admin_api_keys_path, class: "btn quiet" %>
+  <%= link_to new_admin_webhook_path, class: "btn primary" do %><%= icon "plus" %>Add webhook<% end %></div>
+<p class="t2" style="margin:-8px 0 16px;max-width:44rem">helpvibe POSTs JSON in Helpjuice's webhook format, signed with <span class="mono">X-Helpvibe-Signature: t=…,v1=…</span> (HMAC-SHA256 of <span class="mono">t.body</span> with the webhook's secret). Failed deliveries retry for about 15 hours.</p>
+<div class="card"><div class="table-wrap"><table class="data">
+  <thead><tr><th>Event</th><th>URL</th><th>Last response</th><th></th></tr></thead>
+  <tbody>
+    <% @webhooks.each do |w| %>
+      <tr style="<%= "opacity:.55" unless w.enabled %>"><td class="mono"><%= w.event %></td><td class="mono t2"><%= w.url %></td>
+        <td class="num"><%= w.last_response_code || "–" %><%= " · paused" unless w.enabled %></td><td style="text-align:right"><%= link_to "Open", admin_webhook_path(w) %></td></tr>
+    <% end %>
+    <% if @webhooks.empty? %><tr><td colspan="4" class="meta">No webhooks yet.</td></tr><% end %>
+  </tbody>
+</table></div></div>

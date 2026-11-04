@@ -14,13 +14,23 @@ class Admin::ChaptersController < Admin::BaseController
 
   def create
     @chapter = Category.new(chapter_params)
-    @chapter.save ? redirect_to(admin_chapters_path, notice: "Chapter created") : render(:new, status: :unprocessable_entity)
+    if @chapter.save
+      Activity.record!(@chapter, "create", by: Current.user)
+      redirect_to(admin_chapters_path, notice: "Chapter created")
+    else
+      render(:new, status: :unprocessable_entity)
+    end
   end
 
   def edit; end
 
   def update
-    @chapter.update(chapter_params) ? redirect_to(admin_chapters_path, notice: "Saved") : render(:edit, status: :unprocessable_entity)
+    if @chapter.update(chapter_params)
+      Activity.record!(@chapter, "update", by: Current.user)
+      redirect_to(admin_chapters_path, notice: "Saved")
+    else
+      render(:edit, status: :unprocessable_entity)
+    end
   end
 
   private

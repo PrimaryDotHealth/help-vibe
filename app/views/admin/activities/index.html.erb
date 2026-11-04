@@ -1,0 +1,14 @@
+<% content_for :title, "Activity" %>
+<div class="head"><h1>Activity</h1><span class="grow"></span>
+  <div class="seg"><% { "" => "All", "article" => "Articles", "category" => "Chapters", "user" => "People", "comment" => "Comments" }.each do |k, label| %><%= link_to label, admin_activities_path(type: k.presence), class: ("on" if params[:type].to_s == k) %><% end %></div></div>
+<div class="card"><div class="table-wrap"><table class="data">
+  <thead><tr><th>When</th><th>Who</th><th>What</th><th>On</th></tr></thead>
+  <tbody>
+    <% @activities.each do |a| %>
+      <tr><td class="meta"><%= a.created_at.strftime("%-d %b %H:%M") %></td><td><%= a.automatic ? "Scheduled" : (a.owner&.name || "–") %></td>
+        <td><%= a.action.humanize %></td><td class="t2"><%= @labels[a.id] %></td></tr>
+    <% end %>
+    <% if @activities.empty? %><tr><td colspan="4" class="meta">Nothing yet.</td></tr><% end %>
+  </tbody>
+</table></div>
+<% if @activities.size == 100 %><div class="pager"><span class="grow"></span><%= link_to "Older", admin_activities_path(type: params[:type], before: @activities.last.id), class: "btn sm" %></div><% end %></div>

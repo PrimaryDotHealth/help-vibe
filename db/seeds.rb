@@ -28,9 +28,11 @@ articles = [
     <li>Pick a new date and time. Times are shown in your time zone.</li><li>Decide whether to notify the patient, then choose <strong>Save</strong>.</li></ol>
     <h2>Cancel an appointment</h2>
     <p>Cancelling frees the slot straight away. The patient gets an email with the reason you enter.</p>
-    <blockquote>Cancelling within 24 hours of the start may apply your late-cancellation fee.</blockquote>
+    <blockquote>Caution: Cancelling within 24 hours of the start may apply your late-cancellation fee.</blockquote>
+    <blockquote>Tip: Patients can reschedule themselves from the link in their confirmation email, if you allow it.</blockquote>
     <h2>Common questions</h2>
-    <p><strong>Can I undo a cancellation?</strong> No. Book a new appointment in the same slot instead.</p>
+    <h3>Can I undo a cancellation?</h3><p>No. Book a new appointment in the same slot instead.</p>
+    <h3>What does the patient see?</h3><p>An email, and a text if reminders are on, with the new time or your reason.</p>
   HTML
   [ "SCH", "Set your weekly availability", "Choose the hours patients can book.", "availability, hours, schedule", <<~HTML ],
     <h2>Set your hours</h2><ol><li>Open <strong>Settings → Availability</strong>.</li><li>Add a time range for each day you work.</li><li>Choose <strong>Save</strong>.</li></ol>

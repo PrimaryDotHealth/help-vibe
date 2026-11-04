@@ -8,6 +8,8 @@ class Api::V3::BaseController < ActionController::API
   rate_limit to: 100, within: 1.minute, by: -> { @api_key.id }, with: -> { render_error(429, "Rate limit exceeded: 100 requests per minute") }
 
   rescue_from(ActiveRecord::RecordNotFound) { render_error(404, "Not found") }
+  rescue_from(ActionController::BadRequest) { |e| render_error(422, e.message) }
+  rescue_from(ActiveRecord::RecordInvalid) { |e| render_error(422, e.record.errors.full_messages.to_sentence) }
 
   private
     def authenticate_key
@@ -18,6 +20,10 @@ class Api::V3::BaseController < ActionController::API
     end
 
     def viewer = Visibility::Viewer.staff_token
+
+    def require_write
+      render_error(403, "This API key is read-only") unless @api_key.scope == "write"
+    end
 
     def render_error(status, message)
       render json: { errors: [ message ] }, status: status

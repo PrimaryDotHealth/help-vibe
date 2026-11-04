@@ -71,3 +71,5 @@ gem "diff-lcs", "~> 2.0"
 gem "jwt", "~> 3.3"
 
 gem "csv", "~> 3.3"
+
+gem "commonmarker", "~> 2.10"

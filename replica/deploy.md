@@ -26,6 +26,8 @@ image on your Mac and ships it over SSH.
 ```bash
 export HELPVIBE_DATABASE_PASSWORD="$(openssl rand -hex 24)"
 export HELPVIBE_WIDGET_SECRET="$(openssl rand -hex 32)"   # also given to our app's backend (signs widget tokens)
+export HELPVIBE_BACKUP_KEY="$(openssl rand -hex 32)"      # encrypts nightly backups; keep a copy outside AWS
+export HELPVIBE_TIME_ZONE="America/New_York"              # scheduled publishing and backups run in this zone
 export HELPVIBE_HOST=<elastic ip>
 export HELPVIBE_DOMAIN=help.ourcompany.com
 export HELPVIBE_FRAME_ANCESTORS="https://app.ourcompany.com"   # where the widget may be embedded
@@ -98,10 +100,14 @@ Our app's Content-Security-Policy must allow `script-src` and `frame-src` for `h
 
 ## Backups (BAA)
 
-**Until the nightly backup job lands (M3),** take a manual backup before risky changes:
+A nightly job (3am, in `HELPVIBE_TIME_ZONE`) writes an encrypted `pg_dump` to `storage/backups/` and keeps the newest 14:
+- The dump is encrypted with AES-256-GCM using `HELPVIBE_BACKUP_KEY`. Create it with `openssl rand -hex 32`, add it to your shell secrets, and **keep a copy outside AWS**: without it, backups can't be read.
+- Backups sit on the server's encrypted disk next to the uploads.
 
 ```bash
-bin/kamal accessory exec db 'pg_dump -U helpvibe helpvibe_production' > helpvibe-$(date +%F).sql
+bin/kamal app exec 'bin/rails helpvibe:backup:now'                                   # take one now
+bin/kamal app exec "bin/rails 'helpvibe:backup:decrypt[storage/backups/<file>]'" > restore.dump
+pg_restore --clean --no-owner -d helpvibe_production restore.dump                    # restore (stop the app first)
 ```
 
 Uploaded files live in the `helpvibe_storage` Docker volume on the encrypted disk. An EBS snapshot schedule (Data Lifecycle Manager, daily, keep 14) covers both the database and the files at the disk level.

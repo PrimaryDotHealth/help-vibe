@@ -1,0 +1,16 @@
+<% content_for :title, "Settings" %>
+<div class="head"><h1>Settings</h1></div>
+<div class="card form-card" style="max-width:640px">
+  <h2>Review</h2>
+  <%= form_with url: admin_settings_path, method: :patch do %>
+    <div class="field"><span>When several people review</span>
+      <label class="radio"><%= radio_button_tag :review_rule, "any", Setting["review.rule"] == "any" %><span></span><span>Any one approval is enough</span></label>
+      <label class="radio"><%= radio_button_tag :review_rule, "all", Setting["review.rule"] == "all" %><span></span><span>Everyone must approve</span></label></div>
+    <label class="row field" style="font-size:14px"><%= check_box_tag :review_required, "1", Setting["review.required"], style: "accent-color:var(--ink)" %>Nothing publishes without an approved review</label>
+    <div class="field"><span>Who may publish while a review is open</span>
+      <% %w[superadmin admin collaborator].each do |role| %>
+        <label class="row" style="font-size:14px;padding:4px 0"><%= check_box_tag "bypass_roles[]", role, Array(Setting["review.bypass_roles"]).include?(role), style: "accent-color:var(--ink)" %><%= role.humanize.pluralize %></label>
+      <% end %></div>
+    <div class="acts"><%= submit_tag "Save", class: "btn primary" %></div>
+  <% end %>
+</div>

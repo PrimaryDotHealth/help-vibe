@@ -1,0 +1,23 @@
+<% content_for :title, "Webhook" %>
+<div class="head"><%= link_to admin_webhooks_path, class: "btn quiet sm" do %><%= icon "back" %>Webhooks<% end %>
+  <h1 class="mono" style="font-size:16px"><%= @webhook.event %></h1><span class="grow"></span>
+  <%= button_to "Send test", test_admin_webhook_path(@webhook), class: "btn sm", form_class: "inline" %>
+  <%= button_to(@webhook.enabled ? "Pause" : "Enable", toggle_admin_webhook_path(@webhook), class: "btn sm quiet", form_class: "inline") %></div>
+<div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.3fr);gap:16px;align-items:start">
+  <div class="card form-card">
+    <%= render "form", webhook: @webhook %>
+    <div class="field" style="margin-top:20px"><span>Signing secret</span><div class="mono" style="word-break:break-all;padding:8px;background:var(--raised);border-radius:var(--r-md)"><%= @webhook.secret %></div></div>
+    <%= button_to "Delete webhook", admin_webhook_path(@webhook), method: :delete, class: "btn quiet", form: { style: "margin-top:12px" }, data: { turbo_confirm: "Delete this webhook?" } %>
+  </div>
+  <div class="card"><div class="card-head"><h2>Recent deliveries</h2></div><div class="table-wrap"><table class="data">
+    <thead><tr><th>When</th><th>Activity</th><th>Status</th><th class="num">Tries</th></tr></thead>
+    <tbody>
+      <% @deliveries.each do |d| %>
+        <tr><td class="meta"><%= d.created_at.strftime("%-d %b %H:%M") %></td><td class="mono t2"><%= d.activity.trackable_type %> #<%= d.activity.trackable_id %> <%= d.activity.action %></td>
+          <td><span class="status <%= { "delivered" => "live", "pending" => "draft", "failed" => "review", "dead" => "changes" }[d.status] %>"><%= d.status.capitalize %><%= " (#{d.response_code || d.error.to_s.first(40)})" if d.status != "delivered" && (d.response_code || d.error) %></span></td>
+          <td class="num"><%= d.attempt %></td></tr>
+      <% end %>
+      <% if @deliveries.empty? %><tr><td colspan="4" class="meta">Nothing sent yet.</td></tr><% end %>
+    </tbody>
+  </table></div></div>
+</div>

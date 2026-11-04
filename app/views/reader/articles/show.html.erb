@@ -10,6 +10,7 @@
 
   <article class="doc">
     <% if @preview %><div class="flash" style="margin:0 0 16px">Preview of an unpublished version. Readers can't see this yet.</div><% end %>
+    <% if @older %><div class="flash" style="margin:0 0 16px">You're reading version <%= @version.number %>. <%= link_to "Read the current version", article_path(@article) %></div><% end %>
     <div class="crumbs"><%= link_to "Help Center", root_path %> / <%= link_to @chapter.name, chapter_path(@chapter) %></div>
     <h1><%= @version.title %></h1>
     <% if @version.subtitle.present? %><p class="lede"><%= @version.subtitle %></p><% end %>

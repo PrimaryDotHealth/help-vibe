@@ -65,6 +65,7 @@ class Article < ApplicationRecord
     transaction do
       article = create!(slug: unique_slug(title), main_category: category, created_by: author, accessibility: accessibility)
       article.versions.create!(number: 1, title: title, created_by: author)
+      Activity.record!(article, "create", by: author)
       article
     end
   end

@@ -5,9 +5,14 @@ class Reader::ArticlesController < Reader::BaseController
     return if performed?
     raise ActiveRecord::RecordNotFound unless @article&.visible_to?(viewer)
 
-    @version = @article.live_version || (viewer&.editor? && @article.versions.last)
+    @version = if params[:number]
+      @article.versions.find_by(number: params[:number], status: "published") || (Current.user&.editor? && @article.versions.find_by(number: params[:number]))
+    else
+      @article.live_version || (Current.user&.editor? && @article.versions.last)
+    end
     raise ActiveRecord::RecordNotFound unless @version
-    @preview = !@version.is_default
+    @preview = @version.status != "published"
+    @older = !@preview && !@version.is_default
     @chapter = @article.main_category.chapter
     @siblings = Article.listed_for(viewer).where(main_category: [ @chapter ] + @chapter.children).includes(:versions).order(:code)
 

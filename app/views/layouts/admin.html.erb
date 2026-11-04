@@ -28,7 +28,9 @@
           <% if Current.user.admin? %>
             <div class="label">Admin</div>
             <%= nav.("People", "users", admin_users_path, %w[users groups].include?(controller_name)) %>
-            <%= nav.("API keys", "key", admin_api_keys_path, controller_name == "api_keys") %>
+            <%= nav.("API and webhooks", "key", admin_api_keys_path, %w[api_keys webhooks].include?(controller_name)) %>
+            <%= nav.("Activity", "history", admin_activities_path, controller_name == "activities") %>
+            <%= nav.("Settings", "sliders", admin_settings_path, controller_name == "settings") %>
             <%= nav.("Import", "db", admin_import_path, controller_name == "import") %>
           <% end %>
           <div class="label">In our app</div>

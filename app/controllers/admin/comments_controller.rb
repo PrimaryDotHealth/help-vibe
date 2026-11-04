@@ -3,8 +3,9 @@ class Admin::CommentsController < Admin::BaseController
   def create
     version = ArticleVersion.find(params[:version_id])
     quote = params[:quote].to_s.squish.first(300).presence
-    version.comments.create!(author: Current.user, body: params.require(:body), parent_id: params[:parent_id].presence,
-                             anchor: quote ? { "quote" => quote } : nil)
+    comment = version.comments.create!(author: Current.user, body: params.require(:body), parent_id: params[:parent_id].presence,
+                                       anchor: quote ? { "quote" => quote } : nil)
+    Activity.record!(comment, "create", by: Current.user, extra: { article_id: version.article_id })
     redirect_to edit_admin_article_path(version.article, anchor: "comments")
   rescue ActionController::ParameterMissing, ActiveRecord::RecordInvalid
     redirect_to edit_admin_article_path(version.article, anchor: "comments"), alert: "Write something first"
@@ -13,6 +14,7 @@ class Admin::CommentsController < Admin::BaseController
   def update
     comment = Comment.find(params[:id])
     comment.update!(resolved_at: params[:resolved] == "1" ? Time.current : nil)
+    Activity.record!(comment, "update", by: Current.user, extra: { resolved: comment.resolved_at.present? })
     redirect_to edit_admin_article_path(comment.version.article, anchor: "comments")
   end
 end

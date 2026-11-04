@@ -9,6 +9,7 @@ Rails.application.routes.draw do
   scope module: :reader do
     get "c/:slug", to: "chapters#show", as: :chapter
     get "a/:slug", to: "articles#show", as: :article
+    get "a/:slug/v/:number", to: "articles#show", as: :article_version
     post "a/:slug/vote", to: "votes#create", as: :article_vote
     get "search", to: "search#index", as: :search
   end
@@ -27,6 +28,7 @@ Rails.application.routes.draw do
       resources :revisions, only: :create
       resources :reviews, only: :create
       resources :comments, only: :create
+      resource :markdown, only: :create
     end
     resources :reviews, only: :destroy do
       post :decide, on: :member
@@ -39,6 +41,11 @@ Rails.application.routes.draw do
     resource :import, only: %i[show create], controller: "import"
     resources :context_rules, except: :show
     resource :analytics, only: :show
+    resources :webhooks, except: :edit do
+      member { post :toggle; post :test }
+    end
+    resources :activities, only: :index
+    resource :settings, only: %i[show update]
   end
 
   # Embeddable help widget (S07) and chromeless article for iframes (S08)
@@ -55,8 +62,8 @@ Rails.application.routes.draw do
   namespace :api, defaults: { format: :json } do
     namespace :v3 do
       get "search", to: "search#index"
-      resources :articles, only: %i[index show]
-      resources :categories, only: %i[index show]
+      resources :articles, only: %i[index show create update destroy]
+      resources :categories, only: %i[index show create update]
     end
   end
 

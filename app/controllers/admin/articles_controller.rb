@@ -45,6 +45,7 @@ class Admin::ArticlesController < Admin::BaseController
       version = editable_version
       version.save_revision!(body: attrs[:body], author: Current.user, base_revision_id: attrs[:base_revision_id],
                              title: attrs[:title], subtitle: attrs[:subtitle])
+      Activity.record!(@article, "update", by: Current.user)
       if attrs.key?(:publish_at) || attrs.key?(:expire_at)
         version.update!(publish_at: Time.zone.parse(attrs[:publish_at].to_s), expire_at: Time.zone.parse(attrs[:expire_at].to_s))
       end

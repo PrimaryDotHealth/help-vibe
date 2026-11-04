@@ -1,0 +1,6 @@
+<%= form_with model: [ :admin, webhook ] do |f| %>
+  <% if webhook.errors.any? %><div class="errors"><%= webhook.errors.full_messages.to_sentence %></div><% end %>
+  <label class="field"><span>Event</span><%= f.select :event, Webhook::EVENTS, {}, class: "input mono" %></label>
+  <label class="field"><span>URL</span><%= f.url_field :url, class: "input mono", required: true, placeholder: "https://app.ourcompany.com/hooks/help" %></label>
+  <div class="acts"><%= f.submit "Save", class: "btn primary" %><%= link_to "Cancel", admin_webhooks_path, class: "btn quiet" %></div>
+<% end %>

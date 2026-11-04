@@ -15,6 +15,7 @@ class Admin::UsersController < Admin::BaseController
     @user = User.new(user_params.merge(password: SecureRandom.base58(24), role: requested_role || "draft_writer"))
     if @user.save
       Group.auto_join!(@user)
+      Activity.record!(@user, "create", by: Current.user)
       UsersMailer.invitation(@user).deliver_later
       redirect_to admin_users_path, notice: "Invitation sent to #{@user.email_address}"
     else
@@ -38,6 +39,7 @@ class Admin::UsersController < Admin::BaseController
     end
     if @user.update(attrs.merge(role: role))
       @user.sessions.destroy_all unless @user.active?
+      Activity.record!(@user, "update", by: Current.user)
       redirect_to admin_users_path, notice: "Saved"
     else
       render :edit, status: :unprocessable_entity
