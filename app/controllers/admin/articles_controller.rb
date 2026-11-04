@@ -40,8 +40,9 @@ class Admin::ArticlesController < Admin::BaseController
     ActiveRecord::Base.transaction do
       @article.update!(main_category_id: attrs[:main_category_id], accessibility: attrs[:accessibility], keyword_list: attrs[:keywords])
       @article.accessor_keys = attrs[:accessor_keys] if attrs.key?(:accessor_keys)
-      version = editable_version
-      version.save_revision!(body: attrs[:body], author: Current.user, base_revision_id: attrs[:base_revision_id],
+      version, base = @article.draft_for_save!(from_version: @article.versions.find(params[:editor][:version_id]),
+                                               base_revision_id: attrs[:base_revision_id], author: Current.user)
+      version.save_revision!(body: attrs[:body], author: Current.user, base_revision_id: base,
                              title: attrs[:title], subtitle: attrs[:subtitle])
       Activity.record!(@article, "update", by: Current.user)
       if attrs.key?(:publish_at) || attrs.key?(:expire_at)
@@ -62,12 +63,6 @@ class Admin::ArticlesController < Admin::BaseController
   rescue ActiveRecord::RecordInvalid => e
     redirect_to edit_admin_article_path(@article), alert: e.record.errors.full_messages.to_sentence
   rescue ArticleVersion::StaleRevision
-    redirect_to edit_admin_article_path(@article), alert: "Someone saved a newer copy while you were editing. Your changes weren't saved: reload and reapply them."
+    redirect_to edit_admin_article_path(@article), alert: "Someone else changed this article while you were editing, so your changes weren't saved. Copy them, reload, and apply them again."
   end
-
-  private
-    def editable_version
-      version = @article.versions.find(params[:editor][:version_id])
-      version.draft? ? version : @article.working_version!(author: Current.user)
-    end
 end

@@ -14,7 +14,14 @@
   <body>
     <%= render "shared/icons" %>
     <% if content_for?(:full_page) %>
-      <% flash.each do |type, message| %><div class="flash <%= type %>" style="margin:0;border-radius:0"><%= message %></div><% end %>
+      <div class="toasts" aria-live="polite">
+        <% flash.each do |type, message| %>
+          <div class="toast <%= type %>" data-controller="toast" data-toast-sticky-value="<%= type.to_s == "alert" %>" role="<%= type.to_s == "alert" ? "alert" : "status" %>">
+            <%= icon(type.to_s == "alert" ? "alert" : "check") %><span class="grow"><%= message %></span>
+            <button type="button" class="x" data-action="toast#dismiss" aria-label="Dismiss"><%= icon "x" %></button>
+          </div>
+        <% end %>
+      </div>
       <%= yield %>
     <% else %>
       <div class="app" style="min-height:100vh">

@@ -562,3 +562,16 @@ lexxy-editor, .lexxy-content {
 .ticket-fields { display: grid; grid-template-columns: max-content 1fr; gap: 4px 16px; margin: 12px 0 0; font-size: 14px; }
 .ticket-fields dt { color: var(--text-3); }
 .ticket-fields dd { margin: 0; }
+
+/* Toasts (full-page screens like the editor) */
+.toasts { position: fixed; top: 64px; left: 50%; transform: translateX(-50%); z-index: 50; display: grid; gap: 8px; width: min(560px, calc(100vw - 32px)); pointer-events: none; }
+.toast { pointer-events: auto; display: flex; align-items: center; gap: 10px; padding: 10px 8px 10px 14px; border-radius: var(--r-card);
+         background: var(--card); border: 1px solid var(--line-strong); box-shadow: var(--shadow-float); font-size: 14px; line-height: 20px; color: var(--text);
+         animation: toast-in 200ms var(--ease); }
+.toast .i { color: var(--pos); }
+.toast.alert .i:first-child { color: var(--neg); }
+.toast.alert { border-color: color-mix(in srgb, var(--neg) 45%, var(--line-strong)); }
+.toast .x { width: 28px; height: 28px; border: 0; border-radius: var(--r-sm); background: transparent; color: var(--text-3); display: grid; place-items: center; cursor: pointer; }
+.toast .x:hover { background: var(--raised); color: var(--text); }
+.toast.leaving { opacity: 0; transform: translateY(-4px); transition: opacity 200ms var(--ease), transform 200ms var(--ease); }
+@keyframes toast-in { from { opacity: 0; transform: translateY(-6px); } }

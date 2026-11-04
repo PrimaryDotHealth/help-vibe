@@ -66,6 +66,31 @@ class KnowledgeBaseFlowTest < ActionDispatch::IntegrationTest
     assert_response :conflict
   end
 
+  test "Save on a live article creates the draft and saves, with no false conflict" do
+    article = publish_article(title: "Invite a teammate", body: "<p>old</p>", chapter: @chapter)
+    live = article.live_version
+    sign_in_as users(:two)
+    patch admin_article_path(article), params: { editor: { version_id: live.id, base_revision_id: live.current_revision_id,
+      title: "Invite a teammate", body: "<p>new words</p>", main_category_id: @chapter.id, accessibility: "public", keywords: "" } }
+    assert_equal "Saved", flash[:notice]
+    assert_nil flash[:alert]
+    assert_equal "Live, editing v2", article.reload.status_label
+    assert_equal "new words", article.versions.find_by(number: 2).current_revision.body_text
+    assert_equal "old", article.live_version.current_revision.body_text
+  end
+
+  test "a real conflict is still caught: someone started a draft after you opened the live article" do
+    article = publish_article(title: "Fees", body: "<p>old</p>", chapter: @chapter)
+    live = article.live_version
+    article.working_version!(author: users(:one))            # Dana starts a draft meanwhile
+    sign_in_as users(:two)
+    patch admin_article_path(article), params: { editor: { version_id: live.id, base_revision_id: live.current_revision_id,
+      title: "Fees", body: "<p>Lee's words</p>", main_category_id: @chapter.id, accessibility: "public", keywords: "" } }
+    assert_match "Someone else changed this article", flash[:alert]
+    post admin_version_revisions_path(live), params: { body: "<p>autosave</p>", base_revision_id: live.current_revision_id }, as: :json
+    assert_response :conflict
+  end
+
   test "draft writers can't publish" do
     article = Article.start!(title: "Draft", category: @chapter, author: users(:writer))
     sign_in_as users(:writer)

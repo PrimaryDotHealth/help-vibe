@@ -109,6 +109,18 @@ class Article < ApplicationRecord
                         .includes(:versions).order(views: :desc).limit(limit - by_keyword.size).to_a
   end
 
+  # Where a save from the editor goes, and which revision it must build on.
+  # The editor was opened either on a draft (save onto it) or on the live
+  # version (no draft existed then). In the second case a conflict is real only
+  # if someone has since published a newer copy or started a draft.
+  def draft_for_save!(from_version:, base_revision_id:, author:)
+    return [ from_version, base_revision_id ] if from_version.draft?
+    newer_live = base_revision_id.present? && from_version.current_revision_id != base_revision_id.to_i
+    raise ArticleVersion::StaleRevision if newer_live || versions.where(status: "draft").exists?
+    draft = working_version!(author: author)
+    [ draft, draft.current_revision_id ]
+  end
+
   def keyword_list
     keywords.order(:name).pluck(:name).join(", ")
   end
