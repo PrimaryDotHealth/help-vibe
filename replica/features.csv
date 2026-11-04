@@ -36,9 +36,9 @@ Tables and code blocks,editor,should,yes,no,
 Compare revisions (diff),publishing,should,yes,no,
 Multiple published versions with default,publishing,should,yes,no,
 Auto-publish and expiration dates,publishing,should,yes,no,
-Review process: request reviewers approve or disapprove,review,should,yes,no,
-Review rule any or all approvers and bypass roles,review,should,yes,no,
-Inline comments on article text,review,should,yes,no,
+Review process: request reviewers approve or disapprove,review,should,yes,skip,removed 2026-11-03: drafts are published directly by collaborators
+Review rule any or all approvers and bypass roles,review,should,yes,skip,removed 2026-11-03: drafts are published directly by collaborators
+Inline comments on article text,review,should,yes,skip,removed 2026-11-03: drafts are published directly by collaborators
 Email notifications (review requested and decided),notifications,should,yes,no,SMTP config. Optional
 Was this helpful votes,feedback,should,yes,no,
 Contextual suggestions by host page URL,embed,should,no,no,ours: original docs do not show page-aware suggestions

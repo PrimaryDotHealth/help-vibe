@@ -7,20 +7,12 @@ class ArticleVersion < ApplicationRecord
   belongs_to :created_by, class_name: "User", optional: true
   belongs_to :current_revision, class_name: "Revision", optional: true
   has_many :revisions, -> { order(:id) }, foreign_key: :version_id, dependent: :destroy, inverse_of: :version
-  has_many :reviews, -> { order(:created_at) }, foreign_key: :version_id, dependent: :destroy
   has_many :comments, -> { order(:created_at) }, foreign_key: :version_id, dependent: :destroy
 
-  def open_review = reviews.reverse.find { _1.status != "cancelled" }
 
-  # Publishing rules (S14): draft writers never publish. Others may unless a
-  # review is required/open and not approved, in which case only bypass roles may.
+  # Draft writers save drafts; collaborators and above publish them.
   def publish_blocked_for(user)
-    return "Draft writers can't publish. Request a review instead." unless user.can_publish?
-    review = open_review
-    needs_approval = Setting["review.required"] || review&.status.in?(%w[pending changes_requested])
-    return nil unless needs_approval && review&.status != "approved"
-    return nil if Array(Setting["review.bypass_roles"]).include?(user.role)
-    review ? "Waiting for review approval" : "An approved review is required before publishing"
+    "Draft writers can't publish. A collaborator or admin can publish your draft." unless user.can_publish?
   end
 
   validates :title, presence: true

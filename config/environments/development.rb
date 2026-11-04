@@ -40,6 +40,13 @@ Rails.application.configure do
   # Set localhost to be used by links generated in mailer templates.
   config.action_mailer.default_url_options = { host: "localhost", port: 3000 }
 
+  # Send real email from development only if a SendGrid key is set; otherwise log it.
+  if ENV["SENDGRID_API_KEY"].present?
+    require_relative "../sendgrid"
+    config.action_mailer.delivery_method = :smtp
+    config.action_mailer.smtp_settings = Helpvibe.sendgrid_smtp_settings
+  end
+
   # Print deprecation notices to the Rails logger.
   config.active_support.deprecation = :log
 

@@ -16,7 +16,7 @@
       <% if Current.user.can_publish? %>
         <%= f.button class: "btn sm primary", name: "publish", value: "1" do %>Publish<% end %>
       <% else %>
-        <a href="#review" class="btn sm primary">Request review</a>
+        <span class="meta">A collaborator publishes your draft</span>
       <% end %>
     </div>
     <div class="ed-body">
@@ -32,7 +32,7 @@
       </div>
       <aside class="panel">
         <div class="tabs"><a href="#" class="on">Details</a><%= link_to "History", admin_article_history_path(@article) %></div>
-        <%= render "review_panel", version: @version %>
+        <%= render "collab_panel", version: @version %>
         <section>
           <h3>Where it lives</h3>
           <label class="field"><span>Chapter</span>

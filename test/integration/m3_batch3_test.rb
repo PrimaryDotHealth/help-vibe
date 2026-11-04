@@ -45,11 +45,8 @@ class M3Batch3Test < ActionDispatch::IntegrationTest
     assert_equal "markdown", draft.current_revision.body_format
   end
 
-  test "settings change the review rules; activity is listed" do
+  test "activity is listed" do
     sign_in_as users(:one)
-    patch admin_settings_path, params: { review_rule: "all", review_required: "1", bypass_roles: [ "superadmin" ] }
-    assert_equal "all", Setting["review.rule"]
-    assert Setting["review.required"]
     publish_article(title: "Logged", body: "<p>x</p>", chapter: @chapter)
     get admin_activities_path
     assert_select "td", "Publish"

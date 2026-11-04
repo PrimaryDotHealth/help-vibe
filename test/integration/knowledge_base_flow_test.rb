@@ -71,7 +71,7 @@ class KnowledgeBaseFlowTest < ActionDispatch::IntegrationTest
     sign_in_as users(:writer)
     post admin_article_publication_path(article)
     assert_redirected_to edit_admin_article_path(article)
-    assert_match "Request a review", flash[:alert]
+    assert_match "collaborator or admin can publish", flash[:alert]
     assert_nil article.reload.live_version
   end
 

@@ -1,7 +1,0 @@
-<%= @reviewer.name %> <%= @decision == "approved" ? "approved" : "asked for changes to" %> <%= @article.code %> "<%= @review.version.title %>".
-<% if @message.present? %>
-
-"<%= @message %>"
-<% end %>
-
-Open it: <%= @url %>

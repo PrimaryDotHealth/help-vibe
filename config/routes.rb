@@ -26,12 +26,8 @@ Rails.application.routes.draw do
     end
     resources :versions, only: [] do
       resources :revisions, only: :create
-      resources :reviews, only: :create
       resources :comments, only: :create
       resource :markdown, only: :create
-    end
-    resources :reviews, only: :destroy do
-      post :decide, on: :member
     end
     resources :comments, only: :update
     resources :chapters, except: %i[show destroy]
@@ -45,7 +41,6 @@ Rails.application.routes.draw do
       member { post :toggle; post :test }
     end
     resources :activities, only: :index
-    resource :settings, only: %i[show update]
   end
 
   # Embeddable help widget (S07) and chromeless article for iframes (S08)

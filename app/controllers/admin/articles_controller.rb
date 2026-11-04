@@ -1,17 +1,15 @@
 # S11 article list and S12 editor.
 class Admin::ArticlesController < Admin::BaseController
-  STATUSES = %w[all drafts live review].freeze
+  STATUSES = %w[all drafts live].freeze
 
   def index
     @status = STATUSES.include?(params[:status]) ? params[:status] : "all"
     scope = Article.live.includes(:versions, :main_category, :created_by).order(updated_at: :desc)
     scope = scope.published if @status == "live"
     scope = scope.where(id: ArticleVersion.where(status: "draft").select(:article_id)) if @status == "drafts"
-    scope = scope.where(id: ArticleVersion.where(id: Review.awaiting(Current.user).select(:version_id)).select(:article_id)) if @status == "review"
     scope = scope.where("articles.code ilike :q or articles.slug ilike :q", q: "%#{Article.sanitize_sql_like(params[:q])}%") if params[:q].present?
     @articles = scope.limit(200)
-    @counts = { "all" => Article.live.count, "drafts" => Article.live.where(id: ArticleVersion.where(status: "draft").select(:article_id)).count, "live" => Article.live.published.count,
-                "review" => Review.awaiting(Current.user).count }
+    @counts = { "all" => Article.live.count, "drafts" => Article.live.where(id: ArticleVersion.where(status: "draft").select(:article_id)).count, "live" => Article.live.published.count }
   end
 
   def new

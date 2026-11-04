@@ -6,7 +6,7 @@ class Admin::PublicationsController < Admin::BaseController
     article = Article.find_by!(slug: params[:article_id])
     version = article.versions.select(&:draft?).max_by(&:number)
     unless Current.user.can_publish?
-      return redirect_to(edit_admin_article_path(article), alert: "Draft writers can't publish. Request a review instead.")
+      return redirect_to(edit_admin_article_path(article), alert: "Draft writers can't publish. A collaborator or admin can publish your draft.")
     end
     return redirect_to(edit_admin_article_path(article), alert: "Nothing new to publish") unless version&.current_revision
     if (reason = version.publish_blocked_for(Current.user))

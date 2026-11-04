@@ -60,15 +60,16 @@ Rails.application.configure do
   # Set host to be used by links generated in mailer templates.
   config.action_mailer.default_url_options = { host: ENV.fetch("HELPVIBE_DOMAIN", "example.com"), protocol: "https" }
 
-  # Outgoing email over SMTP (Amazon SES under the AWS BAA; see replica/deploy.md).
-  # Without SMTP_ADDRESS, emails are logged instead of sent.
-  if ENV["SMTP_ADDRESS"].present?
+  # Outgoing email: SendGrid via Action Mailer SMTP (config/sendgrid.rb).
+  if ENV["SENDGRID_API_KEY"].present?
+    require_relative "../sendgrid"
     config.action_mailer.delivery_method = :smtp
-    config.action_mailer.smtp_settings = {
-      address: ENV["SMTP_ADDRESS"], port: ENV.fetch("SMTP_PORT", 587).to_i,
-      user_name: ENV["SMTP_USERNAME"], password: ENV["SMTP_PASSWORD"],
-      authentication: :login, enable_starttls_auto: true
-    }
+    config.action_mailer.smtp_settings = Helpvibe.sendgrid_smtp_settings
+    config.action_mailer.raise_delivery_errors = true
+  else
+    # No key yet: keep emails as files on the server (storage/mails) instead of failing.
+    config.action_mailer.delivery_method = :file
+    config.action_mailer.file_settings = { location: Rails.root.join("storage/mails") }
   end
 
   # Enable locale fallbacks for I18n (makes lookups for any locale fall back to

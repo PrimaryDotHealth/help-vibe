@@ -7,7 +7,7 @@
 
 <div class="toolbar-row">
   <div class="seg">
-    <% { "all" => "All", "drafts" => "Drafts", "live" => "Live", "review" => "Needs my review" }.each do |key, label| %>
+    <% { "all" => "All", "drafts" => "Drafts", "live" => "Live" }.each do |key, label| %>
       <%= link_to admin_articles_path(status: key, q: params[:q]), class: ("on" if @status == key) do %><%= label %> <span class="code"><%= @counts[key] %></span><% end %>
     <% end %>
   </div>

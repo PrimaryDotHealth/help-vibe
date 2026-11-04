@@ -69,21 +69,23 @@ bin/kamal app exec 'bin/rails helpvibe:import:helpjuice'
 
 It's safe to run again. Private articles come across visible to superadmins only, and the run lists them so you can share each with the right people or groups.
 
-## Email (BAA)
+## Email (SendGrid)
 
-Amazon SES in the same AWS account:
-1. Verify the domain.
-2. Create SMTP credentials.
-3. Request production access.
-4. Set these:
+All email (invitations, password resets, and later support notifications) goes through Action Mailer over SendGrid's SMTP relay.
 
+1. In SendGrid:
+   - Authenticate your sending domain (Settings → Sender Authentication), so mail passes SPF and DKIM.
+   - Create an API key with "Mail Send" permission only.
+2. Add to your shell secrets, then `bin/kamal deploy`:
+
+```bash
+export SENDGRID_API_KEY=SG.…
+export HELPVIBE_MAIL_FROM=help@ourcompany.com   # must be on the authenticated domain
 ```
-SMTP_ADDRESS=email-smtp.<region>.amazonaws.com
-SMTP_USERNAME=…  SMTP_PASSWORD=…
-HELPVIBE_MAIL_FROM=help@ourcompany.com
-```
 
-Without them, emails are written to the log instead of being sent.
+Without `SENDGRID_API_KEY`, emails are saved as files in `storage/mails` on the server instead of being sent. Click and open tracking are switched off on every message, so SendGrid never rewrites the sign-in links.
+
+> **HIPAA:** check with Twilio whether your SendGrid plan is covered by a BAA before any patient data goes into email. Part 2's notification emails default to "link only" (no message text), which keeps patient details out of email either way.
 
 ## Embedding in our app
 
