@@ -519,3 +519,32 @@ lexxy-editor, .lexxy-content {
 .sheet .paper .lexxy-editor__content p { margin: 0 0 12px; }
 .sheet .paper .lexxy-editor__content blockquote { margin: 16px 0; padding: 12px 16px; border-left: 2px solid var(--text-3); background: var(--paper-raised); border-radius: 0 var(--r-md) var(--r-md) 0; color: var(--text-2); }
 .doc .rich .lexxy-content h2 { font: 400 26px/32px var(--serif); }
+
+/* ---------- support conversations ---------- */
+.conversation { display: flex; flex-direction: column; gap: 12px; }
+#thread_parts { display: flex; flex-direction: column; gap: 12px; }
+.msg { display: flex; flex-direction: column; max-width: 88%; }
+.msg.me { align-self: flex-end; align-items: flex-end; }
+.msg .meta { font-size: 12px; margin-bottom: 4px; }
+.bubble { padding: 10px 12px; border-radius: var(--r-card); background: var(--raised); font-size: 14px; line-height: 22px; overflow-wrap: anywhere; }
+.bubble p { margin: 0; }
+.bubble p + p { margin-top: 8px; }
+.msg.me .bubble { background: var(--ink); color: var(--on-ink); }
+.msg.me .bubble a { color: inherit; text-decoration: underline; }
+.msg.note .bubble { background: rgba(250, 204, 21, .16); box-shadow: inset 2px 0 0 #ca8a04; }
+.msg-event { text-align: center; font-size: 12px; }
+.reply-box { margin-top: 8px; padding-top: 12px; border-top: 1px solid var(--line); }
+.code-link { font: 500 12px var(--mono); }
+.inbox { display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 16px; align-items: start; }
+.inbox .views a { display: flex; justify-content: space-between; padding: 6px 10px; border-radius: var(--r-md); color: var(--text-2); font-size: 14px; }
+.inbox .views a.on { background: var(--raised); color: var(--text); font-weight: 500; }
+.inbox .views a .code { color: var(--text-3); }
+.thread-row { display: grid; grid-template-columns: 28px minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 12px 16px; border-bottom: 1px solid var(--line); color: var(--text); }
+.thread-row:hover { background: var(--raised); text-decoration: none; }
+.thread-row .preview { color: var(--text-2); font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.thread-row.unread b { font-weight: 600; }
+.thread-row .dot-unread { width: 8px; height: 8px; border-radius: 4px; background: var(--ink); display: inline-block; }
+.thread-page { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 16px; align-items: start; }
+.composer textarea { min-height: 96px; }
+.composer .modes { display: flex; gap: 8px; margin-top: 8px; align-items: center; flex-wrap: wrap; }
+@media (max-width: 1000px) { .inbox, .thread-page { grid-template-columns: minmax(0, 1fr); } }

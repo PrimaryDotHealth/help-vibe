@@ -1,0 +1,13 @@
+<div class="card form-card" style="max-width:560px">
+  <%= form_with model: [ :admin, team ] do |f| %>
+    <% if team.errors.any? %><div class="errors"><%= team.errors.full_messages.to_sentence %></div><% end %>
+    <label class="field"><span>Name</span><%= f.text_field :name, class: "input", required: true, placeholder: "Billing" %></label>
+    <div class="field"><span>Agents</span>
+      <% User.active.order(:first_name, :email_address).each do |u| %>
+        <label class="row" style="font-size:14px;padding:4px 0"><%= check_box_tag "team[user_ids][]", u.id, team.user_ids.include?(u.id), style: "accent-color:var(--ink)" %><%= u.name %> <span class="meta"><%= u.email_address %></span></label>
+      <% end %>
+      <%= hidden_field_tag "team[user_ids][]", "" %></div>
+    <div class="acts"><%= f.submit "Save", class: "btn primary" %><%= link_to "Cancel", admin_teams_path, class: "btn quiet" %></div>
+  <% end %>
+  <% if team.persisted? %><%= button_to "Delete team", admin_team_path(team), method: :delete, class: "btn quiet", form: { style: "margin-top:12px" }, data: { turbo_confirm: "Delete #{team.name}? Its conversations become unassigned to a team." } %><% end %>
+</div>

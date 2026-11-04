@@ -1,0 +1,38 @@
+<% content_for :title, "Inbox" %>
+<% content_for :head do %><%= turbo_refreshes_with method: :morph, scroll: :preserve %><% end %>
+<%= turbo_stream_from "inbox" %>
+<div class="head"><h1>Inbox</h1><span class="grow"></span><%= link_to "Saved replies", admin_macros_path, class: "btn quiet" %></div>
+<div class="inbox">
+  <nav class="card views" style="padding:8px">
+    <% { "mine" => "Assigned to me", "unassigned" => "Unassigned", "all" => "All open" }.each do |key, label| %>
+      <%= link_to admin_inbox_path(view: key), class: ("on" if @view == key) do %><span><%= label %></span><span class="code"><%= @counts[key] %></span><% end %>
+    <% end %>
+    <% if @teams.any? %><div class="meta" style="padding:12px 10px 4px">Teams</div><% end %>
+    <% @teams.each do |t| %>
+      <%= link_to admin_inbox_path(view: "team-#{t.id}"), class: ("on" if @view == "team-#{t.id}") do %><span><%= t.name %></span><span class="code"><%= @team_counts[t.id].to_i %></span><% end %>
+    <% end %>
+    <div class="meta" style="padding:12px 10px 4px">Later</div>
+    <%= link_to admin_inbox_path(view: "snoozed"), class: ("on" if @view == "snoozed") do %><span>Snoozed</span><span class="code"><%= @counts["snoozed"] %></span><% end %>
+    <%= link_to admin_inbox_path(view: "closed"), class: ("on" if @view == "closed") do %><span>Closed</span><span></span><% end %>
+  </nav>
+  <div class="card">
+    <% if @threads.empty? %>
+      <div class="blank"><h2>Nothing here</h2><p><%= @view == "mine" ? "Nobody is waiting on you." : "No conversations in this view." %></p></div>
+    <% end %>
+    <% @threads.each do |t| %>
+      <% unread = (@reads[t.id] || 0) < @last_parts[t.id].to_i %>
+      <%= link_to admin_support_thread_path(t), class: "thread-row #{"unread" if unread}", data: { turbo_frame: "_top" } do %>
+        <span class="avatar"><%= t.contact&.initials || "?" %></span>
+        <span style="min-width:0">
+          <span class="row" style="gap:8px"><% if unread %><span class="dot-unread"></span><% end %><b style="font-weight:500"><%= t.contact&.display_name || "Unknown" %></b>
+            <span class="meta">#<%= t.number %><%= " · #{t.contact.kind}" if t.contact && t.contact.kind != "unknown" %><%= " · #{t.page_context}" if t.page_context %></span></span>
+          <div class="preview"><%= @previews[t.id]&.body.to_s.squish.truncate(140) %></div>
+        </span>
+        <span style="text-align:right">
+          <% if t.waiting_since %><span class="status review">Waiting <%= waiting_for(t) %></span><% elsif t.state == "snoozed" %><span class="meta">Until <%= t.snoozed_until.strftime("%-d %b %H:%M") %></span><% else %><span class="meta"><%= relative_day(t.updated_at) %></span><% end %>
+          <div class="meta"><%= [ t.assignee_user&.first_name, t.assignee_team&.name ].compact.join(" · ").presence || "Unassigned" %></div>
+        </span>
+      <% end %>
+    <% end %>
+  </div>
+</div>

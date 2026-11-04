@@ -1,0 +1,11 @@
+<% if ThreadMailer.reply_address(@thread) %><%= ThreadMailer::REPLY_MARKER %>
+
+<% end %>
+<%= @part.author_user&.first_name.presence || "Our team" %> replied to your question.
+<% if @full %>
+
+<%= @part.body %>
+<% end %>
+
+Read and reply: <%= @link %>
+<% if ThreadMailer.reply_address(@thread) %>Or reply to this email.<% end %>

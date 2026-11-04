@@ -9,6 +9,7 @@
     <%= stylesheet_link_tag "lexxy", "data-turbo-track": "reload" %>
     <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
     <%= javascript_importmap_tags %>
+    <%= yield :head %>
   </head>
   <body>
     <%= render "shared/icons" %>
@@ -20,14 +21,24 @@
         <nav class="side">
           <%= link_to admin_root_path, class: "wordmark" do %><span class="mark">h</span>helpvibe<% end %>
           <% nav = ->(label, ico, path, on) { link_to(safe_join([ icon(ico), label ]), path, class: [ "nav", ("on" if on) ]) } %>
+          <% if Current.user.agent? %>
+            <% unread = Current.user.notifications.unread.count %>
+            <%= link_to admin_inbox_path, class: [ "nav", ("on" if %w[inbox support_threads macros].include?(controller_name)) ] do %><%= icon "inbox" %>Inbox<% if unread.positive? %><span class="count"><%= unread %></span><% end %><% end %>
+          <% end %>
+          <% if Current.user.editor? %>
           <%= nav.("Articles", "file", admin_articles_path, controller_name == "articles") %>
           <%= nav.("Analytics", "chart", admin_analytics_path, controller_name == "analytics") %>
           <%= nav.("Chapters", "folder", admin_chapters_path, controller_name == "chapters") %>
+          <% end %>
           <% if Current.user.admin? %>
             <div class="label">Admin</div>
             <%= nav.("People", "users", admin_users_path, %w[users groups].include?(controller_name)) %>
             <%= nav.("API and webhooks", "key", admin_api_keys_path, %w[api_keys webhooks].include?(controller_name)) %>
             <%= nav.("Activity", "history", admin_activities_path, controller_name == "activities") %>
+            <%= nav.("Support teams", "users", admin_teams_path, controller_name == "teams") %>
+            <% if Current.user.superadmin? || Current.user.permissions.include?("compliance") %>
+              <%= nav.("Access log", "eye", admin_audit_events_path, controller_name == "audit_events") %>
+            <% end %>
             <%= nav.("Import", "db", admin_import_path, controller_name == "import") %>
           <% end %>
           <div class="label">In our app</div>

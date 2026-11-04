@@ -266,7 +266,17 @@ authenticate with the staff session or the contact session.
 
 ## Build order
 
-**Status (2026-11-03): M0, M1, M2 and M3 are done.** Notes on what was built:
+**Status (2026-11-04):**
+- **Part 1, M0–M3: done.**
+- **Reviews removed** (by decision): drafts are published directly by collaborators. History and comments stay.
+- **Email** goes through Action Mailer and SendGrid, both outbound (SMTP) and inbound (Inbound Parse → Action Mailbox).
+- **Part 2 core (M5 vertical slice + most of M6): done.** That covers the widget conversations, inbox, replies and notes, assignment and teams, snooze and close, saved replies, email both ways, the access log, and live updates.
+- **Part 2 still to build:**
+  - 2FA and SSO for agents, and retention.
+  - A non-owner database role, so the row-level-security policies are actually enforced.
+  - Ticket types and states, response-time targets with office hours, routing rules, round robin, satisfaction ratings, support reports, hand-off and tracker tickets, and drafting an article from a conversation.
+
+**Part 1 status:** M0, M1, M2 and M3 are done. Notes on what was built:
 - **Callouts and Q&A (M3)** are conventions authors type, not editor plugins:
   - A quote starting "Note:", "Tip:", "Caution:" or "Warning:" renders as a callout.
   - H3s under a "Common questions" or "FAQ" H2 render as collapsible questions.

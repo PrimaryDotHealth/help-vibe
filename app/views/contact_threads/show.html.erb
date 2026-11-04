@@ -1,0 +1,15 @@
+<% content_for :title, "Conversation ##{@thread.number}" %>
+<% content_for :hide_header_search, true %>
+<%= turbo_stream_from @thread, :contact %>
+<main class="results" style="max-width:640px">
+  <h1 style="font:400 28px/34px var(--serif)">Your question</h1>
+  <p class="meta" style="margin:4px 0 24px">Conversation #<%= @thread.number %> · <%= @thread.state == "closed" ? "solved" : "open" %></p>
+  <div class="conversation">
+    <div id="thread_parts"><%= render partial: "widget/conversations/part", collection: @parts %></div>
+    <%= form_with url: contact_thread_reply_path(params[:token]), class: "reply-box", data: { controller: "reset-form", action: "turbo:submit-end->reset-form#reset" } do %>
+      <%= hidden_field_tag :client_id, SecureRandom.uuid %>
+      <%= text_area_tag :body, nil, class: "input", rows: 4, required: true, maxlength: 20000, placeholder: "Reply" %>
+      <div class="acts" style="margin-top:8px"><%= submit_tag "Send", class: "btn primary" %></div>
+    <% end %>
+  </div>
+</main>

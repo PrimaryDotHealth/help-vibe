@@ -1,0 +1,18 @@
+<% content_for :title, "Access log" %>
+<div class="head"><h1>Access log</h1><span class="grow"></span>
+  <%= form_with url: admin_audit_events_path, method: :get, class: "row" do %>
+    <%= text_field_tag :thread, params[:thread], class: "input", placeholder: "Conversation #", style: "width:160px;height:32px" %>
+    <%= text_field_tag :actor, params[:actor], class: "input", placeholder: "Staff email", style: "width:200px;height:32px" %>
+    <%= submit_tag "Filter", class: "btn sm" %>
+  <% end %></div>
+<p class="t2" style="margin:-8px 0 16px;max-width:44rem">Every view and change of a support conversation, kept 6 years. Entries can't be edited or deleted.</p>
+<div class="card"><div class="table-wrap"><table class="data">
+  <thead><tr><th>When</th><th>Who</th><th>Did</th><th>What</th><th>From</th></tr></thead>
+  <tbody><% @events.each do |e| %>
+    <tr><td class="meta"><%= e.at.strftime("%-d %b %Y %H:%M:%S") %></td><td><%= e.actor_label %> <span class="meta"><%= e.actor_type %></span></td><td><%= e.action %></td>
+      <td><%= e.subject_type == "thread" && @thread_numbers[e.subject_id] ? "Conversation ##{@thread_numbers[e.subject_id]}" : "#{e.subject_type} #{e.subject_id}" %><%= " (#{e.detail.map { |k, v| "#{k}: #{v}" }.join(", ")})" if e.detail.present? %></td>
+      <td class="mono t3"><%= e.ip %></td></tr>
+  <% end %>
+  <% if @events.empty? %><tr><td colspan="5" class="meta">Nothing yet.</td></tr><% end %></tbody>
+</table></div>
+<% if @events.size == 200 %><div class="pager"><span class="grow"></span><%= link_to "Older", admin_audit_events_path(thread: params[:thread], actor: params[:actor], before: @events.last.id), class: "btn sm" %></div><% end %></div>

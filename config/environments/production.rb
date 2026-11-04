@@ -1,6 +1,9 @@
 require "active_support/core_ext/integer/time"
 
 Rails.application.configure do
+  # Prepare the ingress controller used to receive mail
+  # config.action_mailbox.ingress = :relay
+
   # Settings specified here will take precedence over those in config/application.rb.
 
   # Code is not reloaded between requests.
@@ -59,6 +62,10 @@ Rails.application.configure do
 
   # Set host to be used by links generated in mailer templates.
   config.action_mailer.default_url_options = { host: ENV.fetch("HELPVIBE_DOMAIN", "example.com"), protocol: "https" }
+
+  # Incoming support email: SendGrid Inbound Parse -> Action Mailbox.
+  # Password from RAILS_INBOUND_EMAIL_PASSWORD (see replica/deploy.md).
+  config.action_mailbox.ingress = :sendgrid
 
   # Outgoing email: SendGrid via Action Mailer SMTP (config/sendgrid.rb).
   if ENV["SENDGRID_API_KEY"].present?

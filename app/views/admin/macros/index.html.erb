@@ -1,0 +1,8 @@
+<% content_for :title, "Saved replies" %>
+<div class="head"><%= link_to admin_inbox_path, class: "btn quiet sm" do %><%= icon "back" %>Inbox<% end %><h1>Saved replies</h1><span class="count"><%= @macros.size %></span><span class="grow"></span>
+  <%= link_to new_admin_macro_path, class: "btn primary" do %><%= icon "plus" %>New saved reply<% end %></div>
+<div class="card"><div class="table-wrap"><table class="data">
+  <thead><tr><th>Name</th><th>Text</th><th>For</th><th class="num">Used</th><th></th></tr></thead>
+  <tbody><% @macros.each do |m| %><tr><td><%= m.name %></td><td class="meta"><%= m.body.truncate(80) %></td><td class="meta"><%= m.team&.name || "Everyone" %></td><td class="num"><%= m.uses %></td><td style="text-align:right"><%= link_to "Edit", edit_admin_macro_path(m) %></td></tr><% end %>
+  <% if @macros.empty? %><tr><td colspan="5" class="meta">None yet.</td></tr><% end %></tbody>
+</table></div></div>

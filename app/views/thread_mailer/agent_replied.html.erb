@@ -1,0 +1,4 @@
+<% if ThreadMailer.reply_address(@thread) %><p style="color:#888;font-size:12px"><%= ThreadMailer::REPLY_MARKER %></p><% end %>
+<p><%= @part.author_user&.first_name.presence || "Our team" %> replied to your question.</p>
+<% if @full %><blockquote style="border-left:3px solid #ddd;margin:0;padding:4px 12px"><%= simple_format @part.body %></blockquote><% end %>
+<p><a href="<%= @link %>">Read and reply</a><% if ThreadMailer.reply_address(@thread) %>, or reply to this email<% end %>.</p>

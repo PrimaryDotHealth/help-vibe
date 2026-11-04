@@ -16,7 +16,8 @@ class Widget::PanelController < Widget::BaseController
     if (article = Article.find_by_code_query(@query)) && article.visible_to?(viewer)
       return redirect_to widget_article_path(article)
     end
-    @results, @fuzzy = @query.present? ? SearchIndex.search(@query, viewer: viewer, limit: 10) : [ [], false ]
+    @results, @fuzzy = @query.present? ? SearchIndex.search(@query, viewer: viewer, limit: params[:suggest] ? 3 : 10) : [ [], false ]
+    return render(:suggestions, layout: false) if params[:suggest]
     @event = SearchEvent.log!(query: @query, results_count: @results.size, source: "widget", page_context: params[:page]) if @query.present?
   end
 

@@ -1,0 +1,9 @@
+<% content_for :title, "Teams" %>
+<div class="head"><h1>Support teams</h1><span class="count"><%= @teams.size %></span><span class="grow"></span>
+  <%= link_to new_admin_team_path, class: "btn primary" do %><%= icon "plus" %>New team<% end %></div>
+<p class="t2" style="margin:-8px 0 16px;max-width:44rem">People in a team are support agents: they get the inbox. Admins always do.</p>
+<div class="card"><div class="table-wrap"><table class="data">
+  <thead><tr><th>Team</th><th>Members</th><th></th></tr></thead>
+  <tbody><% @teams.each do |t| %><tr><td><b style="font-weight:500"><%= t.name %></b></td><td class="meta"><%= t.users.map(&:name).join(", ").presence || "–" %></td><td style="text-align:right"><%= link_to "Edit", edit_admin_team_path(t) %></td></tr><% end %>
+  <% if @teams.empty? %><tr><td colspan="3" class="meta">No teams yet.</td></tr><% end %></tbody>
+</table></div></div>

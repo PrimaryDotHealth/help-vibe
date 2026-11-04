@@ -1,0 +1,11 @@
+<div class="card form-card" style="max-width:640px">
+  <%= form_with model: [ :admin, macro ] do |f| %>
+    <% if macro.errors.any? %><div class="errors"><%= macro.errors.full_messages.to_sentence %></div><% end %>
+    <label class="field"><span>Name</span><%= f.text_field :name, class: "input", required: true, placeholder: "Refund timing" %></label>
+    <label class="field"><span>Text</span><%= f.text_area :body, rows: 6, class: "input", required: true %>
+      <div class="hint">Variables: <span class="mono">{{contact.first_name}} {{contact.name}} {{agent.first_name}} {{agent.name}}</span>. Article codes like BIL·12 become links.</div></label>
+    <label class="field"><span>For</span><%= f.select :team_id, (Current.user.admin? ? Team.order(:name) : Current.user.teams).map { [ _1.name, _1.id ] }, { include_blank: "Everyone" }, class: "input" %></label>
+    <div class="acts"><%= f.submit "Save", class: "btn primary" %><%= link_to "Cancel", admin_macros_path, class: "btn quiet" %></div>
+  <% end %>
+  <% if macro.persisted? %><%= button_to "Delete", admin_macro_path(macro), method: :delete, class: "btn quiet", form: { style: "margin-top:12px" } %><% end %>
+</div>

@@ -30,6 +30,7 @@ env:
     - HELPVIBE_WIDGET_SECRET
     - HELPVIBE_BACKUP_KEY
     - SENDGRID_API_KEY
+    - RAILS_INBOUND_EMAIL_PASSWORD
   clear:
     DB_HOST: helpvibe-db
     SOLID_QUEUE_IN_PUMA: true
@@ -37,6 +38,7 @@ env:
     RAILS_MAX_THREADS: 3        # memory budget for a 2 GB box (replica/architecture.md)
     RUBY_YJIT_ENABLE: 1
     HELPVIBE_DOMAIN: <%= ENV.fetch("HELPVIBE_DOMAIN", "help.example.com") %>
+    HELPVIBE_INBOUND_DOMAIN: "<%= ENV.fetch("HELPVIBE_INBOUND_DOMAIN", "") %>"
     HELPVIBE_MAIL_FROM: <%= ENV.fetch("HELPVIBE_MAIL_FROM", "help@example.com") %>
     HELPVIBE_FRAME_ANCESTORS: <%= ENV.fetch("HELPVIBE_FRAME_ANCESTORS", "'self'") %>
 

@@ -1,0 +1,15 @@
+<%= render layout: "widget/panel/frame", locals: { back: widget_root_path(page: params[:page]), hide_search: true } do %>
+  <div style="padding-top:12px">
+    <%= link_to "Ask a question", new_widget_conversation_path(page: params[:page]), class: "btn primary", style: "width:100%" %>
+    <div class="w-label" style="margin-top:16px">Your conversations</div>
+    <% if @threads.any? %>
+      <ul class="w-list">
+        <% @threads.each do |t| %>
+          <li><%= link_to widget_conversation_path(t, page: params[:page]) do %><span class="code">#<%= t.number %></span><span><%= t.title_or_preview %><p><%= t.state == "closed" ? "Solved" : (t.waiting_since ? "Waiting for us" : "We replied") %> · <%= relative_day(t.updated_at).downcase %></p></span><%= icon "right" %><% end %></li>
+        <% end %>
+      </ul>
+    <% else %>
+      <p class="meta">None yet.</p>
+    <% end %>
+  </div>
+<% end %>

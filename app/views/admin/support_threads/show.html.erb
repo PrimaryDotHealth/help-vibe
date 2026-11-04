@@ -1,0 +1,76 @@
+<% content_for :title, "##{@thread.number} #{@thread.contact&.display_name}" %>
+<%= turbo_stream_from @thread, :agents %>
+<div class="head">
+  <%= link_to admin_inbox_path, class: "btn quiet sm" do %><%= icon "back" %>Inbox<% end %>
+  <h1 style="font-size:18px"><span class="code" style="color:var(--ink);margin-right:8px">#<%= @thread.number %></span><%= @thread.title_or_preview %></h1>
+  <span class="grow"></span>
+  <% if @thread.assignee_user != Current.user %><%= button_to "Take it", admin_support_thread_path(@thread, do: "take"), method: :patch, class: "btn sm" %><% end %>
+  <% if @thread.state == "closed" %>
+    <%= button_to "Reopen", admin_support_thread_path(@thread, do: "reopen"), method: :patch, class: "btn sm" %>
+  <% else %>
+    <%= form_with url: admin_support_thread_path(@thread), method: :patch, class: "row" do %>
+      <%= hidden_field_tag :do, "snooze" %>
+      <%= select_tag :until, options_for_select([ [ "Snooze 1 hour", "1h" ], [ "Until tomorrow 9am", "tomorrow" ], [ "Until next week", "next_week" ] ]), class: "input", style: "height:32px;width:auto;font-size:13px", onchange: "this.form.requestSubmit()", include_blank: "Snooze…" %>
+    <% end %>
+    <%= button_to "Close", admin_support_thread_path(@thread, do: "close"), method: :patch, class: "btn sm primary" %>
+  <% end %>
+</div>
+
+<div class="thread-page">
+  <section class="card" style="padding:20px">
+    <div class="conversation">
+      <div id="thread_parts"><%= render partial: "admin/support_threads/part", collection: @parts %></div>
+      <%= form_with url: admin_support_thread_thread_parts_path(@thread), class: "composer reply-box", multipart: true,
+            data: { controller: "macro reset-form", action: "turbo:submit-end->reset-form#reset" } do %>
+        <%= hidden_field_tag :client_id, SecureRandom.uuid %>
+        <%= hidden_field_tag :macro_id, nil, data: { macro_target: "id" } %>
+        <%= text_area_tag :body, nil, class: "input", required: true, maxlength: 20000, data: { macro_target: "body" },
+              placeholder: "Reply to #{@thread.contact&.first_name || "the contact"}. Type an article code like SCH·07 to link it." %>
+        <div class="modes">
+          <%= submit_tag "Send reply", class: "btn primary sm" %>
+          <%= submit_tag "Reply and close", name: "and_close", class: "btn sm" %>
+          <%= submit_tag "Add internal note", name: "note", class: "btn sm quiet" %>
+          <span class="grow"></span>
+          <% if @macros.any? %>
+            <select class="input" style="height:32px;width:auto;font-size:13px" data-action="change->macro#insert" aria-label="Insert saved reply">
+              <option value="">Insert saved reply…</option>
+              <% @macros.each do |m| %><option value="<%= m.id %>" data-body="<%= m.render_for(@thread, Current.user) %>"><%= m.name %></option><% end %>
+            </select>
+          <% end %>
+          <label class="btn sm quiet" style="cursor:pointer"><%= icon "clip" %>Attach<%= file_field_tag "files[]", multiple: true, hidden: true %></label>
+        </div>
+      <% end %>
+    </div>
+  </section>
+
+  <aside class="card">
+    <% c = @thread.contact %>
+    <section style="padding:16px 20px;border-bottom:1px solid var(--line)">
+      <div class="row"><span class="avatar"><%= c&.initials %></span><b style="font-weight:500"><%= c&.display_name || "Unknown" %></b></div>
+      <% if c %>
+        <p class="meta" style="margin-top:8px"><%= c.email || "No email" %><br><%= c.kind == "unknown" ? "Not identified" : c.kind.capitalize %> · <%= c.verified? ? "verified by our app" : "unverified (email only)" %><%= " · #{c.external_id}" if c.external_id %></p>
+      <% end %>
+      <% if @thread.page_context %><p class="meta" style="margin-top:8px">Asked from <span class="mono"><%= @thread.page_context %></span></p><% end %>
+      <% if @thread.search_query %><p class="meta">Searched "<%= @thread.search_query %>" first</p><% end %>
+      <p class="meta">Via <%= @thread.channel %> · started <%= @thread.created_at.strftime("%-d %b %H:%M") %></p>
+    </section>
+    <section style="padding:16px 20px;border-bottom:1px solid var(--line)">
+      <h3 style="font-size:13px;font-weight:500;margin-bottom:8px">Assigned</h3>
+      <%= form_with url: admin_support_thread_path(@thread), method: :patch do %>
+        <%= hidden_field_tag :do, "assign" %>
+        <%= select_tag :user_id, options_for_select(@agents.map { [ _1.name, _1.id ] }, @thread.assignee_user_id), include_blank: "Nobody", class: "input", onchange: "this.form.requestSubmit()", "aria-label": "Assignee" %>
+        <%= select_tag :team_id, options_for_select(Team.order(:name).map { [ _1.name, _1.id ] }, @thread.assignee_team_id), include_blank: "No team", class: "input", style: "margin-top:8px", onchange: "this.form.requestSubmit()", "aria-label": "Team" %>
+      <% end %>
+      <%= form_with url: admin_support_thread_path(@thread), method: :patch, style: "margin-top:8px" do %>
+        <%= hidden_field_tag :do, "priority" %>
+        <%= select_tag :priority, options_for_select(SupportThread::PRIORITIES.map { [ "Priority: #{_1}", _1 ] }, @thread.priority), class: "input", onchange: "this.form.requestSubmit()", "aria-label": "Priority" %>
+      <% end %>
+    </section>
+    <% if @other_threads.any? %>
+      <section style="padding:16px 20px">
+        <h3 style="font-size:13px;font-weight:500;margin-bottom:8px">Earlier conversations</h3>
+        <% @other_threads.each do |t| %><div class="review-line"><%= link_to "##{t.number}", admin_support_thread_path(t), class: "code" %><span class="grow"><%= t.title_or_preview.to_s.truncate(40) %></span><span class="meta"><%= t.state %></span></div><% end %>
+      </section>
+    <% end %>
+  </aside>
+</div>

@@ -87,6 +87,42 @@ Without `SENDGRID_API_KEY`, emails are saved as files in `storage/mails` on the 
 
 > **HIPAA:** check with Twilio whether your SendGrid plan is covered by a BAA before any patient data goes into email. Part 2's notification emails default to "link only" (no message text), which keeps patient details out of email either way.
 
+## Support email in (SendGrid Inbound Parse)
+
+Replies to support emails, and new emails to the support address, come back into the inbox through Action Mailbox.
+
+1. Pick a subdomain for inbound mail, for example `reply.ourcompany.com`. Add an MX record for it: `mx.sendgrid.net`, priority 10.
+2. Generate a password:
+
+```bash
+export RAILS_INBOUND_EMAIL_PASSWORD="$(openssl rand -hex 24)"
+export HELPVIBE_INBOUND_DOMAIN=reply.ourcompany.com
+```
+
+3. In SendGrid, open Settings → Inbound Parse → Add Host & URL and fill it in:
+   - **Receiving domain:** `reply.ourcompany.com`
+   - **Destination URL:** `https://actionmailbox:<RAILS_INBOUND_EMAIL_PASSWORD>@help.ourcompany.com/rails/action_mailbox/sendgrid/inbound_emails`
+   - Tick **"POST the raw, full MIME message"**.
+4. To accept new conversations by email, forward `support@ourcompany.com` to `support@reply.ourcompany.com`.
+
+How it fits together:
+- **Threading:** our notification emails carry a Reply-To like `support+<token>@reply.ourcompany.com`, and replies are matched by that token, then by In-Reply-To.
+- **Filtering:** auto-replies, loops and duplicates are dropped.
+- **Unknown senders:** someone who isn't the conversation's contact starts a new conversation rather than joining it.
+- **What emails say:** notification emails are link-only by default, with no message text. `HELPVIBE_EMAIL_MODE=full` includes the text.
+
+## Before patient data goes live (open items)
+
+- **Row-level security.** The policies exist and are tested, but the app still connects to Postgres as the table owner, so Postgres doesn't enforce them yet. To enforce them:
+  1. Create a separate login role, e.g. `helpvibe_app`, that owns nothing.
+  2. Grant it select, insert, update and delete, but not update or delete on `audit_events`.
+  3. Point `HELPVIBE_DATABASE_PASSWORD` and the username at that role.
+  4. Keep the owner role for migrations.
+
+  Until then, the app's own permission checks are what keep each team's conversations apart.
+- **BAA coverage.** The host (AWS) and email (SendGrid) both need a BAA. Check SendGrid's with Twilio.
+- **Still to build:** 2FA and SSO for agents, and a retention policy.
+
 ## Embedding in our app
 
 ```html

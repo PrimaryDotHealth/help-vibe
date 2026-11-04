@@ -3,10 +3,12 @@
 class Widget::BaseController < ApplicationController
   WIDGET_COOKIE = :hv_widget
 
+  include WidgetContact
+
   allow_unauthenticated_access
   layout "widget"
   after_action :allow_framing
-  helper_method :widget_identity, :viewer
+  helper_method :widget_identity, :viewer, :current_contact
 
   private
     def widget_identity

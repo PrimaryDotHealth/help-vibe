@@ -64,3 +64,16 @@ articles.each do |code, title, subtitle, keywords, body|
 end
 
 puts "#{Category.count} chapters, #{Article.count} articles"
+
+# Support desk: a team with the dev admin, and one waiting conversation.
+if Rails.env.development? && admin
+  team = Team.find_or_create_by!(name: "Support")
+  team.users << admin unless team.users.include?(admin)
+  unless SupportThread.exists?
+    pat = Contact.for_email("pat.patient@example.com", name: "Pat Patient")
+    pat.update!(kind: "patient")
+    SupportThread.start!(contact: pat, body: "Hi, my invoice from last week shows the wrong amount. Can you check?",
+                         channel: "widget", page_context: "/billing/invoices", search_query: "invoice wrong amount")
+  end
+  puts "Support: #{Team.count} team, #{SupportThread.count} conversation(s). Inbox at http://localhost:3000/admin/inbox"
+end

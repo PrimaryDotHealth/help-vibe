@@ -4,6 +4,10 @@ Rails.application.routes.draw do
   resources :passwords, param: :token
   resources :invitations, only: %i[show update], param: :token
 
+  # Email links into a support conversation (no sign-in needed)
+  get "t/:token", to: "contact_threads#show", as: :contact_thread
+  post "t/:token/reply", to: "contact_threads#reply", as: :contact_thread_reply
+
   # Help center (reader side): S01, S02, S03, S04
   root "reader/home#show"
   scope module: :reader do
@@ -37,6 +41,15 @@ Rails.application.routes.draw do
     resource :import, only: %i[show create], controller: "import"
     resources :context_rules, except: :show
     resource :analytics, only: :show
+
+    # Support desk (Part 2)
+    get "inbox(/:view)", to: "inbox#show", as: :inbox
+    resources :support_threads, path: "threads", param: :number, only: %i[show update] do
+      resources :thread_parts, path: "parts", only: :create
+    end
+    resources :teams, except: :show
+    resources :macros, except: :show
+    resources :audit_events, path: "audit", only: :index
     resources :webhooks, except: :edit do
       member { post :toggle; post :test }
     end
@@ -51,6 +64,9 @@ Rails.application.routes.draw do
     get "search", to: "panel#search"
     get "a/:slug", to: "panel#article", as: :article
     resource :session, only: %i[create destroy]
+    resources :conversations, only: %i[index new create show], param: :number do
+      post :reply, on: :member
+    end
   end
 
   # Helpjuice-shaped read API

@@ -1,0 +1,7 @@
+<%= @thread.contact&.display_name || "A contact" %> wrote in conversation #<%= @thread.number %>.
+<% if @full %>
+
+<%= @part.body %>
+<% end %>
+
+Open it: <%= @link %>
