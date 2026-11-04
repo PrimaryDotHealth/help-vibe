@@ -13,6 +13,12 @@ class ThreadMailer < ApplicationMailer
          references: "<thread-#{@thread.id}@#{message_domain}>"
   end
 
+  def ticket_opened(thread)
+    @thread = thread
+    @link = contact_thread_url(thread.generate_token_for(:contact_link))
+    mail to: thread.contact.email, subject: "We've opened a request for you (##{thread.number})", reply_to: self.class.reply_address(thread)
+  end
+
   def ticket_state_changed(thread)
     @thread = thread
     @link = contact_thread_url(thread.generate_token_for(:contact_link))

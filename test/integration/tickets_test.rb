@@ -1,6 +1,8 @@
 require "test_helper"
 
 class TicketsTest < ActionDispatch::IntegrationTest
+  include ActionMailer::TestHelper
+
   setup do
     Team.create!(name: "Support").users << users(:two)
     @type = TicketType.create!(name: "Billing question", category: "customer")
@@ -46,6 +48,34 @@ class TicketsTest < ActionDispatch::IntegrationTest
     assert_select "td a", "Phone request"
     get admin_tickets_path(category: "tracker")
     assert_select "td a", { text: "Phone request", count: 0 }
+  end
+
+  test "a missing required field re-shows the form with what was typed" do
+    @type.fields.create!(label: "Approver", data_type: "string", required_for_agents: true)
+    sign_in_as users(:two)
+    post admin_tickets_path, params: { ticket_type_id: @type.id, title: "Keep me", description: "and me", email: "quinn@example.com", fields: { invoice_number: "INV-1" } }
+    assert_response :unprocessable_entity
+    assert_select ".flash", /Approver is required/
+    assert_select "input[name=title][value=?]", "Keep me"
+    assert_select "textarea[name=description]", "and me"
+    assert_select "input[name='fields[invoice_number]'][value=?]", "INV-1"
+    assert_equal 0, SupportThread.tickets.count
+  end
+
+  test "agent-created customer tickets email the customer; internal ones don't" do
+    sign_in_as users(:two)
+    assert_emails 1 do
+      perform_enqueued_jobs(only: ActionMailer::MailDeliveryJob) do
+        post admin_tickets_path, params: { ticket_type_id: @type.id, title: "For Quinn", email: "quinn@example.com", fields: { invoice_number: "INV-1" } }
+      end
+    end
+    assert_match "We've opened a request for you", ActionMailer::Base.deliveries.last.subject
+    office = TicketType.create!(name: "Internal work", category: "back_office")
+    assert_no_emails do
+      perform_enqueued_jobs(only: ActionMailer::MailDeliveryJob) do
+        post admin_tickets_path, params: { ticket_type_id: office.id, title: "Internal", email: "quinn@example.com" }
+      end
+    end
   end
 
   test "admins edit ticket types, fields and states" do

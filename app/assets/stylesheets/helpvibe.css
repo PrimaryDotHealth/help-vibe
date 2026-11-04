@@ -557,3 +557,8 @@ lexxy-editor, .lexxy-content {
 .product-switch { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; padding: 2px; margin: 0 0 16px; border-radius: var(--r-md); background: var(--raised); }
 .product-switch a { justify-content: center; height: 30px; font-size: 13px; }
 .product-switch a.on { background: var(--card); box-shadow: var(--shadow-sm); }
+
+.ticket-card { padding: 16px 20px; border: 1px solid var(--line); border-radius: var(--r-card); background: var(--paper-card); }
+.ticket-fields { display: grid; grid-template-columns: max-content 1fr; gap: 4px 16px; margin: 12px 0 0; font-size: 14px; }
+.ticket-fields dt { color: var(--text-3); }
+.ticket-fields dd { margin: 0; }

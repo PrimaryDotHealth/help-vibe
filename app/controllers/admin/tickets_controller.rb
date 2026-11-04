@@ -15,7 +15,7 @@ class Admin::TicketsController < Admin::SupportBaseController
 
   def new
     @types = TicketType.live.order(:category, :name)
-    @type = TicketType.live.find_by(id: params[:type]) || @types.first
+    @type = TicketType.live.find_by(id: params[:ticket_type_id] || params[:type]) || @types.first
     @from = visible_threads.find_by(number: params[:from]) if params[:from]
   end
 
@@ -25,7 +25,12 @@ class Admin::TicketsController < Admin::SupportBaseController
     values, errors = SupportThread.ticket_fields_from(type, params[:fields], as: :agent)
     contact = from&.contact || (Contact.for_email(params[:email]) if params[:email].present?)
     errors << "Customer tickets need the customer's email" if type.customer? && contact.nil?
-    return redirect_to(new_admin_ticket_path(type: type.id, from: params[:from]), alert: errors.to_sentence) if errors.any?
+    if errors.any?
+      flash.now[:alert] = errors.to_sentence
+      @types = TicketType.live.order(:category, :name)
+      @type, @from = type, from
+      return render(:new, status: :unprocessable_entity)
+    end
 
     ticket = SupportThread.open_ticket!(type: type, title: params[:title], description: params[:description], fields: values,
                                         contact: contact, by: Current.user, channel: "internal", link_from: from,

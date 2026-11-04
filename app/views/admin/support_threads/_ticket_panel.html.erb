@@ -3,10 +3,10 @@
   <h3 style="font-size:13px;font-weight:500;margin-bottom:8px"><%= type.name %> <span class="meta"><%= type.category_label %><%= " · shared with the customer" if thread.is_shared %></span></h3>
   <%= form_with url: admin_support_thread_path(thread), method: :patch do %>
     <%= hidden_field_tag :do, "ticket_state" %>
-    <%= select_tag :ticket_state_id, options_for_select(type.states.live.in_order.map { [ _1.internal_label + (thread.is_shared ? " (customer sees: #{_1.external_label})" : ""), _1.id ] }, thread.ticket_state_id),
+    <%= select_tag :ticket_state_id, options_for_select(type.states.live.in_order.map { [ _1.internal_label, _1.id ] }, thread.ticket_state_id),
           class: "input", onchange: "this.form.requestSubmit()", "aria-label": "State" %>
   <% end %>
-  <% if thread.description.present? %><p class="t2" style="font-size:14px;margin-top:12px;white-space:pre-wrap"><%= thread.description %></p><% end %>
+  <% if thread.is_shared %><p class="meta" style="margin-top:4px">Customer sees "<%= thread.ticket_state.external_label %>"</p><% end %>
   <% if type.live_fields.any? %>
     <%= form_with url: admin_support_thread_path(thread), method: :patch, style: "margin-top:12px" do %>
       <%= hidden_field_tag :do, "fields" %>

@@ -1184,6 +1184,7 @@ CREATE TABLE public.threads (
     purge_after timestamp with time zone,
     created_at timestamp with time zone DEFAULT now() NOT NULL,
     updated_at timestamp with time zone DEFAULT now() NOT NULL,
+    created_by_id bigint,
     CONSTRAINT threads_channel_check CHECK ((channel = ANY (ARRAY['widget'::text, 'email'::text, 'api'::text, 'internal'::text]))),
     CONSTRAINT threads_check CHECK (((state <> 'snoozed'::text) OR (snoozed_until IS NOT NULL))),
     CONSTRAINT threads_check1 CHECK (((state <> 'closed'::text) OR (closed_at IS NOT NULL))),
@@ -2560,6 +2561,13 @@ CREATE INDEX index_sessions_on_user_id ON public.sessions USING btree (user_id);
 
 
 --
+-- Name: index_threads_on_created_by_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_threads_on_created_by_id ON public.threads USING btree (created_by_id);
+
+
+--
 -- Name: index_users_on_email_address; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -3131,6 +3139,14 @@ ALTER TABLE ONLY public.context_rule_articles
 
 
 --
+-- Name: threads fk_rails_5479d7a0a1; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.threads
+    ADD CONSTRAINT fk_rails_5479d7a0a1 FOREIGN KEY (created_by_id) REFERENCES public.users(id) ON DELETE SET NULL;
+
+
+--
 -- Name: sessions fk_rails_758836b4f0; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -3670,6 +3686,7 @@ CREATE POLICY threads_system ON public.threads USING ((public.app_actor_type() =
 SET search_path TO "$user", public;
 
 INSERT INTO "schema_migrations" (version) VALUES
+('20261104130000'),
 ('20261104120000'),
 ('20261104090100'),
 ('20261104090001'),

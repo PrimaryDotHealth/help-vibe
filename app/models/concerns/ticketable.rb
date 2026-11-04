@@ -7,6 +7,7 @@ module Ticketable
   included do
     belongs_to :ticket_type, optional: true
     belongs_to :ticket_state, optional: true
+    belongs_to :created_by, class_name: "User", optional: true
     has_many :links_out, class_name: "ThreadLink", foreign_key: :from_thread_id, dependent: :delete_all
     has_many :links_in, class_name: "ThreadLink", foreign_key: :to_thread_id, dependent: :delete_all
 
@@ -45,7 +46,7 @@ module Ticketable
       raise TicketError, "A title is required" if title.blank?
       raise TicketError, "#{type.name} needs a description" if description.blank? && type.description_required && by.nil?
       transaction do
-        ticket = create!(kind: "ticket", ticket_type: type, ticket_state: type.first_state, contact: contact || link_from&.contact,
+        ticket = create!(kind: "ticket", ticket_type: type, ticket_state: type.first_state, contact: contact || link_from&.contact, created_by: by,
                          channel: channel, title: title.to_s.squish.first(200),
                          ticket_attributes: fields.merge("description" => description.to_s.strip.presence).compact,
                          is_shared: type.shared_with_customer?, waiting_since: by ? nil : Time.current,
@@ -56,11 +57,20 @@ module Ticketable
                                   event: { ticket_number: ticket.number, ticket_type: type.name })
         end
         ticket
+      end.tap do |ticket|
+        # Tell the customer when the team opens a request on their behalf.
+        if by && ticket.is_shared && ticket.contact&.email.present?
+          ThreadMailer.ticket_opened(ticket).deliver_later
+        end
       end
     end
   end
 
   def ticket? = kind == "ticket"
+
+  def created_by_label
+    created_by&.name || (channel == "widget" ? contact&.display_name || "the customer" : "the team")
+  end
   def description = ticket_attributes.to_h["description"]
   def shared_with_contact? = !ticket? || is_shared
 

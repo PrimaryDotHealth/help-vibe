@@ -4,22 +4,20 @@
   <div class="card blank"><h2>No ticket types</h2><p>Create one first.</p><div class="row"><%= link_to "Ticket types", admin_ticket_types_path, class: "btn primary" %></div></div>
 <% else %>
 <div class="card form-card" style="max-width:640px">
-  <%= form_with url: new_admin_ticket_path, method: :get, class: "field" do %>
+  <%= form_with url: admin_tickets_path, data: { controller: "type-switch", type_switch_url_value: new_admin_ticket_path } do %>
+    <label class="field"><span>Type</span>
+      <%= select_tag :ticket_type_id, options_for_select(@types.map { [ "#{_1.name} (#{_1.category_label})", _1.id ] }, @type.id), class: "input", data: { action: "change->type-switch#reload" } %>
+      <div class="hint"><%= @type.description.presence || { "customer" => "Shared with the customer", "back_office" => "Internal hand-off", "tracker" => "One issue, many conversations" }[@type.category] %></div></label>
     <%= hidden_field_tag :from, params[:from] %>
-    <span class="meta">Type</span><%= select_tag :type, options_for_select(@types.map { [ "#{_1.name} (#{_1.category_label})", _1.id ] }, @type.id), class: "input", onchange: "this.form.requestSubmit()" %>
-  <% end %>
-  <%= form_with url: admin_tickets_path do %>
-    <%= hidden_field_tag :ticket_type_id, @type.id %>
-    <%= hidden_field_tag :from, params[:from] %>
-    <label class="field"><span>Title *</span><%= text_field_tag :title, @from&.title, class: "input", required: true %></label>
-    <label class="field"><span>Description</span><%= text_area_tag :description, nil, rows: 4, class: "input" %></label>
+    <label class="field"><span>Title *</span><%= text_field_tag :title, params[:title].presence || @from&.title, class: "input", required: true %></label>
+    <label class="field"><span>Description</span><%= text_area_tag :description, params[:description], rows: 4, class: "input" %></label>
     <% if @type.customer? && !@from %>
-      <label class="field"><span>Customer's email *</span><%= email_field_tag :email, nil, class: "input", required: true %></label>
+      <label class="field"><span>Customer's email *</span><%= email_field_tag :email, params[:email], class: "input", required: true %></label>
     <% end %>
     <% @type.live_fields.reject(&:hidden_on_create).each do |field| %>
-      <%= render "admin/tickets/field_input", field: field, value: nil, required: field.required_for_agents %>
+      <%= render "admin/tickets/field_input", field: field, value: params.dig(:fields, field.key), required: field.required_for_agents %>
     <% end %>
-    <label class="field"><span>Team</span><%= select_tag :team_id, options_for_select(Team.order(:name).map { [ _1.name, _1.id ] }, @type.default_team_id), include_blank: "No team", class: "input" %></label>
+    <label class="field"><span>Team</span><%= select_tag :team_id, options_for_select(Team.order(:name).map { [ _1.name, _1.id ] }, params[:team_id].presence || @type.default_team_id), include_blank: "No team", class: "input" %></label>
     <% if @from && !@type.customer? %><p class="meta">Linked to conversation #<%= @from.number %>. The customer keeps talking in the conversation<%= "; this ticket can be shared with them" if @type.shareable %>.</p><% end %>
     <div class="acts"><%= submit_tag "Create ticket", class: "btn primary" %></div>
   <% end %>
