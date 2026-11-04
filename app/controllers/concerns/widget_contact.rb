@@ -25,7 +25,7 @@ module WidgetContact
 
     def contact_threads
       return SupportThread.none unless current_contact
-      scope = current_contact.threads
+      scope = current_contact.threads.where("threads.kind = 'conversation' or threads.is_shared")
       contact_verified? ? scope : scope.where(id: Array(contact_cookie["thread_ids"]))
     end
 

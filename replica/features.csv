@@ -123,3 +123,15 @@ Phone SMS WhatsApp and social channels,support-channels,could,yes,skip,email and
 Intercom app store and integrations,support-integrations,could,yes,skip,their partner network
 Group conversations with several customers,support-inbox,could,yes,skip,rare for us
 AI QA monitors and scorecards,support-ai,could,yes,skip,needs LLM
+Separate Knowledge base and Helpdesk products in the admin,helpdesk,must,no,no,"ours (2026-11-04): split now, merge later"
+Ticket types with categories customer / back-office / tracker,support-tickets,must,yes,no,
+Ticket fields: text list number decimal yes-no date-time,support-tickets,must,yes,no,file fields later
+"Field rules: visible to customers, required for customers or agents, required to close",support-tickets,must,yes,no,
+Ticket states with customer-facing labels and notify switch,support-tickets,must,yes,no,
+Tickets list with filters,support-tickets,must,yes,no,
+Agent creates a ticket,support-tickets,must,yes,no,
+Customer submits a ticket from the widget,support-tickets,must,yes,no,
+Customer sees their tickets and state,support-tickets,must,yes,no,
+Convert a conversation into a customer ticket,support-tickets,should,yes,no,
+Fin autofill of ticket title and description,support-tickets,could,yes,skip,needs an LLM
+Conditional ticket fields,support-tickets,could,yes,skip,later

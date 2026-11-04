@@ -1,6 +1,17 @@
 <%= turbo_stream_from @thread, :contact %>
 <%= render layout: "widget/panel/frame", locals: { back: widget_conversations_path(page: params[:page]), hide_search: true, code: "##{@thread.number}" } do %>
   <div class="conversation" style="padding-top:12px">
+    <% if @thread.ticket? %>
+      <div class="answer">
+        <span class="meta"><%= @thread.ticket_type.name %></span>
+        <h3><%= @thread.title %></h3>
+        <p style="margin-top:6px"><span class="status <%= @thread.ticket_state.resolved? ? "live" : "review" %>"><%= @thread.ticket_state.external_label %></span></p>
+        <% if @thread.description.present? && @thread.ticket_type.description_visible %><p class="t2" style="font-size:14px;margin-top:8px;white-space:pre-wrap"><%= @thread.description %></p><% end %>
+        <% @thread.ticket_type.live_fields.select(&:visible_to_contacts).each do |f| %>
+          <p class="meta" style="margin-top:4px"><%= f.label %>: <span class="t2"><%= f.display(@thread.ticket_attributes.to_h[f.key]) %></span></p>
+        <% end %>
+      </div>
+    <% end %>
     <div id="thread_parts"><%= render partial: "widget/conversations/part", collection: @parts %></div>
     <%= form_with url: reply_widget_conversation_path(@thread), class: "reply-box", data: { controller: "reset-form", action: "turbo:submit-end->reset-form#reset" } do %>
       <%= hidden_field_tag :client_id, SecureRandom.uuid %>

@@ -28,7 +28,7 @@ class SupportSystemTest < ApplicationSystemTestCase
       fill_in "email_address", with: users(:two).email_address
       fill_in "password", with: "password"
       click_on "Sign in"
-      within(".side") { click_on "Inbox" }
+      within(".side") { click_on "Helpdesk" }
       click_on "Unassigned"
       find(".thread-row", text: "pat@example.com").click
       fill_in "body", with: "Sorry about that, it's fixed now."

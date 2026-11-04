@@ -1,0 +1,14 @@
+<% content_for :title, "Ticket types" %>
+<div class="head"><h1>Ticket types</h1><span class="count"><%= @types.count { _1.archived_at.nil? } %></span><span class="grow"></span>
+  <%= link_to "States", admin_ticket_states_path, class: "btn quiet" %>
+  <%= link_to new_admin_ticket_type_path, class: "btn primary" do %><%= icon "plus" %>New ticket type<% end %></div>
+<p class="t2" style="margin:-8px 0 16px;max-width:44rem"><b style="font-weight:500">Customer</b> tickets are shared with the customer. <b style="font-weight:500">Back-office</b> tickets are internal hand-offs from a conversation (optionally shared). <b style="font-weight:500">Tracker</b> tickets link many conversations about one issue and are never shared.</p>
+<div class="card"><div class="table-wrap"><table class="data">
+  <thead><tr><th>Type</th><th>Category</th><th class="num">Fields</th><th>States</th><th></th></tr></thead>
+  <tbody><% @types.each do |t| %>
+    <tr style="<%= "opacity:.5" if t.archived_at %>"><td><b style="font-weight:500"><%= t.name %></b><div class="meta"><%= t.description %></div></td>
+      <td><%= t.category_label %><%= " · shareable" if t.shareable %></td><td class="num"><%= t.live_fields.size %></td>
+      <td class="meta"><%= t.states.map(&:internal_label).join(" → ") %></td>
+      <td style="text-align:right"><%= link_to "Edit", edit_admin_ticket_type_path(t) %></td></tr>
+  <% end %></tbody>
+</table></div></div>

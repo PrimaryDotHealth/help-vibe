@@ -1,0 +1,21 @@
+<%= render layout: "widget/panel/frame", locals: { back: new_widget_conversation_path(page: params[:page]), hide_search: true } do %>
+  <div style="padding-top:12px">
+    <h3 style="font:400 20px/26px var(--serif)"><%= @type.name %></h3>
+    <% if flash.now[:alert] || flash[:alert] %><p class="errors" style="margin-top:8px"><%= flash.now[:alert] || flash[:alert] %></p><% end %>
+    <%= form_with url: widget_tickets_path(type: @type.id), style: "margin-top:12px" do %>
+      <%= hidden_field_tag :page, params[:page] %>
+      <% unless current_contact %>
+        <label class="field"><span>Your email *</span><%= email_field_tag :email, params[:email], class: "input", required: true, autocomplete: "email" %></label>
+        <label class="field"><span>Your name</span><%= text_field_tag :name, params[:name], class: "input", autocomplete: "name" %></label>
+      <% end %>
+      <label class="field"><span>Title *</span><%= text_field_tag :title, params[:title], class: "input", required: true, maxlength: 200 %></label>
+      <% if @type.description_visible %>
+        <label class="field"><span>What's happening?<%= " *" if @type.description_required %></span><%= text_area_tag :description, params[:description], rows: 4, class: "input", required: @type.description_required %></label>
+      <% end %>
+      <% @type.live_fields.select(&:visible_to_contacts).each do |field| %>
+        <%= render "admin/tickets/field_input", field: field, value: params.dig(:fields, field.key), required: field.required_for_contacts %>
+      <% end %>
+      <div class="acts" style="margin-top:12px"><%= submit_tag "Submit", class: "btn primary" %></div>
+    <% end %>
+  </div>
+<% end %>

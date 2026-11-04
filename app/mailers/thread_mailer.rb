@@ -13,6 +13,13 @@ class ThreadMailer < ApplicationMailer
          references: "<thread-#{@thread.id}@#{message_domain}>"
   end
 
+  def ticket_state_changed(thread)
+    @thread = thread
+    @link = contact_thread_url(thread.generate_token_for(:contact_link))
+    mail to: thread.contact.email, subject: "Your request ##{thread.number} is now: #{thread.ticket_state.external_label}",
+         reply_to: self.class.reply_address(thread)
+  end
+
   def contact_replied(part, user)
     @part, @thread = part, part.thread
     @full = full_mode?

@@ -1,0 +1,20 @@
+<% type = thread.ticket_type %>
+<section style="padding:16px 20px;border-bottom:1px solid var(--line)">
+  <h3 style="font-size:13px;font-weight:500;margin-bottom:8px"><%= type.name %> <span class="meta"><%= type.category_label %><%= " · shared with the customer" if thread.is_shared %></span></h3>
+  <%= form_with url: admin_support_thread_path(thread), method: :patch do %>
+    <%= hidden_field_tag :do, "ticket_state" %>
+    <%= select_tag :ticket_state_id, options_for_select(type.states.live.in_order.map { [ _1.internal_label + (thread.is_shared ? " (customer sees: #{_1.external_label})" : ""), _1.id ] }, thread.ticket_state_id),
+          class: "input", onchange: "this.form.requestSubmit()", "aria-label": "State" %>
+  <% end %>
+  <% if thread.description.present? %><p class="t2" style="font-size:14px;margin-top:12px;white-space:pre-wrap"><%= thread.description %></p><% end %>
+  <% if type.live_fields.any? %>
+    <%= form_with url: admin_support_thread_path(thread), method: :patch, style: "margin-top:12px" do %>
+      <%= hidden_field_tag :do, "fields" %>
+      <% type.live_fields.each do |field| %>
+        <%= render "admin/tickets/field_input", field: field, value: thread.ticket_attributes.to_h[field.key], required: false %>
+        <% if field.required_to_close %><div class="hint" style="margin-top:-8px;margin-bottom:8px">Needed before resolving<%= " · customers see this" if field.visible_to_contacts && thread.is_shared %></div><% end %>
+      <% end %>
+      <%= submit_tag "Save fields", class: "btn sm" %>
+    <% end %>
+  <% end %>
+</section>

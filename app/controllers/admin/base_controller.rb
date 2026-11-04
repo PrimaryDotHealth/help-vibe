@@ -5,7 +5,9 @@ class Admin::BaseController < ApplicationController
 
   private
     def require_editor
-      redirect_to root_path, alert: "You don't have access to the admin." unless Current.user&.active? && Current.user.editor?
+      return if Current.user&.active? && Current.user.editor?
+      return redirect_to(admin_inbox_path) if Current.user&.agent?
+      redirect_to root_path, alert: "You don't have access to the admin."
     end
 
     def require_publisher

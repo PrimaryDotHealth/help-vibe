@@ -1,0 +1,53 @@
+<% content_for :title, @type.name %>
+<div class="head"><%= link_to admin_ticket_types_path, class: "btn quiet sm" do %><%= icon "back" %>Ticket types<% end %>
+  <h1><%= @type.name %></h1><span class="meta"><%= @type.category_label %></span><span class="grow"></span>
+  <%= button_to(@type.archived_at ? "Restore" : "Archive", archive_admin_ticket_type_path(@type), class: "btn quiet sm", form_class: "inline") %></div>
+<%= form_with model: [ :admin, @type ] do |f| %>
+  <% if @type.errors.any? %><div class="flash alert" style="margin:0 0 16px"><%= @type.errors.full_messages.to_sentence %></div><% end %>
+  <div style="display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:16px;align-items:start" class="type-grid">
+    <section class="card">
+      <div class="card-head"><h2>Fields</h2><span class="meta">Title and description are always included</span></div>
+      <div class="table-wrap"><table class="data">
+        <thead><tr><th>Field</th><th>Format</th><% if @type.shared_with_customer? %><th>Customers see</th><th>Customers must fill</th><% end %><th>Agents must fill</th><th>Needed to close</th><th>Archived</th></tr></thead>
+        <tbody>
+          <%= f.fields_for :fields do |ff| %>
+            <% field = ff.object %>
+            <tr style="<%= "opacity:.5" if field.archived_at %>">
+              <td style="min-width:220px;padding:8px 16px"><%= ff.text_field :label, class: "input", placeholder: (field.new_record? ? "Add a field, e.g. Invoice number" : nil) %>
+                <% if field.new_record? || field.data_type == "list" %>
+                  <%= ff.text_area :list_options_text, rows: 2, class: "input mono", style: "margin-top:4px;font-size:12px", placeholder: "List options, one per line (list fields)" %>
+                <% end %></td>
+              <td><% if field.new_record? %><%= ff.select :data_type, [ [ "Text", "string" ], [ "List", "list" ], [ "Whole number", "integer" ], [ "Decimal", "decimal" ], [ "Yes / no", "boolean" ], [ "Date and time", "datetime" ] ], {}, class: "input", style: "width:auto" %>
+                  <label class="row meta" style="margin-top:4px"><%= ff.check_box :multiline %>Multi-line</label>
+                  <% else %><%= { "string" => field.multiline ? "Text (multi-line)" : "Text", "list" => "List", "integer" => "Whole number", "decimal" => "Decimal", "boolean" => "Yes / no", "datetime" => "Date and time" }[field.data_type] %><% end %></td>
+              <% if @type.shared_with_customer? %>
+                <td><%= ff.check_box :visible_to_contacts %></td><td><%= ff.check_box :required_for_contacts %></td>
+              <% end %>
+              <td><%= ff.check_box :required_for_agents %></td><td><%= ff.check_box :required_to_close %></td>
+              <td><% if field.persisted? %><%= ff.check_box :archived, checked: field.archived_at.present? %><% end %></td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table></div>
+    </section>
+    <aside>
+      <div class="card form-card">
+        <label class="field"><span>Name</span><%= f.text_field :name, class: "input", required: true %></label>
+        <label class="field"><span>When to use it</span><%= f.text_field :description, class: "input", maxlength: 255 %></label>
+        <% if @type.category == "back_office" %><label class="row field" style="font-size:14px"><%= f.check_box :shareable %>Can be shared with the customer</label><% end %>
+        <% if @type.shared_with_customer? %>
+          <label class="row field" style="font-size:14px"><%= f.check_box :description_visible %>Customers can describe the problem</label>
+          <label class="row field" style="font-size:14px"><%= f.check_box :description_required %>…and must</label>
+        <% end %>
+        <label class="field"><span>New tickets go to</span><%= f.select :default_team_id, Team.order(:name).map { [ _1.name, _1.id ] }, { include_blank: "No team" }, class: "input" %></label>
+        <div class="field"><span>States</span>
+          <% TicketState.live.in_order.each do |s| %>
+            <label class="row" style="font-size:14px;padding:3px 0"><%= check_box_tag "ticket_type[state_ids][]", s.id, @type.state_ids.include?(s.id), style: "accent-color:var(--ink)" %><%= s.internal_label %> <span class="meta"><%= s.category.humanize %></span></label>
+          <% end %>
+          <div class="hint">At least one state per category. <%= link_to "Manage states", admin_ticket_states_path %></div></div>
+        <div class="acts"><%= f.submit "Save", class: "btn primary" %></div>
+      </div>
+    </aside>
+  </div>
+<% end %>
+<style>@media (max-width: 1100px) { .type-grid { grid-template-columns: minmax(0,1fr) !important; } }</style>

@@ -16,5 +16,11 @@
       <turbo-frame id="suggestions" data-suggest-target="frame"></turbo-frame>
       <div class="acts" style="margin-top:12px"><%= submit_tag "Send", class: "btn primary" %></div>
     <% end %>
+    <% if (types = TicketType.for_customers.order(:name)).any? %>
+      <div class="w-label" style="margin-top:20px">Or submit a request</div>
+      <ul class="w-list">
+        <% types.each do |t| %><li><%= link_to new_widget_ticket_path(type: t.id, page: params[:page]) do %><span class="code"><%= icon "file" %></span><span><%= t.name %></span><%= icon "right" %><% end %></li><% end %>
+      </ul>
+    <% end %>
   </div>
 <% end %>

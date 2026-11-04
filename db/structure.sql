@@ -1337,6 +1337,9 @@ CREATE TABLE public.ticket_type_attributes (
     visible_to_contacts boolean DEFAULT false NOT NULL,
     "position" integer DEFAULT 0 NOT NULL,
     archived_at timestamp with time zone,
+    multiline boolean DEFAULT false NOT NULL,
+    required_to_close boolean DEFAULT false NOT NULL,
+    hidden_on_create boolean DEFAULT false NOT NULL,
     CONSTRAINT ticket_type_attributes_check CHECK (((NOT required_for_contacts) OR visible_to_contacts)),
     CONSTRAINT ticket_type_attributes_data_type_check CHECK ((data_type = ANY (ARRAY['string'::text, 'list'::text, 'integer'::text, 'decimal'::text, 'boolean'::text, 'datetime'::text, 'files'::text]))),
     CONSTRAINT ticket_type_attributes_key_check CHECK ((key ~ '^[a-z][a-z0-9_]{0,62}$'::text))
@@ -1383,6 +1386,8 @@ CREATE TABLE public.ticket_types (
     archived_at timestamp with time zone,
     created_at timestamp with time zone DEFAULT now() NOT NULL,
     updated_at timestamp with time zone DEFAULT now() NOT NULL,
+    description_visible boolean DEFAULT true NOT NULL,
+    description_required boolean DEFAULT false NOT NULL,
     CONSTRAINT ticket_types_category_check CHECK ((category = ANY (ARRAY['customer'::text, 'back_office'::text, 'tracker'::text]))),
     CONSTRAINT ticket_types_check CHECK (((category <> 'tracker'::text) OR (NOT shareable)))
 );
@@ -3665,6 +3670,7 @@ CREATE POLICY threads_system ON public.threads USING ((public.app_actor_type() =
 SET search_path TO "$user", public;
 
 INSERT INTO "schema_migrations" (version) VALUES
+('20261104120000'),
 ('20261104090100'),
 ('20261104090001'),
 ('20261104090000'),

@@ -3,9 +3,11 @@
 <div class="head">
   <%= link_to admin_inbox_path, class: "btn quiet sm" do %><%= icon "back" %>Inbox<% end %>
   <h1 style="font-size:18px"><span class="code" style="color:var(--ink);margin-right:8px">#<%= @thread.number %></span><%= @thread.title_or_preview %></h1>
+  <% if @thread.ticket? %><span class="meta"><%= @thread.ticket_type.name %></span><% end %>
   <span class="grow"></span>
   <% if @thread.assignee_user != Current.user %><%= button_to "Take it", admin_support_thread_path(@thread, do: "take"), method: :patch, class: "btn sm" %><% end %>
-  <% if @thread.state == "closed" %>
+  <% if @thread.ticket? %>
+  <% elsif @thread.state == "closed" %>
     <%= button_to "Reopen", admin_support_thread_path(@thread, do: "reopen"), method: :patch, class: "btn sm" %>
   <% else %>
     <%= form_with url: admin_support_thread_path(@thread), method: :patch, class: "row" do %>
@@ -44,6 +46,7 @@
   </section>
 
   <aside class="card">
+    <% if @thread.ticket? %><%= render "ticket_panel", thread: @thread %><% end %>
     <% c = @thread.contact %>
     <section style="padding:16px 20px;border-bottom:1px solid var(--line)">
       <div class="row"><span class="avatar"><%= c&.initials %></span><b style="font-weight:500"><%= c&.display_name || "Unknown" %></b></div>
@@ -64,6 +67,20 @@
       <%= form_with url: admin_support_thread_path(@thread), method: :patch, style: "margin-top:8px" do %>
         <%= hidden_field_tag :do, "priority" %>
         <%= select_tag :priority, options_for_select(SupportThread::PRIORITIES.map { [ "Priority: #{_1}", _1 ] }, @thread.priority), class: "input", onchange: "this.form.requestSubmit()", "aria-label": "Priority" %>
+      <% end %>
+    </section>
+    <section style="padding:16px 20px;border-bottom:1px solid var(--line)">
+      <h3 style="font-size:13px;font-weight:500;margin-bottom:8px">Tickets</h3>
+      <% @linked.each do |t| %><div class="review-line"><%= link_to "##{t.number}", admin_support_thread_path(t), class: "code" %><span class="grow"><%= t.ticket? ? t.ticket_type.name : "Conversation" %></span><span class="meta"><%= t.ticket_state&.internal_label || t.state %></span></div><% end %>
+      <% unless @thread.ticket? %>
+        <% if (customer_types = TicketType.for_customers.order(:name)).any? %>
+          <%= form_with url: admin_support_thread_path(@thread), method: :patch, class: "row", style: "margin-top:8px" do %>
+            <%= hidden_field_tag :do, "convert" %>
+            <%= select_tag :ticket_type_id, options_for_select(customer_types.map { [ _1.name, _1.id ] }), class: "input", style: "height:32px;font-size:13px", "aria-label": "Customer ticket type" %>
+            <%= submit_tag "Convert to ticket", class: "btn sm", data: { turbo_confirm: "Turn this conversation into a ticket? The customer will see its status." } %>
+          <% end %>
+        <% end %>
+        <%= link_to "Back-office or tracker ticket", new_admin_ticket_path(from: @thread.number, type: TicketType.live.where.not(category: "customer").order(:name).first&.id), class: "btn sm quiet", style: "margin-top:8px" %>
       <% end %>
     </section>
     <% if @other_threads.any? %>

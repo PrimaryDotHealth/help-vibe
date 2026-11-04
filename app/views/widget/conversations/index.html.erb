@@ -5,7 +5,7 @@
     <% if @threads.any? %>
       <ul class="w-list">
         <% @threads.each do |t| %>
-          <li><%= link_to widget_conversation_path(t, page: params[:page]) do %><span class="code">#<%= t.number %></span><span><%= t.title_or_preview %><p><%= t.state == "closed" ? "Solved" : (t.waiting_since ? "Waiting for us" : "We replied") %> · <%= relative_day(t.updated_at).downcase %></p></span><%= icon "right" %><% end %></li>
+          <li><%= link_to widget_conversation_path(t, page: params[:page]) do %><span class="code">#<%= t.number %></span><span><%= t.title_or_preview %><p><%= "#{t.ticket_type.name} · " if t.ticket? %><%= t.contact_status %> · <%= relative_day(t.updated_at).downcase %></p></span><%= icon "right" %><% end %></li>
         <% end %>
       </ul>
     <% else %>

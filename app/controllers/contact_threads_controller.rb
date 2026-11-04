@@ -20,7 +20,7 @@ class ContactThreadsController < ApplicationController
   private
     def set_thread
       @thread = SupportThread.find_by_token_for(:contact_link, params[:token])
-      raise ActiveRecord::RecordNotFound unless @thread&.contact
+      raise ActiveRecord::RecordNotFound unless @thread&.contact && @thread.shared_with_contact?
       remember_contact!(@thread.contact, thread: @thread, options: { same_site: :lax })
     end
 end

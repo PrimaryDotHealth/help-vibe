@@ -1,0 +1,15 @@
+<% content_for :title, "New ticket type" %>
+<div class="head"><h1>New ticket type</h1></div>
+<div class="card form-card" style="max-width:560px">
+  <%= form_with model: [ :admin, @type ] do |f| %>
+    <% if @type.errors.any? %><div class="errors"><%= @type.errors.full_messages.to_sentence %></div><% end %>
+    <label class="field"><span>Name</span><%= f.text_field :name, class: "input", required: true, placeholder: "Billing question" %><div class="hint">Customers see this name when the ticket is shared with them</div></label>
+    <label class="field"><span>When to use it</span><%= f.text_field :description, class: "input", maxlength: 255 %><div class="hint">For teammates only</div></label>
+    <div class="field"><span>Category</span>
+      <% { "customer" => "Customer: shared with the customer", "back_office" => "Back-office: internal hand-off from a conversation", "tracker" => "Tracker: one issue, many conversations (internal)" }.each do |key, label| %>
+        <label class="radio"><%= f.radio_button :category, key %><span></span><span><%= label %></span></label>
+      <% end %>
+      <div class="hint">Can't be changed later</div></div>
+    <div class="acts"><%= f.submit "Create", class: "btn primary" %><%= link_to "Cancel", admin_ticket_types_path, class: "btn quiet" %></div>
+  <% end %>
+</div>

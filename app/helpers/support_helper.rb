@@ -35,6 +35,9 @@ module SupportHelper
     when "close" then "#{who} closed this"
     when "open" then "#{who} reopened this"
     when "snooze" then "#{who} snoozed this until #{Time.zone.parse(e["until"].to_s)&.strftime("%-d %b %H:%M")}"
+    when "ticket_state_change" then e["converted"] ? "#{who} turned this into a #{e["type"]} ticket" : "#{e["reopened"] ? "Reopened by the customer's reply: " : "#{who} set the state to "}#{e["internal"]}"
+    when "attribute_change" then "#{who} updated #{Array(e["changed"]).size} field(s)"
+    when "link" then "#{who} opened ticket ##{e["ticket_number"]} (#{e["ticket_type"]})"
     else part.kind.humanize
     end
   end

@@ -7,6 +7,7 @@ class Admin::SupportThreadsController < Admin::SupportBaseController
     @other_threads = @thread.contact ? visible_threads.where(contact: @thread.contact).where.not(id: @thread.id).order(created_at: :desc).limit(5) : []
     @agents = User.active.joins(:team_members).distinct.order(:first_name).to_a | User.active.where(role: %w[superadmin admin]).to_a
     @macros = Macro.for(Current.user)
+    @linked = SupportThread.where(id: @thread.links_out.select(:to_thread_id)).or(SupportThread.where(id: @thread.links_in.select(:from_thread_id))).includes(:ticket_type, :ticket_state)
     @thread.mark_read!(Current.user)
     Notification.unread.where(user: Current.user, thread: @thread).update_all(read_at: Time.current)
     AuditEvent.record!(actor: Current.user, action: "view", subject: @thread, request: request)
@@ -24,8 +25,17 @@ class Admin::SupportThreadsController < Admin::SupportBaseController
     when "reopen" then @thread.reopen!(by: Current.user)
     when "snooze" then @thread.snooze!(by: Current.user, until_time: snooze_until)
     when "priority" then @thread.update!(priority: params[:priority]) if SupportThread::PRIORITIES.include?(params[:priority])
+    when "ticket_state" then @thread.change_ticket_state!(TicketState.find(params[:ticket_state_id]), by: Current.user)
+    when "fields"
+      errors = @thread.update_ticket_fields!(params[:fields], by: Current.user)
+      return redirect_to(admin_support_thread_path(@thread), alert: errors.to_sentence) if errors.any?
+    when "convert"
+      type = TicketType.for_customers.find(params[:ticket_type_id])
+      @thread.convert_to_ticket!(type: type, title: params[:title], by: Current.user)
     end
     redirect_to(params[:do] == "close" ? admin_inbox_path : admin_support_thread_path(@thread))
+  rescue SupportThread::TicketError => e
+    redirect_to admin_support_thread_path(@thread), alert: e.message
   end
 
   private

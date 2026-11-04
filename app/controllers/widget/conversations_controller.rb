@@ -8,7 +8,7 @@ class Widget::ConversationsController < Widget::BaseController
   around_action :with_rls
 
   def index
-    @threads = contact_threads.includes(:parts).order(updated_at: :desc).limit(20)
+    @threads = contact_threads.includes(:parts, :ticket_type, :ticket_state).order(updated_at: :desc).limit(20)
   end
 
   def new

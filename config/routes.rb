@@ -47,6 +47,11 @@ Rails.application.routes.draw do
     resources :support_threads, path: "threads", param: :number, only: %i[show update] do
       resources :thread_parts, path: "parts", only: :create
     end
+    resources :tickets, only: %i[index new create]
+    resources :ticket_types, except: %i[show destroy] do
+      post :archive, on: :member
+    end
+    resources :ticket_states, only: %i[index create update]
     resources :teams, except: :show
     resources :macros, except: :show
     resources :audit_events, path: "audit", only: :index
@@ -64,6 +69,7 @@ Rails.application.routes.draw do
     get "search", to: "panel#search"
     get "a/:slug", to: "panel#article", as: :article
     resource :session, only: %i[create destroy]
+    resources :tickets, only: %i[new create]
     resources :conversations, only: %i[index new create show], param: :number do
       post :reply, on: :member
     end

@@ -548,3 +548,7 @@ lexxy-editor, .lexxy-content {
 .composer textarea { min-height: 96px; }
 .composer .modes { display: flex; gap: 8px; margin-top: 8px; align-items: center; flex-wrap: wrap; }
 @media (max-width: 1000px) { .inbox, .thread-page { grid-template-columns: minmax(0, 1fr); } }
+
+.product-switch { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; padding: 2px; margin: 0 0 16px; border-radius: var(--r-md); background: var(--raised); }
+.product-switch a { justify-content: center; height: 30px; font-size: 13px; }
+.product-switch a.on { background: var(--card); box-shadow: var(--shadow-sm); }

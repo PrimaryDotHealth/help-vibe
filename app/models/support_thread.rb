@@ -2,6 +2,7 @@
 # Parts are its messages, notes and events, in order.
 class SupportThread < ApplicationRecord
   self.table_name = "threads"
+  include Ticketable
 
   STATES = %w[open snoozed closed].freeze
   PRIORITIES = %w[none low medium high urgent].freeze
@@ -31,6 +32,12 @@ class SupportThread < ApplicationRecord
   def to_param = number.to_s
   def title_or_preview = title.presence || parts.find { _1.kind == "comment" }&.body.to_s.truncate(80)
 
+  # What the contact sees as the status line.
+  def contact_status
+    return ticket_state.external_label if ticket? && ticket_state
+    state == "closed" ? "Solved" : (waiting_since ? "Waiting for us" : "We replied")
+  end
+
   # Ruby mirror of the threads_agent RLS policy, used for authorization.
   def self.visible_to_agent(user)
     return all if user.admin? || user.permissions.include?("see_all_threads")
@@ -55,6 +62,7 @@ class SupportThread < ApplicationRecord
       changes = { waiting_since: waiting_since || Time.current }
       changes.merge!(state: "open", closed_at: nil, snoozed_until: nil) unless state == "open"
       update!(changes)
+      reopen_ticket_on_reply!
       part
     end
   end

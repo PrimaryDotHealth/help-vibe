@@ -21,31 +21,45 @@
         <nav class="side">
           <%= link_to admin_root_path, class: "wordmark" do %><span class="mark">h</span>helpvibe<% end %>
           <% nav = ->(label, ico, path, on) { link_to(safe_join([ icon(ico), label ]), path, class: [ "nav", ("on" if on) ]) } %>
-          <% if Current.user.agent? %>
+          <% desk = helpdesk_area? %>
+          <% if Current.user.agent? && Current.user.editor? %>
+            <div class="seg product-switch">
+              <%= link_to "Knowledge base", admin_articles_path, class: ("on" unless desk) %>
+              <%= link_to "Helpdesk", admin_inbox_path, class: ("on" if desk) %>
+            </div>
+          <% end %>
+          <% if desk %>
             <% unread = Current.user.notifications.unread.count %>
-            <%= link_to admin_inbox_path, class: [ "nav", ("on" if %w[inbox support_threads macros].include?(controller_name)) ] do %><%= icon "inbox" %>Inbox<% if unread.positive? %><span class="count"><%= unread %></span><% end %><% end %>
-          <% end %>
-          <% if Current.user.editor? %>
-          <%= nav.("Articles", "file", admin_articles_path, controller_name == "articles") %>
-          <%= nav.("Analytics", "chart", admin_analytics_path, controller_name == "analytics") %>
-          <%= nav.("Chapters", "folder", admin_chapters_path, controller_name == "chapters") %>
-          <% end %>
-          <% if Current.user.admin? %>
-            <div class="label">Admin</div>
-            <%= nav.("People", "users", admin_users_path, %w[users groups].include?(controller_name)) %>
-            <%= nav.("API and webhooks", "key", admin_api_keys_path, %w[api_keys webhooks].include?(controller_name)) %>
-            <%= nav.("Activity", "history", admin_activities_path, controller_name == "activities") %>
-            <%= nav.("Support teams", "users", admin_teams_path, controller_name == "teams") %>
+            <%= link_to admin_inbox_path, class: [ "nav", ("on" if %w[inbox support_threads].include?(controller_name) && !@thread&.ticket?) ] do %><%= icon "inbox" %>Inbox<% if unread.positive? %><span class="count"><%= unread %></span><% end %><% end %>
+            <%= nav.("Tickets", "file", admin_tickets_path, controller_name == "tickets" || (controller_name == "support_threads" && @thread&.ticket?)) %>
+            <%= nav.("Saved replies", "message", admin_macros_path, controller_name == "macros") %>
+            <% if Current.user.admin? %>
+              <div class="label">Helpdesk settings</div>
+              <%= nav.("Ticket types", "sliders", admin_ticket_types_path, %w[ticket_types ticket_states].include?(controller_name)) %>
+              <%= nav.("Teams", "users", admin_teams_path, controller_name == "teams") %>
+            <% end %>
             <% if Current.user.superadmin? || Current.user.permissions.include?("compliance") %>
               <%= nav.("Access log", "eye", admin_audit_events_path, controller_name == "audit_events") %>
             <% end %>
-            <%= nav.("Import", "db", admin_import_path, controller_name == "import") %>
+          <% else %>
+            <%= nav.("Articles", "file", admin_articles_path, controller_name == "articles") %>
+            <%= nav.("Chapters", "folder", admin_chapters_path, controller_name == "chapters") %>
+            <%= nav.("Analytics", "chart", admin_analytics_path, controller_name == "analytics") %>
+            <%= nav.("Page suggestions", "sign", admin_context_rules_path, controller_name == "context_rules") %>
+            <% if Current.user.admin? %>
+              <div class="label">Knowledge base settings</div>
+              <%= nav.("API and webhooks", "key", admin_api_keys_path, %w[api_keys webhooks].include?(controller_name)) %>
+              <%= nav.("Activity", "history", admin_activities_path, controller_name == "activities") %>
+              <%= nav.("Import", "db", admin_import_path, controller_name == "import") %>
+            <% end %>
+            <div class="label">Readers</div>
+            <%= nav.("Help center", "globe", root_path, false) %>
+            <%= nav.("Widget preview", "help", (Rails.env.local? ? dev_host_path : widget_root_path), false) %>
           <% end %>
-          <div class="label">In our app</div>
-          <%= nav.("Page suggestions", "sign", admin_context_rules_path, controller_name == "context_rules") %>
-          <div class="label">Readers</div>
-          <%= nav.("Help center", "globe", root_path, false) %>
-          <%= nav.("Widget preview", "help", (Rails.env.development? ? dev_host_path : widget_root_path), false) %>
+          <% if Current.user.admin? %>
+            <div class="label">Everyone</div>
+            <%= nav.("People", "users", admin_users_path, %w[users groups].include?(controller_name)) %>
+          <% end %>
           <div class="me"><span class="avatar"><%= Current.user.initials %></span><%= Current.user.name %>
             <span class="grow"></span><%= button_to "Sign out", session_path, method: :delete, class: "link", form_class: "inline", style: "font-size:13px" %></div>
         </nav>

@@ -1,0 +1,27 @@
+<% content_for :title, "Ticket states" %>
+<div class="head"><%= link_to admin_ticket_types_path, class: "btn quiet sm" do %><%= icon "back" %>Ticket types<% end %><h1>Ticket states</h1></div>
+<p class="t2" style="margin:-8px 0 16px;max-width:44rem">Teammates see the internal label; customers see the customer label in the widget and by email. With "Email the customer" on, moving a ticket into that state tells them.</p>
+<div class="card"><div class="table-wrap"><table class="data">
+  <thead><tr><th>Category</th><th>Internal label</th><th>Customer label</th><th>Email the customer</th><th>Archived</th><th></th></tr></thead>
+  <tbody>
+    <% @states.each do |s| %>
+      <%= form_with model: [ :admin, s ], id: dom_id(s, :form) do %><% end %>
+      <tr style="<%= "opacity:.5" if s.archived_at %>"><td><%= s.category.humanize %></td>
+        <td><%= text_field_tag "ticket_state[internal_label]", s.internal_label, class: "input", form: dom_id(s, :form) %></td>
+        <td><%= text_field_tag "ticket_state[external_label]", s.external_label, class: "input", form: dom_id(s, :form) %></td>
+        <td><%= hidden_field_tag "ticket_state[notify_customer]", "0", form: dom_id(s, :form) %><%= check_box_tag "ticket_state[notify_customer]", "1", s.notify_customer, form: dom_id(s, :form) %></td>
+        <td><%= hidden_field_tag "ticket_state[archived]", "0", form: dom_id(s, :form) %><%= check_box_tag "ticket_state[archived]", "1", s.archived_at.present?, form: dom_id(s, :form) %></td>
+        <td style="text-align:right"><button type="submit" form="<%= dom_id(s, :form) %>" class="btn sm">Save</button></td></tr>
+    <% end %>
+  </tbody>
+</table></div></div>
+<div class="card form-card" style="max-width:720px;margin-top:16px">
+  <h2>Add a state</h2>
+  <%= form_with model: [ :admin, @state ], class: "row", style: "flex-wrap:wrap" do |f| %>
+    <%= f.select :category, TicketState::CATEGORIES.map { [ _1.humanize, _1 ] }, {}, class: "input", style: "width:auto" %>
+    <%= f.text_field :internal_label, class: "input", placeholder: "Internal label", style: "width:180px", required: true %>
+    <%= f.text_field :external_label, class: "input", placeholder: "Customer label", style: "width:180px", required: true %>
+    <label class="row meta"><%= f.check_box :notify_customer %>Email the customer</label>
+    <%= f.submit "Add", class: "btn" %>
+  <% end %>
+</div>

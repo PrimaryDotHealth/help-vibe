@@ -6,5 +6,12 @@
       <% part.files.each do |f| %><div><%= link_to f.filename, rails_blob_path(f, disposition: "attachment") %></div><% end %></div>
   </div>
 <% else %>
-  <div class="msg-event meta" id="<%= dom_id(part) %>"><%= part.kind == "close" ? "Marked as solved. Reply to reopen." : (part.kind == "open" ? "Reopened" : part.kind.humanize) %></div>
+  <div class="msg-event meta" id="<%= dom_id(part) %>">
+    <%= case part.kind
+        when "close" then "Marked as solved. Reply to reopen."
+        when "open" then "Reopened"
+        when "ticket_state_change" then part.event.to_h["converted"] ? "We're tracking this as a request" : "Status: #{part.event.to_h["external"]}"
+        else part.kind.humanize
+        end %>
+  </div>
 <% end %>

@@ -1,0 +1,30 @@
+<% content_for :title, "Tickets" %>
+<div class="head"><h1>Tickets</h1><span class="count"><%= @tickets.size %></span><span class="grow"></span>
+  <%= link_to new_admin_ticket_path, class: "btn primary" do %><%= icon "plus" %>New ticket<% end %></div>
+<div class="toolbar-row">
+  <div class="seg">
+    <%= link_to "Open", admin_tickets_path(type: params[:type]), class: ("on" if params.slice(:mine, :resolved, :category, :state).empty?) %>
+    <%= link_to "Mine", admin_tickets_path(mine: 1), class: ("on" if params[:mine]) %>
+    <% TicketType::CATEGORIES.each do |c| %><%= link_to({ "customer" => "Customer", "back_office" => "Back-office", "tracker" => "Tracker" }[c], admin_tickets_path(category: c), class: ("on" if params[:category] == c)) %><% end %>
+    <%= link_to "Including resolved", admin_tickets_path(resolved: 1), class: ("on" if params[:resolved]) %>
+  </div>
+  <span class="grow"></span>
+  <%= form_with url: admin_tickets_path, method: :get, class: "row" do %>
+    <%= select_tag :type, options_for_select(@types.map { [ _1.name, _1.id ] }, params[:type]), include_blank: "Any type", class: "input", onchange: "this.form.requestSubmit()" %>
+    <%= select_tag :state, options_for_select(@states.map { [ _1.internal_label, _1.id ] }, params[:state]), include_blank: "Any state", class: "input", onchange: "this.form.requestSubmit()" %>
+  <% end %>
+</div>
+<div class="card"><div class="table-wrap"><table class="data">
+  <thead><tr><th>Ticket</th><th>Type</th><th>State</th><th>Customer</th><th>Assigned</th><th>Updated</th></tr></thead>
+  <tbody>
+    <% @tickets.each do |t| %>
+      <tr><td><div class="title-cell" style="min-width:260px"><span class="code">#<%= t.number %></span><%= link_to t.title, admin_support_thread_path(t) %></div></td>
+        <td class="meta"><%= t.ticket_type.name %></td>
+        <td><span class="status <%= { "submitted" => "draft", "in_progress" => "review", "waiting_on_customer" => "scheduled", "resolved" => "live" }[t.ticket_state.category] %>"><%= t.ticket_state.internal_label %></span></td>
+        <td class="meta"><%= t.contact&.display_name || "–" %></td>
+        <td class="meta"><%= [ t.assignee_user&.first_name, t.assignee_team&.name ].compact.join(" · ").presence || "Unassigned" %></td>
+        <td class="meta"><%= relative_day(t.updated_at) %></td></tr>
+    <% end %>
+    <% if @tickets.empty? %><tr><td colspan="6" class="meta">No tickets here.</td></tr><% end %>
+  </tbody>
+</table></div></div>

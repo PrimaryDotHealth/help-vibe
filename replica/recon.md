@@ -527,3 +527,110 @@ so rescope into phases:
 - **Phase 1**: help center, editor and widget (Part 1 must-haves). M.
 - **Phase 2**: support MVP. Conversations from the widget, inbox with views and assignment, notes, macros, article insert, email in and out, contacts, one ticket type with states, access log, SSO and 2FA, encryption at rest. M to L.
 - **Phase 3**: ticket types with custom fields, back-office and tracker tickets, SLAs with office hours, rules, round robin/balanced, CSAT, reports, F18 article drafting. M.
+
+---
+
+# Part 3: Ticketing (Intercom tickets), a separate product
+
+Decision 2026-11-04: the admin becomes **two products**, **Knowledge base**
+(Helpjuice, Part 1) and **Helpdesk** (Intercom: conversations from Part 2 +
+tickets here). They share only people, sign-in and the widget, and can be
+merged later.
+
+## Sources (added)
+
+| # | source | URL | notes |
+| --- | --- | --- | --- |
+| 24 | Custom ticket types | https://intercom.com/help/en/articles/7112127-create-custom-ticket-types | categories, default + custom attributes, customer/teammate settings, limits |
+| 25 | Tickets explained | https://www.intercom.com/help/en/articles/6436600-tickets-explained | the three categories |
+| 26 | Back-office tickets | https://www.intercom.com/help/en/articles/8300297-how-to-create-a-back-office-ticket | created from a conversation, linked, one shareable per conversation |
+| 27 | Customer (tickets) portal | https://www.intercom.com/help/en/articles/8450754-customer-portal-explained | customers' list of their tickets |
+| 28 | Ticket states | (source 18) | 4 categories, internal/external labels, notify toggle |
+| 29 | Community: convert conversations | https://community.intercom.com/helpdesk-9/auto-convert-conversations-to-tickets-6719 | conversion is manual. Customers start in a conversation or a ticket form. |
+
+## Rules found (Intercom's behaviour we replicate)
+
+- **Customer tickets:**
+  - Always shared with the customer, who sees the state's customer-facing label and the fields marked visible.
+  - Both sides can reply, and agents can add internal notes.
+  - Customers can't edit fields after submitting.
+- **Back-office tickets:**
+  - Internal unless the type is shareable.
+  - Created from a conversation and linked to it.
+  - Customer replies stay in the linked conversation.
+- **Tracker tickets:** always internal, and many conversations link to one.
+- **Default fields:** every type has a title and a description, each optionally visible to and required for customers.
+- **Custom fields:**
+  - Formats: text (single or multi-line), list, whole number, decimal, yes/no, date-time, file. The format is fixed once created.
+  - Each field can be visible to customers and required for customers (customer tickets, or shareable back-office ones).
+  - Each field can be hidden from the agent creation form, required when an agent creates the ticket, or required before closing.
+  - Fields are archived, never deleted. At most 50 per type.
+- **Changing type:** only to another type of the same category.
+- **States:**
+  - Each type uses at least one state from each category: submitted, in progress, waiting on customer, resolved.
+  - Moving into a state notifies the customer (email and widget) when that state has notify switched on.
+
+## Screens (added)
+
+| ID | screen | route | purpose | states |
+| --- | --- | --- | --- | --- |
+| S43 | product switcher | admin sidebar | Knowledge base or Helpdesk | - |
+| S44 | tickets list | `/admin/tickets` | all tickets, filter by type, state, assignee, category | empty, filtered |
+| S45 | new ticket (agent) | `/admin/tickets/new` | pick type, fill fields, contact, assignee | missing required |
+| S46 | ticket page | `/admin/threads/:n` (kind ticket) | replies, notes, state, fields, links | each state, close blocked by required field |
+| S47 | ticket types | `/admin/ticket_types` | list, create, archive | default types |
+| S48 | ticket type editor | `/admin/ticket_types/:id/edit` | name, category, description, fields, states | - |
+| S49 | ticket states | `/admin/ticket_states` | labels, notify, archive | - |
+| S50 | widget: submit a request | widget → Ask us → type | customer ticket form | required missing |
+| S51 | widget: your tickets | widget → Your conversations | tickets with customer-facing state | - |
+
+## Flows (added)
+
+```
+F21 Customer submits a ticket from the widget
+    S07 -> Ask us -> S50 pick "Billing question" -> fill visible fields -> submit -> S51 "Submitted"
+    happy path clicks: 4
+    edge: required field empty, decimal with a comma, no customer ticket types (falls back to a conversation)
+
+F22 Agent works a ticket
+    S44 -> S46 -> set state In progress -> reply -> Waiting on customer (customer emailed) -> customer replies -> Resolved
+    edge: required-to-close field empty, state with notify off, reopened by a customer reply
+
+F23 Convert a conversation into a customer ticket
+    S30 -> "Convert to ticket" -> type -> fields -> the conversation becomes the ticket (history kept)
+
+F24 Hand off to another team
+    S30 -> "Back-office ticket" -> type, team -> linked; billing works it; customer only sees the conversation
+
+F25 Track one issue across customers
+    tracker ticket -> link conversations -> resolve -> optional update posted to each linked conversation
+```
+
+## Data model (extends Part 2)
+
+Already in the schema (Part 2 migration): `ticket_types`, `ticket_type_attributes`, `ticket_states`,
+`ticket_type_states`, `threads` (kind = 'ticket', ticket_type_id, ticket_state_id, ticket_attributes, is_shared),
+`thread_links` (handoff | tracker). Adds:
+
+```
+TicketTypeAttribute + multiline (bool), required_to_close (bool), hidden_on_create (bool)
+                    evidence: source 24   confidence: high
+SupportThread (ticket)  title = default title attribute; ticket_attributes["description"] = default description
+```
+
+## Out of scope (Part 3)
+
+- **AI autofill of title and description (Fin):** needs an LLM.
+- **Conditional fields** (show a field only when another has a value).
+- **CSV import of list options.**
+- **A separate customer portal on a custom domain:** the widget's list plus the email links cover it.
+- **Company-wide ticket visibility:** needs companies (M8).
+
+## Size (Part 3)
+
+9 screens, 5 flows, no new tables (3 new columns). Hard parts:
+1. Validating fields by type and by who's editing.
+2. State changes triggering customer notifications.
+3. Keeping internal and shared content apart for back-office and tracker tickets.
+
+Size: **S–M**, because most of the plumbing (threads, parts, email, widget, live updates) exists from Part 2.
