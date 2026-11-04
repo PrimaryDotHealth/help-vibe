@@ -24,8 +24,8 @@
           <% desk = helpdesk_area? %>
           <% if Current.user.agent? && Current.user.editor? %>
             <div class="seg product-switch">
-              <%= link_to "Knowledge base", admin_articles_path, class: ("on" unless desk) %>
               <%= link_to "Helpdesk", admin_inbox_path, class: ("on" if desk) %>
+              <%= link_to "Articles", admin_articles_path, class: ("on" unless desk) %>
             </div>
           <% end %>
           <% if desk %>
@@ -47,7 +47,7 @@
             <%= nav.("Analytics", "chart", admin_analytics_path, controller_name == "analytics") %>
             <%= nav.("Page suggestions", "sign", admin_context_rules_path, controller_name == "context_rules") %>
             <% if Current.user.admin? %>
-              <div class="label">Knowledge base settings</div>
+              <div class="label">Articles settings</div>
               <%= nav.("API and webhooks", "key", admin_api_keys_path, %w[api_keys webhooks].include?(controller_name)) %>
               <%= nav.("Activity", "history", admin_activities_path, controller_name == "activities") %>
               <%= nav.("Import", "db", admin_import_path, controller_name == "import") %>

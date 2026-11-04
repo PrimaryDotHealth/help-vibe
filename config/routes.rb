@@ -21,7 +21,7 @@ Rails.application.routes.draw do
   # Admin: articles (S11), editor (S12), history (S13), chapters (S15),
   # people (S17), API keys (S20), import (S22)
   namespace :admin do
-    root "articles#index"
+    root "home#show"   # Helpdesk first for agents, Articles for everyone else
     resources :articles, only: %i[index new create edit update] do
       resource :publication, only: %i[create destroy]
       resource :history, only: :show, controller: "history" do

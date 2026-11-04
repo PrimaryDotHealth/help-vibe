@@ -58,10 +58,14 @@ class TicketsTest < ActionDispatch::IntegrationTest
     assert_equal "We need your reply", TicketState.find_by!(category: "waiting_on_customer").external_label
   end
 
-  test "the admin is split into Knowledge base and Helpdesk" do
+  test "the admin is split into Helpdesk and Articles, Helpdesk first" do
     sign_in_as users(:one)
+    get admin_root_path
+    assert_redirected_to admin_inbox_path, "admins (agents) land in the Helpdesk"
     get admin_articles_path
-    assert_select ".product-switch a.on", "Knowledge base"
+    assert_select ".product-switch a", count: 2
+    assert_select ".product-switch a:first-child", "Helpdesk"
+    assert_select ".product-switch a.on", "Articles"
     assert_select ".side a.nav", { text: "Tickets", count: 0 }
     get admin_tickets_path
     assert_select ".product-switch a.on", "Helpdesk"

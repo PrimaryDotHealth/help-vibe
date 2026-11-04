@@ -8,7 +8,7 @@ class InvitationsController < ApplicationController
   def update
     if @user.update(params.permit(:password, :password_confirmation))
       start_new_session_for @user
-      redirect_to(@user.editor? ? admin_root_path : root_path, notice: "Welcome, #{@user.first_name.presence || @user.email_address}")
+      redirect_to(@user.editor? || @user.agent? ? admin_root_path : root_path, notice: "Welcome, #{@user.first_name.presence || @user.email_address}")
     else
       redirect_to invitation_path(params[:token]), alert: "Those passwords didn't match"
     end

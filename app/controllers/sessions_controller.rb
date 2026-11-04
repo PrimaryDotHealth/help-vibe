@@ -9,7 +9,7 @@ class SessionsController < ApplicationController
     if user = User.authenticate_active(params.permit(:email_address, :password))
       start_new_session_for user
       user.update_column(:last_sign_in_at, Time.current)
-      redirect_to session.delete(:return_to_after_authenticating) || (user.editor? ? admin_root_url : (user.agent? ? admin_inbox_url : root_url))
+      redirect_to session.delete(:return_to_after_authenticating) || (user.editor? || user.agent? ? admin_root_url : root_url)
     else
       redirect_to new_session_path, alert: "Try another email address or password."
     end

@@ -532,7 +532,7 @@ so rescope into phases:
 
 # Part 3: Ticketing (Intercom tickets), a separate product
 
-Decision 2026-11-04: the admin becomes **two products**, **Knowledge base**
+Decision 2026-11-04: the admin becomes **two products**, **Articles**
 (Helpjuice, Part 1) and **Helpdesk** (Intercom: conversations from Part 2 +
 tickets here). They share only people, sign-in and the widget, and can be
 merged later.
