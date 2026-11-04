@@ -4,5 +4,6 @@
     <h3 style="font:400 22px/28px var(--serif)"><%= @version.title %></h3>
     <p class="meta" style="margin-top:4px"><%= @article.main_category.name %> · Updated <%= relative_day(@version.published_at || @version.updated_at).downcase %></p>
     <div class="rich" style="margin-top:16px;font-size:14px"><%= body %></div>
+    <%= render "reader/articles/helpful", article: @article, vote: nil, source: "widget" %>
   </div>
 <% end %>

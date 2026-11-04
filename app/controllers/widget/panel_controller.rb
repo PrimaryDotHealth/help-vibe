@@ -1,8 +1,14 @@
 # The panel inside the iframe: suggestions, search, article.
 class Widget::PanelController < Widget::BaseController
   def show
-    @popular = Article.listed_for(viewer).includes(:versions).order(views: :desc, code: :asc).limit(5)
     @page = params[:page]
+    rule = ContextRule.for_page(@page)
+    if rule
+      visible = Article.listed_for(viewer).where(id: rule.article_ids).pluck(:id)
+      @suggested = rule.articles.select { visible.include?(_1.id) }
+    end
+    @popular = Article.listed_for(viewer).includes(:versions).order(views: :desc, code: :asc).limit(5)
+    @popular = @popular.where.not(id: @suggested.map(&:id)) if @suggested.present?
   end
 
   def search

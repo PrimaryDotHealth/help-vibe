@@ -98,6 +98,16 @@ class Article < ApplicationRecord
     end
   end
 
+  # Up to 3 visible articles sharing the most keywords, then same chapter.
+  def related_for(viewer, limit: 3)
+    ids = ArticleKeyword.where(keyword_id: keyword_ids).where.not(article_id: id)
+                        .group(:article_id).order(Arel.sql("count(*) desc")).limit(20).pluck(:article_id)
+    by_keyword = Article.listed_for(viewer).where(id: ids).includes(:versions).index_by(&:id).values_at(*ids).compact
+    return by_keyword.first(limit) if by_keyword.size >= limit
+    by_keyword + Article.listed_for(viewer).where(main_category_id: main_category_id).where.not(id: [ id ] + ids)
+                        .includes(:versions).order(views: :desc).limit(limit - by_keyword.size).to_a
+  end
+
   def keyword_list
     keywords.order(:name).pluck(:name).join(", ")
   end

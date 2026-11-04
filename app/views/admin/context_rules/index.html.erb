@@ -1,0 +1,26 @@
+<% content_for :title, "Page suggestions" %>
+<div class="head">
+  <h1>Page suggestions</h1><span class="count"><%= @rules.size %></span>
+  <span class="grow"></span>
+  <%= link_to new_admin_context_rule_path, class: "btn primary" do %><%= icon "plus" %>New rule<% end %>
+</div>
+<p class="t2" style="margin:-8px 0 16px;max-width:44rem">When the widget opens on a matching page of our app, it leads with these articles. <span class="mono">*</span> matches one path segment, <span class="mono">**</span> any number. The highest priority match wins.</p>
+<div class="card"><div class="table-wrap"><table class="data">
+  <thead><tr><th>Rule</th><th>Pages</th><th>Articles</th><th class="num">Priority</th><th></th></tr></thead>
+  <tbody>
+    <% @rules.each do |r| %>
+      <tr><td><%= r.name %></td><td class="mono"><%= r.url_pattern %></td>
+        <td><% r.articles.each do |a| %><%= code_tag a.code, title: a.live_version&.title, style: "margin-right:8px" %><% end %></td>
+        <td class="num"><%= r.priority %></td><td style="text-align:right"><%= link_to "Edit", edit_admin_context_rule_path(r) %></td></tr>
+    <% end %>
+    <% if @rules.empty? %><tr><td colspan="5" class="meta">No rules yet. The widget shows the most-read articles everywhere.</td></tr><% end %>
+  </tbody>
+</table></div></div>
+<% if @pages.any? %>
+  <p class="section-title">Pages where people searched in the widget, last 30 days</p>
+  <div class="card"><div class="table-wrap"><table class="data">
+    <tbody><% @pages.each do |page, count| %>
+      <tr><td class="mono"><%= page %></td><td class="num"><%= count %></td><td style="text-align:right"><%= link_to "Add a rule", new_admin_context_rule_path(pattern: page) %></td></tr>
+    <% end %></tbody>
+  </table></div></div>
+<% end %>

@@ -1,0 +1,11 @@
+<div class="card form-card" style="max-width:560px">
+  <%= form_with model: [ :admin, rule ] do |f| %>
+    <% if rule.errors.any? %><div class="errors"><%= rule.errors.full_messages.to_sentence %></div><% end %>
+    <label class="field"><span>Name</span><%= f.text_field :name, class: "input", required: true, placeholder: "Invoices" %></label>
+    <label class="field"><span>Pages in our app</span><%= f.text_field :url_pattern, class: "input mono", required: true, placeholder: "/billing/invoices/**" %></label>
+    <label class="field"><span>Articles, in order</span><%= f.text_field :article_codes, class: "input mono", placeholder: "BIL·07, BIL·09, BIL·12" %><div class="hint">Codes, separated by commas. The first one is shown as the answer card.</div></label>
+    <label class="field"><span>Priority</span><%= f.number_field :priority, class: "input", style: "width:120px" %><div class="hint">Higher wins when several rules match</div></label>
+    <div class="acts"><%= f.submit "Save", class: "btn primary" %><%= link_to "Cancel", admin_context_rules_path, class: "btn quiet" %></div>
+  <% end %>
+  <% if rule.persisted? %><%= button_to "Remove rule", admin_context_rule_path(rule), method: :delete, class: "btn quiet", form: { style: "margin-top:12px" } %><% end %>
+</div>

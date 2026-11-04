@@ -33,7 +33,9 @@ class Admin::ArticlesController < Admin::BaseController
   # Manual save (and optionally publish). Autosave goes through RevisionsController.
   def update
     @article = Article.find_by!(slug: params[:id])
-    attrs = params.require(:editor).permit(:title, :subtitle, :body, :base_revision_id, :main_category_id, :accessibility, :keywords, accessor_keys: [])
+    attrs = params.require(:editor).permit(:title, :subtitle, :body, :base_revision_id, :main_category_id, :accessibility, :keywords,
+                                           :publish_at, :expire_at, accessor_keys: [])
+    notice = "Saved"
 
     ActiveRecord::Base.transaction do
       @article.update!(main_category_id: attrs[:main_category_id], accessibility: attrs[:accessibility], keyword_list: attrs[:keywords])
@@ -41,12 +43,22 @@ class Admin::ArticlesController < Admin::BaseController
       version = editable_version
       version.save_revision!(body: attrs[:body], author: Current.user, base_revision_id: attrs[:base_revision_id],
                              title: attrs[:title], subtitle: attrs[:subtitle])
+      if attrs.key?(:publish_at) || attrs.key?(:expire_at)
+        version.update!(publish_at: Time.zone.parse(attrs[:publish_at].to_s), expire_at: Time.zone.parse(attrs[:expire_at].to_s))
+      end
       if params[:publish].present?
         raise ActionController::BadRequest, "Draft writers can't publish" unless Current.user.can_publish?
-        version.publish!(by: Current.user)
+        if version.scheduled?
+          notice = "Scheduled to go live #{version.publish_at.strftime("%-d %b %H:%M %Z")}"
+        else
+          version.publish!(by: Current.user)
+          notice = "Published"
+        end
       end
     end
-    redirect_to edit_admin_article_path(@article), notice: params[:publish].present? ? "Published" : "Saved"
+    redirect_to edit_admin_article_path(@article), notice: notice
+  rescue ActiveRecord::RecordInvalid => e
+    redirect_to edit_admin_article_path(@article), alert: e.record.errors.full_messages.to_sentence
   rescue ArticleVersion::StaleRevision
     redirect_to edit_admin_article_path(@article), alert: "Someone saved a newer copy while you were editing. Your changes weren't saved: reload and reapply them."
   end

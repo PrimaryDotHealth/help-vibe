@@ -28,6 +28,8 @@
             <%= nav.("API keys", "key", admin_api_keys_path, controller_name == "api_keys") %>
             <%= nav.("Import", "db", admin_import_path, controller_name == "import") %>
           <% end %>
+          <div class="label">In our app</div>
+          <%= nav.("Page suggestions", "sign", admin_context_rules_path, controller_name == "context_rules") %>
           <div class="label">Readers</div>
           <%= nav.("Help center", "globe", root_path, false) %>
           <%= nav.("Widget preview", "help", (Rails.env.development? ? dev_host_path : widget_root_path), false) %>

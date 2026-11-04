@@ -11,6 +11,7 @@ class Reader::ArticlesController < Reader::BaseController
     @chapter = @article.main_category.chapter
     @siblings = Article.listed_for(viewer).where(main_category: [ @chapter ] + @chapter.children).includes(:versions).order(:code)
 
+    @related = @article.related_for(viewer)
     record_view unless @preview
   end
 

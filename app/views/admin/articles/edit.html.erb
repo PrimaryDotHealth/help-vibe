@@ -55,6 +55,12 @@
           <div class="hint">Comma-separated. Matched alongside the title.</div>
         </section>
         <section>
+          <h3>Schedule</h3>
+          <label class="field"><span>Go live at</span><%= f.datetime_local_field :publish_at, value: @version.publish_at&.in_time_zone&.strftime("%Y-%m-%dT%H:%M"), class: "input" %></label>
+          <label class="field"><span>Take down at</span><%= f.datetime_local_field :expire_at, value: @version.expire_at&.in_time_zone&.strftime("%Y-%m-%dT%H:%M"), class: "input" %></label>
+          <div class="hint">Times in <%= Time.zone.name %>. With a go-live time, Publish schedules instead of publishing now.</div>
+        </section>
+        <section>
           <h3>Versions</h3>
           <% @article.versions.reverse_each do |v| %>
             <div class="review-line"><span class="grow">v<%= v.number %> · <%= v.is_default ? "live" : v.status %></span><span class="meta"><%= relative_day(v.updated_at) %></span></div>

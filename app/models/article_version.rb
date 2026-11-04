@@ -13,6 +13,13 @@ class ArticleVersion < ApplicationRecord
 
   def draft? = status == "draft"
 
+  scope :due_to_publish, -> { where(status: "draft").where(publish_at: ..Time.current) }
+  scope :due_to_expire, -> { where(is_default: true).where(expire_at: ..Time.current) }
+
+  validate :expiry_after_go_live
+
+  def scheduled? = draft? && publish_at.present? && publish_at.future?
+
   # Every save (manual or autosave) is a new revision. Saving on top of a
   # revision that is no longer current raises StaleRevision (HTTP 409), so two
   # editors can't silently overwrite each other.
@@ -39,15 +46,19 @@ class ArticleVersion < ApplicationRecord
       article.versions.where(language: language, is_default: true).where.not(id: id).update_all(is_default: false)
       update!(status: "published", is_default: true, published_at: Time.current, publish_at: nil)
       SearchIndex.refresh!(self)
-      Activity.record!(article, "publish", by: by)
+      Activity.record!(article, "publish", by: by, automatic: by.nil?)
     end
+  end
+
+  def expiry_after_go_live
+    errors.add(:expire_at, "must be after the go-live time") if publish_at && expire_at && expire_at <= publish_at
   end
 
   def unpublish!(by:)
     transaction do
-      update!(is_default: false, status: "draft")
+      update!(is_default: false, status: "draft", expire_at: nil)
       SearchIndex.remove!(article, language)
-      Activity.record!(article, "unpublish", by: by)
+      Activity.record!(article, "unpublish", by: by, automatic: by.nil?)
     end
   end
 end

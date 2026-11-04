@@ -9,6 +9,7 @@ Rails.application.routes.draw do
   scope module: :reader do
     get "c/:slug", to: "chapters#show", as: :chapter
     get "a/:slug", to: "articles#show", as: :article
+    post "a/:slug/vote", to: "votes#create", as: :article_vote
     get "search", to: "search#index", as: :search
   end
 
@@ -30,6 +31,7 @@ Rails.application.routes.draw do
     resources :groups, except: :show
     resources :api_keys, only: %i[index create destroy]
     resource :import, only: %i[show create], controller: "import"
+    resources :context_rules, except: :show
   end
 
   # Embeddable help widget (S07) and chromeless article for iframes (S08)

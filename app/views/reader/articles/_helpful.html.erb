@@ -1,0 +1,18 @@
+<%= turbo_frame_tag dom_id(article, :helpful) do %>
+  <div class="helpful">
+    <% if vote.nil? %>
+      <b>Did this answer your question?</b>
+      <%= button_to article_vote_path(article, value: 1, source: source), class: "btn sm", form_class: "inline" do %><%= icon "up" %>Yes<% end %>
+      <%= button_to article_vote_path(article, value: -1, source: source), class: "btn sm", form_class: "inline" do %><%= icon "downvote" %>No<% end %>
+    <% elsif vote.value == 1 || vote.comment.present? %>
+      <b>Thanks for letting us know.</b>
+    <% else %>
+      <%= form_with url: article_vote_path(article, value: -1, source: source), class: "row grow", style: "flex-wrap:wrap" do %>
+        <label class="grow"><span class="meta">What were you looking for?</span>
+          <%= text_field_tag :comment, nil, class: "input", maxlength: 1000, placeholder: "Optional" %></label>
+        <%= submit_tag "Send", class: "btn sm" %>
+      <% end %>
+    <% end %>
+    <% if source == "kb" %><span class="quote-code">Asking support? Quote <%= code_tag article.code %></span><% end %>
+  </div>
+<% end %>

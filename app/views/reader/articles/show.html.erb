@@ -20,10 +20,14 @@
     </div>
     <div class="rich numbered"><%= body %></div>
 
-    <div class="helpful">
-      <b>Did this answer your question?</b>
-      <span class="quote-code">Asking support? Quote <%= code_tag @article.code %></span>
-    </div>
+    <%= render "reader/articles/helpful", article: @article, vote: nil, source: "kb" unless @preview %>
+
+    <% if @related.any? %>
+      <div class="related">
+        <h3>Related</h3>
+        <% @related.each do |a| %><%= link_to article_path(a) do %><%= code_tag a.code %><%= a.live_version.title %><% end %><% end %>
+      </div>
+    <% end %>
   </article>
 
   <aside class="toc" aria-label="On this page">

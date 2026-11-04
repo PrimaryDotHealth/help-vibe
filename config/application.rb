@@ -28,7 +28,7 @@ module Helpvibe
     # round-trip through schema.rb, so dump the schema as SQL (db/structure.sql).
     config.active_record.schema_format = :sql
 
-    # Store UTC, render in the viewer's zone (see replica/architecture.md).
-    config.time_zone = "UTC"
+    # Store UTC; show and enter times (scheduled publishing) in the team's zone.
+    config.time_zone = ENV.fetch("HELPVIBE_TIME_ZONE", "UTC")
   end
 end
