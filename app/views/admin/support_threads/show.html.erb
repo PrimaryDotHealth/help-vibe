@@ -31,7 +31,7 @@
         <div class="modes">
           <%= submit_tag "Send reply", class: "btn primary sm" %>
           <%= submit_tag "Reply and close", name: "and_close", class: "btn sm" %>
-          <%= submit_tag "Add internal note", name: "note", class: "btn sm quiet" %>
+          <%= button_tag name: "note", value: "1", class: "btn sm quiet", title: "Only your team sees notes" do %><%= icon "lock" %>Add internal note<% end %>
           <span class="grow"></span>
           <% if @macros.any? %>
             <select class="input" style="height:32px;width:auto;font-size:13px" data-action="change->macro#insert" aria-label="Insert saved reply">

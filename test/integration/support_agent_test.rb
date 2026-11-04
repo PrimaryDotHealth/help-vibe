@@ -27,6 +27,18 @@ class SupportAgentTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
+  test "internal notes are labelled as internal for agents and never shown to the contact" do
+    @billing_thread.note!(user: users(:two), body: "Check the discount code")
+    sign_in_as users(:two)
+    get admin_support_thread_path(@billing_thread)
+    assert_select ".msg.is-note .meta", /Internal note · only your team sees this/
+    assert_select ".msg.is-note .bubble", /Check the discount code/
+    assert_select ".msg.me .bubble", { text: /discount code/, count: 0 }, "not styled like a sent reply"
+
+    get contact_thread_path(@billing_thread.generate_token_for(:contact_link))
+    assert_select ".bubble", { text: /discount code/, count: 0 }
+  end
+
   test "people outside support teams don't get the inbox" do
     users(:viewer).update!(role: "viewer")
     sign_in_as users(:viewer)

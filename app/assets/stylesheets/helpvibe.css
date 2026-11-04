@@ -531,7 +531,12 @@ lexxy-editor, .lexxy-content {
 .bubble p + p { margin-top: 8px; }
 .msg.me .bubble { background: var(--ink); color: var(--on-ink); }
 .msg.me .bubble a { color: inherit; text-decoration: underline; }
-.msg.is-note .bubble { background: rgba(250, 204, 21, .16); box-shadow: inset 2px 0 0 #ca8a04; }
+/* Internal notes: full width, yellow, plainly not a message to the customer */
+.msg.is-note { align-self: stretch; max-width: none; }
+.msg.is-note .meta { display: flex; align-items: center; gap: 6px; color: var(--warn); }
+.msg.is-note .meta b { font-weight: 500; }
+.msg.is-note .meta .i { width: 14px; height: 14px; }
+.msg.is-note .bubble { background: rgba(250, 204, 21, .12); color: var(--text); border: 1px dashed rgba(202, 138, 4, .55); border-radius: var(--r-md); }
 .msg-event { text-align: center; font-size: 12px; }
 .reply-box { margin-top: 8px; padding-top: 12px; border-top: 1px solid var(--line); }
 .code-link { font: 500 12px var(--mono); }

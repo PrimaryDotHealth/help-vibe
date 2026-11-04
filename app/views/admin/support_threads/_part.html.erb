@@ -1,7 +1,13 @@
 <%# One part as agents see it (also broadcast live to agents viewing the thread). %>
-<% if part.message? %>
-  <div class="msg <%= part.from_contact? ? "them" : "me" %> <%= "is-note" if part.kind == "note" %>" id="<%= dom_id(part) %>">
-    <div class="meta"><%= part.author_name %><%= " · internal note" if part.kind == "note" %><%= " · by email" if part.channel == "email" %> · <%= part.created_at.strftime("%-d %b %H:%M") %></div>
+<% if part.kind == "note" %>
+  <div class="msg is-note" id="<%= dom_id(part) %>">
+    <div class="meta"><%= icon "lock" %><b>Internal note</b> · only your team sees this · <%= part.author_name %> · <%= part.created_at.strftime("%-d %b %H:%M") %></div>
+    <div class="bubble"><%= render_message(part) %>
+      <% part.files.each do |f| %><div><%= link_to f.filename, rails_blob_path(f, disposition: "attachment") %></div><% end %></div>
+  </div>
+<% elsif part.message? %>
+  <div class="msg <%= part.from_contact? ? "them" : "me" %> " id="<%= dom_id(part) %>">
+    <div class="meta"><%= part.author_name %><%= " · by email" if part.channel == "email" %> · <%= part.created_at.strftime("%-d %b %H:%M") %></div>
     <div class="bubble"><%= render_message(part) %>
       <% part.files.each do |f| %><div><%= link_to f.filename, rails_blob_path(f, disposition: "attachment") %></div><% end %></div>
   </div>
