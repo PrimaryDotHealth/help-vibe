@@ -531,7 +531,7 @@ lexxy-editor, .lexxy-content {
 .bubble p + p { margin-top: 8px; }
 .msg.me .bubble { background: var(--ink); color: var(--on-ink); }
 .msg.me .bubble a { color: inherit; text-decoration: underline; }
-.msg.note .bubble { background: rgba(250, 204, 21, .16); box-shadow: inset 2px 0 0 #ca8a04; }
+.msg.is-note .bubble { background: rgba(250, 204, 21, .16); box-shadow: inset 2px 0 0 #ca8a04; }
 .msg-event { text-align: center; font-size: 12px; }
 .reply-box { margin-top: 8px; padding-top: 12px; border-top: 1px solid var(--line); }
 .code-link { font: 500 12px var(--mono); }
