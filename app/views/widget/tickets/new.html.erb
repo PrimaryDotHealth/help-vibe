@@ -2,7 +2,7 @@
   <div style="padding-top:12px">
     <h3 style="font:400 20px/26px var(--serif)"><%= @type.name %></h3>
     <% if flash.now[:alert] || flash[:alert] %><p class="errors" style="margin-top:8px"><%= flash.now[:alert] || flash[:alert] %></p><% end %>
-    <%= form_with url: widget_tickets_path(type: @type.id), style: "margin-top:12px" do %>
+    <%= form_with url: widget_tickets_path(type: @type.id), html: { style: "margin-top:12px" } do %>
       <%= hidden_field_tag :page, params[:page] %>
       <% unless current_contact %>
         <label class="field"><span>Your email *</span><%= email_field_tag :email, params[:email], class: "input", required: true, autocomplete: "email" %></label>

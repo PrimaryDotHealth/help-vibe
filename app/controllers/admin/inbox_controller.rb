@@ -11,7 +11,7 @@ class Admin::InboxController < Admin::SupportBaseController
       "snoozed" => base.where(state: "snoozed").count
     }
     @team_counts = base.open_state.where(assignee_team_id: @teams.map(&:id)).group(:assignee_team_id).count
-    @threads = scope_for(base).includes(:contact, :assignee_user, :assignee_team).waiting_first.limit(100).to_a
+    @threads = scope_for(base).includes(:contact, :assignee_user, :assignee_team, :ticket_type).waiting_first.limit(100).to_a
     @reads = ThreadRead.where(user: Current.user, thread_id: @threads.map(&:id)).pluck(:thread_id, :last_part_id).to_h
     @last_parts = ThreadPart.where(thread_id: @threads.map(&:id)).group(:thread_id).maximum(:id)
     @previews = ThreadPart.where(id: ThreadPart.where(thread_id: @threads.map(&:id), kind: "comment").group(:thread_id).select("max(id)")).index_by(&:thread_id)

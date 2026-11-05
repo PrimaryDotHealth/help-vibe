@@ -1,8 +1,8 @@
 <% name = "fields[#{field.key}]" %>
 <label class="field"><span><%= field.label %><%= " *" if required %></span>
   <% case field.data_type
-     when "list" %><%= select_tag name, options_for_select(field.list_options, value), include_blank: true, class: "input", required: required %>
-  <% when "boolean" %><%= select_tag name, options_for_select([ [ "Yes", "true" ], [ "No", "false" ] ], value.nil? ? nil : value.to_s), include_blank: true, class: "input", required: required %>
+     when "list" %><%= select_tag name, options_for_select(field.list_options, value), include_blank: "Choose…", class: "input", required: required %>
+  <% when "boolean" %><%= select_tag name, options_for_select([ [ "Yes", "true" ], [ "No", "false" ] ], value.nil? ? nil : value.to_s), include_blank: "Choose…", class: "input", required: required %>
   <% when "integer" %><%= number_field_tag name, value, step: 1, class: "input", required: required %>
   <% when "decimal" %><%= text_field_tag name, value, inputmode: "decimal", pattern: "-?[0-9]+(\\.[0-9]+)?", class: "input", required: required, placeholder: "10.5" %>
   <% when "datetime" %><%= datetime_local_field_tag name, (Time.zone.parse(value.to_s)&.strftime("%Y-%m-%dT%H:%M") if value), class: "input", required: required %>

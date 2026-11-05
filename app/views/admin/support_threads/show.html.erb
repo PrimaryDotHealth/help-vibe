@@ -75,17 +75,18 @@
         <%= select_tag :user_id, options_for_select(@agents.map { [ _1.name, _1.id ] }, @thread.assignee_user_id), include_blank: "Nobody", class: "input", onchange: "this.form.requestSubmit()", "aria-label": "Assignee" %>
         <%= select_tag :team_id, options_for_select(Team.order(:name).map { [ _1.name, _1.id ] }, @thread.assignee_team_id), include_blank: "No team", class: "input", style: "margin-top:8px", onchange: "this.form.requestSubmit()", "aria-label": "Team" %>
       <% end %>
-      <%= form_with url: admin_support_thread_path(@thread), method: :patch, style: "margin-top:8px" do %>
+      <%= form_with url: admin_support_thread_path(@thread), method: :patch, html: { style: "margin-top:8px" } do %>
         <%= hidden_field_tag :do, "priority" %>
         <%= select_tag :priority, options_for_select(SupportThread::PRIORITIES.map { [ "Priority: #{_1}", _1 ] }, @thread.priority), class: "input", onchange: "this.form.requestSubmit()", "aria-label": "Priority" %>
       <% end %>
     </section>
+    <% if !@thread.ticket? || @linked.any? %>
     <section style="padding:16px 20px;border-bottom:1px solid var(--line)">
-      <h3 style="font-size:13px;font-weight:500;margin-bottom:8px">Tickets</h3>
+      <h3 style="font-size:13px;font-weight:500;margin-bottom:8px"><%= @thread.ticket? ? "Linked" : "Tickets" %></h3>
       <% @linked.each do |t| %><div class="review-line"><%= link_to "##{t.number}", admin_support_thread_path(t), class: "code" %><span class="grow"><%= t.ticket? ? t.ticket_type.name : "Conversation" %></span><span class="meta"><%= t.ticket_state&.internal_label || t.state %></span></div><% end %>
       <% unless @thread.ticket? %>
         <% if (customer_types = TicketType.for_customers.order(:name)).any? %>
-          <%= form_with url: admin_support_thread_path(@thread), method: :patch, class: "row", style: "margin-top:8px" do %>
+          <%= form_with url: admin_support_thread_path(@thread), method: :patch, html: { style: "margin-top:8px;display:grid;gap:8px;justify-items:start" } do %>
             <%= hidden_field_tag :do, "convert" %>
             <%= select_tag :ticket_type_id, options_for_select(customer_types.map { [ _1.name, _1.id ] }), class: "input", style: "height:32px;font-size:13px", "aria-label": "Customer ticket type" %>
             <%= submit_tag "Convert to ticket", class: "btn sm", data: { turbo_confirm: "Turn this conversation into a ticket? The customer will see its status." } %>
@@ -94,6 +95,7 @@
         <%= link_to "Back-office or tracker ticket", new_admin_ticket_path(from: @thread.number, type: TicketType.live.where.not(category: "customer").order(:name).first&.id), class: "btn sm quiet", style: "margin-top:8px" %>
       <% end %>
     </section>
+    <% end %>
     <% if @other_threads.any? %>
       <section style="padding:16px 20px">
         <h3 style="font-size:13px;font-weight:500;margin-bottom:8px">Earlier conversations</h3>

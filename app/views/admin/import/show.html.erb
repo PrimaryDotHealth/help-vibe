@@ -3,7 +3,7 @@
 <div class="card form-card" style="max-width:720px">
   <% if @configured %>
     <p class="t2">Brings across chapters (with new codes), articles and their images, keywords and old Helpjuice links (as redirects). Safe to run again: it updates what it imported before.</p>
-    <%= form_with url: admin_import_path, style: "margin-top:16px" do %>
+    <%= form_with url: admin_import_path, html: { style: "margin-top:16px" } do %>
       <label class="row" style="font-size:14px"><%= check_box_tag :images, "1", true, style: "accent-color:var(--ink)" %>Download images into helpvibe</label>
       <label class="row" style="font-size:14px;margin-top:8px"><%= check_box_tag :users, "1", false, style: "accent-color:var(--ink)" %>Also create accounts for Helpjuice users (no emails are sent)</label>
       <div class="acts"><%= submit_tag "Start import", class: "btn primary" %></div>

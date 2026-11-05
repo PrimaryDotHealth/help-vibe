@@ -7,7 +7,7 @@
     <% elsif vote.value == 1 || vote.comment.present? %>
       <b>Thanks for letting us know.</b>
     <% else %>
-      <%= form_with url: article_vote_path(article, value: -1, source: source), class: "row grow", style: "flex-wrap:wrap" do %>
+      <%= form_with url: article_vote_path(article, value: -1, source: source), class: "row grow", html: { style: "flex-wrap:wrap" } do %>
         <label class="grow"><span class="meta">What were you looking for?</span>
           <%= text_field_tag :comment, nil, class: "input", maxlength: 1000, placeholder: "Optional" %></label>
         <%= submit_tag "Send", class: "btn sm" %>

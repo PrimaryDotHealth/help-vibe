@@ -25,8 +25,13 @@
       <%= yield %>
     <% else %>
       <div class="app" style="min-height:100vh">
-        <nav class="side">
-          <%= link_to admin_root_path, class: "wordmark" do %><span class="mark">h</span>helpvibe<% end %>
+        <nav class="side" aria-label="Main">
+          <input type="checkbox" id="nav-toggle" class="nav-toggle" aria-label="Show menu">
+          <div class="side-top">
+            <%= link_to admin_root_path, class: "wordmark" do %><span class="mark">h</span>helpvibe<% end %>
+            <label for="nav-toggle" class="btn menu-btn"><%= icon "list" %>Menu</label>
+          </div>
+          <div class="side-body">
           <% nav = ->(label, ico, path, on) { link_to(safe_join([ icon(ico), label ]), path, class: [ "nav", ("on" if on) ]) } %>
           <% desk = helpdesk_area? %>
           <% if Current.user.agent? && Current.user.editor? %>
@@ -69,6 +74,7 @@
           <% end %>
           <div class="me"><span class="avatar"><%= Current.user.initials %></span><%= Current.user.name %>
             <span class="grow"></span><%= button_to "Sign out", session_path, method: :delete, class: "link", form_class: "inline", style: "font-size:13px" %></div>
+          </div>
         </nav>
         <main class="main">
           <% flash.each do |type, message| %><div class="flash <%= type %>"><%= message %></div><% end %>

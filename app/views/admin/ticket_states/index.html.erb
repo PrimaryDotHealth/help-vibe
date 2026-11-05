@@ -17,7 +17,7 @@
 </table></div></div>
 <div class="card form-card" style="max-width:720px;margin-top:16px">
   <h2>Add a state</h2>
-  <%= form_with model: [ :admin, @state ], class: "row", style: "flex-wrap:wrap" do |f| %>
+  <%= form_with model: [ :admin, @state ], class: "row", html: { style: "flex-wrap:wrap" } do |f| %>
     <%= f.select :category, TicketState::CATEGORIES.map { [ _1.humanize, _1 ] }, {}, class: "input", style: "width:auto" %>
     <%= f.text_field :internal_label, class: "input", placeholder: "Internal label", style: "width:180px", required: true %>
     <%= f.text_field :external_label, class: "input", placeholder: "Customer label", style: "width:180px", required: true %>
