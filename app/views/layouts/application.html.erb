@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" <%= tag.attributes(data: { theme: page_theme }) %>>
   <head>
     <title><%= content_for(:title) || "Help Center" %></title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -23,9 +23,10 @@
         <% end %>
         <span class="grow"></span>
         <nav class="links">
+          <%= link_to "Contact support", contact_path if help_center_contact? && controller_name != "contact" %>
           <% if authenticated? && Current.user&.editor? %>
             <%= link_to "Admin", admin_root_path %>
-          <% elsif !authenticated? %>
+          <% elsif !authenticated? && !in_frame? %>
             <%= link_to "Staff sign in", new_session_path %>
           <% end %>
         </nav>

@@ -49,6 +49,7 @@
               <div class="label">Helpdesk settings</div>
               <%= nav.("Ticket types", "sliders", admin_ticket_types_path, %w[ticket_types ticket_states].include?(controller_name)) %>
               <%= nav.("Teams", "users", admin_teams_path, controller_name == "teams") %>
+              <%= nav.("Install", "code", admin_install_helpdesk_path, controller_name == "install") %>
             <% end %>
             <% if Current.user.superadmin? || Current.user.permissions.include?("compliance") %>
               <%= nav.("Access log", "eye", admin_audit_events_path, controller_name == "audit_events") %>
@@ -60,13 +61,16 @@
             <%= nav.("Page suggestions", "sign", admin_context_rules_path, controller_name == "context_rules") %>
             <% if Current.user.admin? %>
               <div class="label">Articles settings</div>
+              <%= nav.("Contact support", "message", admin_help_center_path, controller_name == "help_center") %>
               <%= nav.("API and webhooks", "key", admin_api_keys_path, %w[api_keys webhooks].include?(controller_name)) %>
               <%= nav.("Activity", "history", admin_activities_path, controller_name == "activities") %>
+              <%= nav.("Install", "code", admin_install_articles_path, controller_name == "install") %>
               <%= nav.("Import", "db", admin_import_path, controller_name == "import") %>
             <% end %>
             <div class="label">Readers</div>
-            <%= nav.("Help center", "globe", root_path, false) %>
-            <%= nav.("Widget preview", "help", (Rails.env.local? ? dev_host_path : widget_root_path), false) %>
+            <% ext = ->(label, ico, path) { link_to(safe_join([ icon(ico), label, icon("out", class: "ext") ]), path, class: "nav", target: "_blank", rel: "noopener", "aria-label": "#{label} (opens in a new tab)") } %>
+            <%= ext.("Help center", "globe", root_path) %>
+            <%= ext.("Widget preview", "help", (Rails.env.local? ? dev_host_path : widget_root_path)) %>
           <% end %>
           <% if Current.user.admin? %>
             <div class="label">Everyone</div>

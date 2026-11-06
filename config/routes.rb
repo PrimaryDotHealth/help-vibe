@@ -5,6 +5,10 @@ Rails.application.routes.draw do
   resources :invitations, only: %i[show update], param: :token
 
   # Email links into a support conversation (no sign-in needed)
+  get "contact", to: "reader/contact#show", as: :contact
+  post "contact", to: "reader/contact#create"
+  get "contact/:type", to: "reader/contact#ticket", as: :contact_ticket
+  post "contact/:type", to: "reader/contact#create_ticket"
   get "t/:token", to: "contact_threads#show", as: :contact_thread
   post "t/:token/reply", to: "contact_threads#reply", as: :contact_thread_reply
 
@@ -22,6 +26,9 @@ Rails.application.routes.draw do
   # people (S17), API keys (S20), import (S22)
   namespace :admin do
     root "home#show"   # Helpdesk first for agents, Articles for everyone else
+    get "install/helpdesk", to: "install#helpdesk", as: :install_helpdesk
+    get "install/articles", to: "install#articles", as: :install_articles
+    resource :help_center, only: %i[show update], controller: "help_center"
     resources :articles, only: %i[index new create edit update] do
       resource :publication, only: %i[create destroy]
       resource :history, only: :show, controller: "history" do
@@ -85,7 +92,10 @@ Rails.application.routes.draw do
   end
 
   # A stand-in for our product, to try the widget locally
-  get "dev/host", to: "dev#host" if Rails.env.local?
+  if Rails.env.local?
+    get "dev/host", to: "dev#host"
+    get "dev/embed", to: "dev#embed"
+  end
 
   get "up" => "rails/health#show", as: :rails_health_check
 

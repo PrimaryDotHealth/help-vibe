@@ -1,0 +1,33 @@
+<% content_for :title, "Contact support" %>
+<% content_for :hide_header_search, true %>
+<main class="results contact-page">
+  <%= link_to root_path, class: "back" do %><%= icon "back" %>Help Center<% end %>
+  <h1>Contact support</h1>
+  <p class="t2">We usually reply within one business day, by email and on a page you can come back to.</p>
+  <% if flash[:alert] %><p class="errors" role="alert"><%= flash[:alert] %></p><% end %>
+
+  <section class="card form-card">
+    <h2>Ask a question</h2>
+    <%= form_with url: contact_path, data: { turbo_frame: "_top" } do %>
+      <%= render "you" %>
+      <label class="field"><span>Your question *</span>
+        <%= text_area_tag :body, params[:body], class: "input", rows: 6, required: true, maxlength: 20000,
+              placeholder: ("About “#{params[:q]}”: " if params[:q].present?) %></label>
+      <div class="acts"><%= submit_tag "Send", class: "btn primary" %></div>
+    <% end %>
+  </section>
+
+  <% if @types.any? %>
+    <section>
+      <h2 class="sub">Or file a request</h2>
+      <p class="meta">For something our team needs to look into. You'll be able to see its status.</p>
+      <ul class="request-types">
+        <% @types.each do |t| %>
+          <li><%= link_to contact_ticket_path(t, from: params[:from], q: params[:q]) do %>
+            <span class="grow"><b><%= t.name %></b><% if t.description.present? %><span class="meta"><%= t.description %></span><% end %></span><%= icon "right" %>
+          <% end %></li>
+        <% end %>
+      </ul>
+    </section>
+  <% end %>
+</main>

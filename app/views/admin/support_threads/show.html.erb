@@ -66,7 +66,7 @@
       <% end %>
       <% if @thread.page_context %><p class="meta" style="margin-top:8px">Asked from <span class="mono"><%= @thread.page_context %></span></p><% end %>
       <% if @thread.search_query %><p class="meta">Searched "<%= @thread.search_query %>" first</p><% end %>
-      <p class="meta"><%= @thread.channel == "internal" ? "Created by #{@thread.created_by_label}" : "Via #{@thread.channel}" %> · started <%= @thread.created_at.strftime("%-d %b %H:%M") %></p>
+      <p class="meta"><%= @thread.channel == "internal" ? "Created by #{@thread.created_by_label}" : "Via #{@thread.channel.tr("_", " ")}" %> · started <%= @thread.created_at.strftime("%-d %b %H:%M") %></p>
     </section>
     <section style="padding:16px 20px;border-bottom:1px solid var(--line)">
       <h3 style="font-size:13px;font-weight:500;margin-bottom:8px">Assigned</h3>

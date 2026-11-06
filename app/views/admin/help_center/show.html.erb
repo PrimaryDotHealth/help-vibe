@@ -1,0 +1,21 @@
+<% content_for :title, "Contact support" %>
+<div class="head"><h1>Contact support</h1><span class="grow"></span><%= link_to "Open the help center", root_path, class: "btn quiet", target: "_blank" %></div>
+<div class="card form-card" style="max-width:640px">
+  <%= form_with url: admin_help_center_path, method: :patch do %>
+    <h2>In the help center</h2>
+    <label class="row" style="font-size:14px;align-items:flex-start;gap:10px">
+      <%= hidden_field_tag :contact, "0", id: nil %>
+      <%= check_box_tag :contact, "1", @contact, style: "accent-color:var(--ink);margin-top:3px" %>
+      <span>Show "Contact support" in the help center
+        <span class="hint" style="display:block">People can ask a question or file a request from the help center, and it lands in the Helpdesk inbox. Turn this off to keep the help center to articles only: the header link, the "Can't find it?" button, the links after searches and "not helpful" votes, and the <code>/contact</code> page all go away. Conversations already started stay open, and their email links keep working. The help bubble isn't affected.</span>
+      </span>
+    </label>
+    <% if @contact %>
+      <p class="hint" style="margin-top:16px">
+        <% if @types.any? %>Requests people can file: <%= @types.map(&:name).to_sentence %>. Change these in <%= link_to "Ticket types", admin_ticket_types_path %>.
+        <% else %>No customer ticket types yet, so people can only ask a question. Add one in <%= link_to "Ticket types", admin_ticket_types_path %>.<% end %>
+      </p>
+    <% end %>
+    <div class="acts"><%= submit_tag "Save", class: "btn primary" %></div>
+  <% end %>
+</div>

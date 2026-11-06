@@ -37,7 +37,10 @@
     </div>
   <% end %>
 
-  <section class="band">
-    <div><h2>Can't find it?</h2><p>Our support team replies within one business day. Mention the article code if you have one.</p></div>
-  </section>
+  <% if help_center_contact? %>
+    <section class="band">
+      <div><h2>Can't find it?</h2><p>Ask our support team, or file a request. We reply within one business day.</p></div>
+      <%= link_to "Contact support", contact_path, class: "btn" %>
+    </section>
+  <% end %>
 </main>

@@ -1,0 +1,88 @@
+<% content_for :title, "Install the help bubble" %>
+<div class="head"><h1>Install the help bubble</h1></div>
+<div class="install">
+  <p class="lead">Add one script tag to your app or website. It puts a <b>Help</b> button in the bottom-right corner that opens a panel where people search articles, ask a question (it lands in the <%= link_to "Inbox", admin_inbox_path %>) or submit a ticket.</p>
+
+  <section>
+    <h2>1. Allow your site to show it</h2>
+    <p>Browsers only show the panel on sites listed in <code>HELPVIBE_FRAME_ANCESTORS</code> on the server. List every site that will have the bubble, separated by spaces, for example <code>https://app.yourcompany.com https://www.yourcompany.com</code>.</p>
+    <div class="check <%= @frame_ancestors == "'self'" ? "bad" : "ok" %>">
+      <%= icon(@frame_ancestors == "'self'" ? "alert" : "check") %>
+      <span>Now set to <code><%= @frame_ancestors %></code>.
+        <% if @frame_ancestors == "'self'" %>The bubble won't open on any other site until this is changed.<% elsif @frame_ancestors == "*" %>Any site can show it (fine for development; list your sites in production).<% end %></span>
+    </div>
+  </section>
+
+  <section>
+    <h2>2. Paste this before <code>&lt;/body&gt;</code></h2>
+    <%= render "snippet", code: %(<script src="#{@script_url}" async></script>) %>
+    <p class="hint">Single-page app? Load it once in the app shell, not on every route.</p>
+  </section>
+
+  <section>
+    <h2>3. Tell it who's signed in <span class="meta">recommended</span></h2>
+    <p>Without this, people type their email to ask a question and show as <i>unverified</i> in the inbox. With it, patients skip the email field, their conversations and tickets follow them, and staff see staff-only articles.</p>
+    <p>Your backend signs a short-lived token with the shared secret <code>HELPVIBE_WIDGET_SECRET</code>, and the page hands it to the widget:</p>
+    <div class="check <%= @secret_set ? "ok" : "bad" %>">
+      <%= icon(@secret_set ? "check" : "alert") %>
+      <span><%= @secret_set ? "HELPVIBE_WIDGET_SECRET is set on this server. Give the same value to your backend; never put it in the page." : "HELPVIBE_WIDGET_SECRET isn't set on this server yet#{" (development uses a built-in key)" unless Rails.env.production?}." %></span>
+    </div>
+    <%= render "snippet", code: <<~JS %>
+      // In the page, after the script tag:
+      HelpVibe.identify(tokenFromYourBackend)
+    JS
+    <p>The token is a JWT signed with HS256 that expires in 5 minutes:</p>
+    <%= render "snippet", code: <<~JSON %>
+      {
+        "sub":   "user-123",          // your user's id (required)
+        "kind":  "patient",           // "patient" or "staff" (required)
+        "email": "pat@example.com",
+        "name":  "Pat Patient",
+        "iat":   1730900000,
+        "exp":   1730900300           // at most 5 minutes after iat
+      }
+    JSON
+    <div class="split">
+      <div><h3>Node</h3>
+        <%= render "snippet", code: <<~JS %>
+          import jwt from "jsonwebtoken"
+          const token = jwt.sign(
+            { sub: user.id, kind: "patient", email: user.email, name: user.name },
+            process.env.HELPVIBE_WIDGET_SECRET,
+            { algorithm: "HS256", expiresIn: "5m" }
+          )
+        JS
+      </div>
+      <div><h3>Ruby</h3>
+        <%= render "snippet", code: <<~RUBY %>
+          require "jwt"
+          token = JWT.encode(
+            { sub: user.id.to_s, kind: "patient", email: user.email, name: user.name,
+              iat: Time.now.to_i, exp: 5.minutes.from_now.to_i },
+            ENV.fetch("HELPVIBE_WIDGET_SECRET"), "HS256"
+          )
+        RUBY
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Options</h2>
+    <table class="table">
+      <tr><td><code>data-label="Support"</code></td><td>Changes the button text from "Help".</td></tr>
+      <tr><td><code>data-launcher="none"</code></td><td>Hides the bubble; open the panel from your own button instead.</td></tr>
+      <tr><td><code>HelpVibe.open()</code></td><td>Opens the panel.</td></tr>
+      <tr><td><code>HelpVibe.open({ article: "BIL·01" })</code></td><td>Opens one article, by its code or link.</td></tr>
+      <tr><td><code>HelpVibe.close()</code></td><td>Closes it.</td></tr>
+      <tr><td><code>HelpVibe.setPage("/billing/invoices")</code></td><td>For single-page apps: the current page, used for <%= link_to "page suggestions", admin_context_rules_path %> and shown to agents.</td></tr>
+    </table>
+    <%= render "snippet", code: %(<script src="#{@script_url}" data-label="Support" data-launcher="none" async></script>\n<button onclick="HelpVibe.open()">Contact support</button>) %>
+  </section>
+
+  <% if Rails.env.local? %>
+    <section>
+      <h2>Try it here</h2>
+      <p><%= link_to "Open a stand-in app with the bubble on it", dev_host_path %>, or <%= link_to "as a signed-in staff member", dev_host_path(staff: 1) %>. Development only.</p>
+    </section>
+  <% end %>
+</div>

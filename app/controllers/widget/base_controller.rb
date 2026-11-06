@@ -4,10 +4,10 @@ class Widget::BaseController < ApplicationController
   WIDGET_COOKIE = :hv_widget
 
   include WidgetContact
+  include Frameable
 
   allow_unauthenticated_access
   layout "widget"
-  after_action :allow_framing
   helper_method :widget_identity, :viewer, :current_contact
 
   private
@@ -23,10 +23,4 @@ class Widget::BaseController < ApplicationController
     end
 
     def widget_cookie(value) = widget_cookie_options.merge(value: value, expires: 8.hours)
-
-    def allow_framing
-      response.headers.delete("X-Frame-Options")
-      ancestors = ENV.fetch("HELPVIBE_FRAME_ANCESTORS", Rails.env.production? ? "'self'" : "*")
-      response.headers["Content-Security-Policy"] = "frame-ancestors #{ancestors}"
-    end
 end

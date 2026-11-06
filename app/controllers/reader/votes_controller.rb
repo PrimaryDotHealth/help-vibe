@@ -1,7 +1,10 @@
 # POST /a/:slug/vote from the help center or the widget (S03, S07).
 class Reader::VotesController < Reader::BaseController
   include VisitorTracking
-  skip_forgery_protection only: :create, if: -> { params[:source] == "widget" }   # iframe: no first-party session cookie
+  # In an iframe on another site the session cookie (and so the CSRF token)
+  # isn't sent. A forged anonymous vote is harmless, so allow it there.
+  # (One `if:`, not `only:` plus `if:`: Rails' skip_* ORs those together.)
+  skip_forgery_protection if: -> { params[:source] == "widget" || framed? }
 
   def create
     @article = Article.find_by!(slug: params[:slug])

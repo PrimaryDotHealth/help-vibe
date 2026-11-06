@@ -1,0 +1,75 @@
+<% content_for :title, "Put articles in your app" %>
+<% ex = @example %>
+<% ex_link = ex ? ex.slug : "your-article" %>
+<% ex_title = ex&.live_version&.title || "Help article" %>
+<div class="head"><h1>Put articles in your app</h1></div>
+<div class="install">
+  <p class="lead">Show one article, or the whole help center, inside a page of your app or website with an <code>&lt;iframe&gt;</code>. Only articles readable by <b>Everyone</b> (or <b>Link only</b>, when linked directly) show inside a frame; staff-only articles don't.</p>
+  <% unless ex %><p class="hint">Publish an article for Everyone to see real links in these examples.</p><% end %>
+
+  <section>
+    <h2>First: allow your site to frame it</h2>
+    <p>Browsers only show these pages in an iframe on sites listed in <code>HELPVIBE_FRAME_ANCESTORS</code> on the server. List every site that will embed them, separated by spaces, for example <code>https://app.yourcompany.com https://www.yourcompany.com</code>. The help bubble uses the same list.</p>
+    <div class="check <%= @frame_ancestors == "'self'" ? "bad" : "ok" %>">
+      <%= icon(@frame_ancestors == "'self'" ? "alert" : "check") %>
+      <span>Now set to <code><%= @frame_ancestors %></code>.
+        <% if @frame_ancestors == "'self'" %>Iframes on any other site will show a blank or "refused to connect" box until this is changed.<% elsif @frame_ancestors == "*" %>Any site can frame them (fine for development; list your sites in production).<% end %></span>
+    </div>
+  </section>
+
+  <section>
+    <h2>One article</h2>
+    <p>Just the article: no header, search or menus. Good for onboarding steps or next to a setting it explains. Links inside it open in a new tab.</p>
+    <%= render "snippet", code: %(<iframe src="#{embedded_article_url(ex_link)}"\n        title="#{ex_title}" style="width:100%;height:480px;border:0"></iframe>) %>
+    <p>To make the frame grow to fit the article instead of scrolling, add this once on the page:</p>
+    <%= render "snippet", code: <<~HTML %>
+      <script>
+        addEventListener("message", function (e) {
+          if (e.origin !== #{root_url.chomp("/").to_json} || !e.data || e.data.helpvibe !== "embed-height") return;
+          document.querySelectorAll("iframe").forEach(function (f) {
+            if (f.contentWindow === e.source) f.style.height = e.data.height + "px";
+          });
+        });
+      </script>
+    HTML
+    <p class="hint">The address takes the article's link name (<%= ex_link %>) or its code<%= " (#{ex.code})" if ex %>. The code keeps working if the title changes.</p>
+  </section>
+
+  <section>
+    <h2>The whole help center</h2>
+    <p>The full help center with search and chapters, for a Help page inside your app. "Staff sign in" is hidden inside the frame.</p>
+    <p>People can also <b>Contact support</b> from it<% unless Setting.help_center_contact? %> (now turned off in <%= link_to "Articles → Contact support", admin_help_center_path %>)<% end %>: ask a question or file a request (any <%= link_to "customer ticket type", admin_ticket_types_path %>). It lands in the <%= link_to "Inbox", admin_inbox_path %> marked "via help center", and we email them a link back to it. The contact page alone: <code><%= contact_url %></code></p>
+    <%= render "snippet", code: %(<iframe src="#{root_url}" title="Help Center"\n        style="width:100%;height:80vh;border:0"></iframe>) %>
+    <p>Open it on a chapter, an article or a search instead:</p>
+    <table class="table">
+      <tr><td>An article<%= " (#{ex.code})" if ex %></td><td><code><%= ex ? article_url(ex) : "#{root_url}a/your-article" %></code></td></tr>
+      <tr><td>Search</td><td><code><%= search_url(q: "invoice") %></code></td></tr>
+    </table>
+  </section>
+
+  <section>
+    <h2>Match your page's colours</h2>
+    <p>Framed pages follow the reader's light or dark system setting. To pin one, add <code>?theme=light</code> or <code>?theme=dark</code> to the address; it stays for the rest of the visit inside the frame.</p>
+    <%= render "snippet", code: %(<iframe src="#{embedded_article_url(ex_link, theme: "light")}" ...></iframe>) %>
+  </section>
+
+  <% if Rails.env.local? %>
+    <section>
+      <h2>Try it here</h2>
+      <p><%= link_to "Open a stand-in app with an article and the help center framed in it", dev_embed_path %>. Development only.</p>
+    </section>
+  <% end %>
+
+  <section>
+    <h2>Other ways</h2>
+    <table class="table">
+      <tr><td>Help bubble</td><td>Search and page-by-page article suggestions in a corner panel. See <%= link_to "Helpdesk install", admin_install_helpdesk_path %>, then choose articles per page in <%= link_to "Page suggestions", admin_context_rules_path %>.</td></tr>
+      <tr><td>Open from your button</td><td><code>HelpVibe.open({ article: '<%= ex&.code || "BIL·01" %>' })</code>, once the bubble's script is on the page.</td></tr>
+      <tr><td>Plain links</td><td><code><%= root_url %></code> and any article or search address above.</td></tr>
+      <tr><td>API</td><td>Articles and chapters as JSON, in Helpjuice's format. Create a key in <%= link_to "API and webhooks", admin_api_keys_path %> and keep it on your server.</td></tr>
+    </table>
+    <%= render "snippet", code: <<~SH %>
+      curl -H "Authorization: Bearer YOUR_API_KEY" "#{root_url}api/v3/search?query=invoice"
+    SH
+  </section>
+</div>

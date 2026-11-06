@@ -5,6 +5,7 @@ module AdminHelper
   # (Helpjuice side). They share only people, sign-in and the widget.
   def helpdesk_area?
     return true if HELPDESK_CONTROLLERS.include?(controller_name)
+    return action_name == "helpdesk" if controller_name == "install"
     return false if Current.user&.editor?
     Current.user&.agent? || false
   end

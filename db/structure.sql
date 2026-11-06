@@ -1185,7 +1185,7 @@ CREATE TABLE public.threads (
     created_at timestamp with time zone DEFAULT now() NOT NULL,
     updated_at timestamp with time zone DEFAULT now() NOT NULL,
     created_by_id bigint,
-    CONSTRAINT threads_channel_check CHECK ((channel = ANY (ARRAY['widget'::text, 'email'::text, 'api'::text, 'internal'::text]))),
+    CONSTRAINT threads_channel_check CHECK ((channel = ANY (ARRAY['widget'::text, 'email'::text, 'api'::text, 'internal'::text, 'help_center'::text]))),
     CONSTRAINT threads_check CHECK (((state <> 'snoozed'::text) OR (snoozed_until IS NOT NULL))),
     CONSTRAINT threads_check1 CHECK (((state <> 'closed'::text) OR (closed_at IS NOT NULL))),
     CONSTRAINT threads_check2 CHECK (((kind = 'ticket'::text) OR (num_nonnulls(ticket_type_id, ticket_state_id, ticket_attributes, is_shared) = 0))),
@@ -1236,7 +1236,7 @@ CREATE TABLE public.thread_parts (
     created_at timestamp with time zone DEFAULT now() NOT NULL,
     search tsvector GENERATED ALWAYS AS (to_tsvector('english'::regconfig, body)) STORED,
     CONSTRAINT thread_parts_author_type_check CHECK ((author_type = ANY (ARRAY['contact'::text, 'user'::text, 'system'::text]))),
-    CONSTRAINT thread_parts_channel_check CHECK ((channel = ANY (ARRAY['widget'::text, 'email'::text, 'api'::text, 'admin'::text, 'system'::text]))),
+    CONSTRAINT thread_parts_channel_check CHECK ((channel = ANY (ARRAY['widget'::text, 'email'::text, 'api'::text, 'admin'::text, 'system'::text, 'help_center'::text]))),
     CONSTRAINT thread_parts_check CHECK (((author_type <> 'contact'::text) OR (kind = ANY (ARRAY['comment'::text, 'rating'::text])))),
     CONSTRAINT thread_parts_kind_check CHECK ((kind = ANY (ARRAY['comment'::text, 'note'::text, 'assignment'::text, 'state_change'::text, 'ticket_state_change'::text, 'priority'::text, 'snooze'::text, 'close'::text, 'open'::text, 'rating'::text, 'article'::text, 'link'::text, 'attribute_change'::text])))
 );
@@ -3686,6 +3686,7 @@ CREATE POLICY threads_system ON public.threads USING ((public.app_actor_type() =
 SET search_path TO "$user", public;
 
 INSERT INTO "schema_migrations" (version) VALUES
+('20261106090000'),
 ('20261104130000'),
 ('20261104120000'),
 ('20261104090100'),

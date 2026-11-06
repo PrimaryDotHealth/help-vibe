@@ -22,8 +22,8 @@
   <% else %>
     <section class="empty">
       <h2>No articles match "<%= @query %>"</h2>
-      <p>Try fewer words, or ask our support team. We log searches like this one so the right article gets written.</p>
-      <div class="row"><%= link_to "Browse the contents", root_path, class: "btn quiet" %></div>
+      <p>Try fewer words<%= ", or ask our support team" if help_center_contact? %>. We log searches like this one so the right article gets written.</p>
+      <div class="row"><%= link_to "Ask our team", contact_path(q: @query, from: request.fullpath), class: "btn" if help_center_contact? %><%= link_to "Browse the contents", root_path, class: "btn quiet" %></div>
     </section>
   <% end %>
 </main>

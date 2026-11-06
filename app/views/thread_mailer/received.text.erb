@@ -1,0 +1,8 @@
+Thanks for getting in touch. We've got your <%= @thread.ticket? ? "request" : "question" %> (#<%= @thread.number %>) and usually reply within one business day.
+
+<% if @thread.ticket? %>Request: "<%= @thread.title %>"
+Status: <%= @thread.ticket_state.external_label %>
+
+<% end %>See it, and our reply, here: <%= @link %>
+
+We'll email you when we reply.<% if ThreadMailer.reply_address(@thread) %> You can also reply to this email.<% end %>
