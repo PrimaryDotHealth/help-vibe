@@ -1,70 +1,107 @@
 # Deploying helpvibe
 
-One AWS server running the app and Postgres, about $15/month. Kamal builds the
-image on your Mac and ships it over SSH.
+A Kubernetes cluster, with the Helm chart in `chart/helpvibe`. It runs the app
+(one pod) and, by default, Postgres 17 beside it (one StatefulSet). You build
+the image on your Mac and push it to a registry the cluster can pull from.
 
 > **Before any patient data exists (Part 1, the help center only),** you can
 > skip the BAA steps. **Before Part 2 (support desk) goes live,** every box
 > below marked BAA is required.
 
-## Once: AWS
+## Once: AWS and the cluster
 
 1. **BAA.** In the AWS console, open AWS Artifact → Agreements and accept the AWS Business Associate Addendum for the account. Free.
-2. **Server.** Launch an EC2 instance:
-   - **type:** `t4g.small` (2 GB, arm64), or `t4g.micro` while it's just the help center
-   - **image:** Ubuntu 24.04 LTS (arm64)
-   - **disk:** 20 GB gp3, **encrypted** (KMS default key). This holds Postgres and uploaded files.
-   - **security group:** inbound 22 (your IP only), 80 and 443 (anywhere)
-   - **key pair:** your SSH key. Kamal connects as `root` by default, so either allow root over SSH with your key, or set `ssh: user: ubuntu` in `config/deploy.yml` and give that user passwordless sudo plus docker.
-3. **Address.** Attach an Elastic IP, then point DNS for `help.ourcompany.com` (an A record) at it.
+2. **Cluster.** Any Kubernetes works. Either:
+   - **EKS:** about $73/month for the control plane, plus the nodes. Use an arm64 (Graviton) node group if you build arm64 images.
+   - **k3s on one EC2 box:** keeps the cost near the single-server plan (`t4g.small`, 20 GB **encrypted** gp3).
+3. **Encrypted storage class.** Both volumes (Postgres and uploads) hold patient data in Part 2. On EKS, use a gp3 class with `encrypted: "true"`.
+4. **Ingress and TLS.** An ingress controller (ingress-nginx, Traefik on k3s, or the AWS Load Balancer Controller) and cert-manager with a Let's Encrypt issuer.
+5. **Registry.** ECR, or GitHub's registry (`ghcr.io/primarydothealth/help-vibe`). The cluster needs pull access.
+6. **DNS.** Point `help.ourcompany.com` at the ingress's load balancer.
 
 ## Once: your Mac
 
-- Docker (Docker Desktop, OrbStack or colima) for building the image. Apple Silicon builds arm64 natively.
-- Secrets in your shell. Generate them once and keep them in a password manager:
+- Docker (Docker Desktop, OrbStack or colima) for building the image, plus `kubectl` and `helm`.
+- Secrets. Generate them once and keep them in a password manager:
 
 ```bash
 export HELPVIBE_DATABASE_PASSWORD="$(openssl rand -hex 24)"
 export HELPVIBE_WIDGET_SECRET="$(openssl rand -hex 32)"   # also given to our app's backend (signs widget tokens)
 export HELPVIBE_BACKUP_KEY="$(openssl rand -hex 32)"      # encrypts nightly backups; keep a copy outside AWS
-export HELPVIBE_TIME_ZONE="America/New_York"              # scheduled publishing and backups run in this zone
-export HELPVIBE_HOST=<elastic ip>
-export HELPVIBE_DOMAIN=help.ourcompany.com
-export HELPVIBE_FRAME_ANCESTORS="https://app.ourcompany.com"   # where the widget may be embedded
 ```
 
 `config/master.key` must exist (it's created by `rails new` and is never committed).
 
-## First deploy
+Put them in the cluster as a Secret, so they never sit in a values file:
 
 ```bash
-bin/kamal setup          # installs Docker on the server, starts Postgres, builds, migrates, starts the app
-bin/kamal app exec 'bin/rails "helpvibe:user[you@ourcompany.com,superadmin]"'   # prints a password
+kubectl create namespace helpvibe
+kubectl -n helpvibe create secret generic helpvibe-secrets \
+  --from-file=RAILS_MASTER_KEY=config/master.key \
+  --from-literal=HELPVIBE_DATABASE_PASSWORD="$HELPVIBE_DATABASE_PASSWORD" \
+  --from-literal=HELPVIBE_WIDGET_SECRET="$HELPVIBE_WIDGET_SECRET" \
+  --from-literal=HELPVIBE_BACKUP_KEY="$HELPVIBE_BACKUP_KEY"
 ```
 
-Then open https://help.ourcompany.com/session/new.
-
-## Every deploy after that
+To add a key later (SendGrid, inbound email, Helpjuice), patch the Secret and restart:
 
 ```bash
-bin/kamal deploy         # zero-downtime: new container, health check on /up, switch, migrate on boot
-bin/kamal logs           # tail the logs
-bin/kamal console        # rails console on the server
+kubectl -n helpvibe patch secret helpvibe-secrets --type merge -p '{"stringData":{"SENDGRID_API_KEY":"SG.…"}}'
+kubectl -n helpvibe rollout restart deploy/helpvibe
+```
+
+And the plain settings in `values.prod.yaml` (safe to commit, no secrets):
+
+```yaml
+domain: help.ourcompany.com
+existingSecret: helpvibe-secrets
+image:
+  repository: ghcr.io/primarydothealth/help-vibe
+ingress:
+  className: nginx
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt
+config:
+  timeZone: America/New_York                    # scheduled publishing and backups run in this zone
+  frameAncestors: "https://app.ourcompany.com"  # where the widget and help center may be embedded
+  mailFrom: help@ourcompany.com
+storage:
+  storageClass: gp3-encrypted
+postgresql:
+  storageClass: gp3-encrypted
+```
+
+## Every deploy
+
+```bash
+TAG=$(git rev-parse --short HEAD)
+docker buildx build --platform linux/arm64 -t ghcr.io/primarydothealth/help-vibe:$TAG --push .
+helm upgrade --install helpvibe chart/helpvibe -n helpvibe -f values.prod.yaml --set image.tag=$TAG
+```
+
+The pod migrates the database as it starts (`bin/docker-entrypoint` runs `db:prepare`), then `/up` turns ready. With one pod and a ReadWriteOnce volume, the old pod stops before the new one starts, so expect a few seconds of downtime per deploy.
+
+The first time, create a staff account (it prints a password), then open https://help.ourcompany.com/session/new:
+
+```bash
+kubectl -n helpvibe exec deploy/helpvibe -- bin/rails 'helpvibe:user[you@ourcompany.com,superadmin]'
+```
+
+Day to day:
+
+```bash
+kubectl -n helpvibe logs -f deploy/helpvibe                  # tail the logs
+kubectl -n helpvibe exec -it deploy/helpvibe -- bin/rails console
 ```
 
 ## Importing from Helpjuice
 
-On the server's environment (add to `env.clear` and `.kamal/secrets`, then `bin/kamal deploy`):
-
-```
-HELPJUICE_SUBDOMAIN=yourcompany
-HELPJUICE_API_KEY=…            # Helpjuice → Settings → API credentials
-```
+Set `HELPJUICE_SUBDOMAIN=yourcompany` under `config.extraEnv` in `values.prod.yaml`, add `HELPJUICE_API_KEY` (Helpjuice → Settings → API credentials) to the Secret, and deploy.
 
 Then Admin → Import → Start import, or from a terminal:
 
 ```bash
-bin/kamal app exec 'bin/rails helpvibe:import:helpjuice'
+kubectl -n helpvibe exec deploy/helpvibe -- bin/rails helpvibe:import:helpjuice
 ```
 
 It's safe to run again. Private articles come across visible to superadmins only, and the run lists them so you can share each with the right people or groups.
@@ -76,14 +113,9 @@ All email (invitations, password resets, and later support notifications) goes t
 1. In SendGrid:
    - Authenticate your sending domain (Settings → Sender Authentication), so mail passes SPF and DKIM.
    - Create an API key with "Mail Send" permission only.
-2. Add to your shell secrets, then `bin/kamal deploy`:
+2. Add `SENDGRID_API_KEY` to the Secret, and set `config.mailFrom` in `values.prod.yaml` to an address on the authenticated domain. Then deploy.
 
-```bash
-export SENDGRID_API_KEY=SG.…
-export HELPVIBE_MAIL_FROM=help@ourcompany.com   # must be on the authenticated domain
-```
-
-Without `SENDGRID_API_KEY`, emails are saved as files in `storage/mails` on the server instead of being sent. Click and open tracking are switched off on every message, so SendGrid never rewrites the sign-in links.
+Without `SENDGRID_API_KEY`, emails are saved as files in `storage/mails` in the storage volume instead of being sent. Click and open tracking are switched off on every message, so SendGrid never rewrites the sign-in links.
 
 > **HIPAA:** check with Twilio whether your SendGrid plan is covered by a BAA before any patient data goes into email. Part 2's notification emails default to "link only" (no message text), which keeps patient details out of email either way.
 
@@ -95,9 +127,10 @@ Replies to support emails, and new emails to the support address, come back into
 2. Generate a password:
 
 ```bash
-export RAILS_INBOUND_EMAIL_PASSWORD="$(openssl rand -hex 24)"
-export HELPVIBE_INBOUND_DOMAIN=reply.ourcompany.com
+export RAILS_INBOUND_EMAIL_PASSWORD="$(openssl rand -hex 24)"   # add to the Secret
 ```
+
+   and set `config.inboundDomain: reply.ourcompany.com` in `values.prod.yaml`.
 
 3. In SendGrid, open Settings → Inbound Parse → Add Host & URL and fill it in:
    - **Receiving domain:** `reply.ourcompany.com`
@@ -139,18 +172,21 @@ Our app's Content-Security-Policy must allow `script-src` and `frame-src` for `h
 ## Backups (BAA)
 
 A nightly job (3am, in `HELPVIBE_TIME_ZONE`) writes an encrypted `pg_dump` to `storage/backups/` and keeps the newest 14:
-- The dump is encrypted with AES-256-GCM using `HELPVIBE_BACKUP_KEY`. Create it with `openssl rand -hex 32`, add it to your shell secrets, and **keep a copy outside AWS**: without it, backups can't be read.
-- Backups sit on the server's encrypted disk next to the uploads.
+- The dump is encrypted with AES-256-GCM using `HELPVIBE_BACKUP_KEY`. Create it with `openssl rand -hex 32`, put it in the Secret, and **keep a copy outside AWS**: without it, backups can't be read.
+- Backups sit on the storage volume next to the uploads, so that volume must use an encrypted storage class.
 
 ```bash
-bin/kamal app exec 'bin/rails helpvibe:backup:now'                                   # take one now
-bin/kamal app exec "bin/rails 'helpvibe:backup:decrypt[storage/backups/<file>]'" > restore.dump
-pg_restore --clean --no-owner -d helpvibe_production restore.dump                    # restore (stop the app first)
+kubectl -n helpvibe exec deploy/helpvibe -- bin/rails helpvibe:backup:now                                # take one now
+kubectl -n helpvibe exec deploy/helpvibe -- bin/rails 'helpvibe:backup:decrypt[storage/backups/<file>]' > restore.dump
+kubectl -n helpvibe scale deploy/helpvibe --replicas=0                                         # stop the app
+kubectl -n helpvibe exec -i helpvibe-postgresql-0 -- pg_restore --clean --no-owner -U helpvibe -d helpvibe_production < restore.dump
+kubectl -n helpvibe scale deploy/helpvibe --replicas=1
 ```
 
-Uploaded files live in the `helpvibe_storage` Docker volume on the encrypted disk. An EBS snapshot schedule (Data Lifecycle Manager, daily, keep 14) covers both the database and the files at the disk level.
+Uploaded files live in the `helpvibe-storage` volume. On EKS, a daily EBS snapshot schedule (Data Lifecycle Manager, keep 14, matched on the volumes' tags) covers both volumes at the disk level. Both volumes outlive `helm uninstall`.
 
 ## Sizing
 
-- **RAM.** One Puma process with 3 threads (YJIT and jemalloc), jobs in-process, and Postgres with 256 MB of shared buffers. Expect about 500–700 MB in use on the 2 GB box.
-- **When to scale up.** If `bin/kamal app exec 'ps -o rss= -p 1'` creeps past about 700 MB, move to `t4g.medium`.
+- **RAM.** One Puma process with 3 threads (YJIT and jemalloc), jobs in-process, and Postgres with 256 MB of shared buffers. Expect about 500–700 MB for the app pod and 300 MB for Postgres. The chart's limits are 1 GiB and 768 MiB.
+- **When to scale up.** Watch `kubectl -n helpvibe top pods`. If the app creeps toward its limit, raise `resources.limits.memory`.
+- **More than one app pod** needs S3 for uploads (Active Storage) and a separate jobs Deployment, since jobs run inside Puma today.

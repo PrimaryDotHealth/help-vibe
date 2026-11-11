@@ -1,0 +1,6 @@
+apiVersion: v2
+name: helpvibe
+description: Help center (Articles) and support desk (Helpdesk), with an optional bundled Postgres 17.
+type: application
+version: 0.1.0
+appVersion: "0.1.0"

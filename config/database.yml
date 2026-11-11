@@ -88,9 +88,10 @@ production:
   primary: &primary_production
     <<: *default
     database: helpvibe_production
-    username: helpvibe
+    username: <%= ENV.fetch("DB_USER", "helpvibe") %>
     password: <%= ENV["HELPVIBE_DATABASE_PASSWORD"] %>
     host: <%= ENV.fetch("DB_HOST", "localhost") %>
+    port: <%= ENV.fetch("DB_PORT", 5432) %>
   cache:
     <<: *primary_production
     database: helpvibe_production_cache

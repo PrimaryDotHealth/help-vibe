@@ -16,7 +16,7 @@ bin/rails server                      # web + jobs in one process (SOLID_QUEUE_I
 bin/rails db:prepare                  # create + migrate
 bin/rails helpvibe:user[you@company.com,superadmin]
 bin/rails helpvibe:import:helpjuice   # reads HELPJUICE_SUBDOMAIN / HELPJUICE_API_KEY from env
-kamal deploy                          # one EC2 box: app container + Postgres accessory
+helm upgrade --install               # Kubernetes: app pod + Postgres StatefulSet (chart/helpvibe)
 ```
 
 ## Stack
@@ -46,7 +46,7 @@ kamal deploy                          # one EC2 box: app container + Postgres ac
 | HTTP clients | **Faraday** (webhooks out, Helpjuice importer) | |
 | rate limiting | Rails 8 built-in `rate_limit` in controllers (Solid Cache store) | login, API keys, search, widget messages. |
 | observability | Rails logs (with a filter for bodies/emails/names), `/up` health check, optional Sentry (BAA needed if enabled) | |
-| deploy | **Kamal 2** to one AWS **t4g.small** (2 GB). Postgres runs as a Kamal accessory on the same box. Encrypted EBS. Thruster in front of Puma. kamal-proxy terminates TLS (Let's Encrypt). | about $15/month. AWS signs a BAA at no extra cost. |
+| deploy | **Helm** chart (`chart/helpvibe`) on Kubernetes: one app pod (Thruster in front of Puma, jobs in-process) and a Postgres 17 StatefulSet, or RDS. Encrypted volumes. The ingress terminates TLS (cert-manager, Let's Encrypt). | k3s on one t4g.small stays near $15/month; EKS adds about $73/month. AWS signs a BAA at no extra cost. |
 | memory budget | Puma: 1 worker, 3 threads, YJIT + jemalloc, Solid Queue in-process. Postgres `shared_buffers=256MB`. | ~300–400 MB app + ~150–250 MB Postgres, inside 2 GB with room to spare. |
 | backups | nightly `pg_dump` + Active Storage files → encrypted with **age** → S3 (BAA-covered, SSE-KMS). Optional WAL archiving for point-in-time recovery. | backups contain PHI, so they're encrypted before leaving the box. |
 
@@ -283,7 +283,7 @@ authenticate with the staff session or the contact session.
 - **Tabs (M3)** aren't built.
 - **Markdown mode (M3)** is "Paste Markdown", which converts into the draft, rather than a second live editor.
 - **Backups (M3)** are AES-256-GCM-encrypted `pg_dump`s on the server's encrypted disk. Copying them off-box to S3 is still a manual step: EBS snapshots cover the disk.
-- **Deploy.** Configured (Kamal, `replica/deploy.md`) but not yet run. It needs an AWS account and Docker on the Mac.
+- **Deploy.** Configured (Helm, `replica/deploy.md`) but not yet run or rendered. It needs a cluster, a registry and Docker on the Mac.
 - **Cross-origin widget cookie.** The partitioned cookie for staff in the widget is tested same-origin only. The real cross-domain case gets checked on the first deploy.
 - **Private articles from the Helpjuice import.** They arrive visible to superadmins only, because Helpjuice's API doesn't expose who they're shared with. The import run lists each one.
 
@@ -301,7 +301,7 @@ authenticate with the staff session or the contact session.
 codes, also-in categories, redirects. Uploads (Active Storage). Draft on top
 of published, history, restore. Visibility + accessors + the widget JWT. TOC,
 keyword-boosted search. Iframe embed. `/api/v3` reads + API keys. The
-Helpjuice importer. Kamal deploy to the t4g.small.
+Helpjuice importer. Helm deploy to the cluster.
 
 **M3. Part 1 should-haves.**
 - Editor: markdown mode, all blocks, diff, multiple published versions, scheduled publish.

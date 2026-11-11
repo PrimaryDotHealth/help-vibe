@@ -28,10 +28,13 @@ Rails.application.configure do
   config.active_storage.service = :local
 
   # Assume all access to the app is happening through a SSL-terminating reverse proxy.
-  config.assume_ssl = true
+  # HELPVIBE_SSL=false turns both off for running the image over plain http on
+  # your own machine (compose.yaml). Never set it on a real server.
+  ssl = ENV.fetch("HELPVIBE_SSL", "true") != "false"
+  config.assume_ssl = ssl
 
   # Force all access to the app over SSL, use Strict-Transport-Security, and use secure cookies.
-  config.force_ssl = true
+  config.force_ssl = ssl
 
   # Skip http-to-https redirect for the default health check endpoint.
   config.ssl_options = { redirect: { exclude: ->(request) { request.path == "/up" } } }
@@ -61,7 +64,7 @@ Rails.application.configure do
   # config.action_mailer.raise_delivery_errors = false
 
   # Set host to be used by links generated in mailer templates.
-  config.action_mailer.default_url_options = { host: ENV.fetch("HELPVIBE_DOMAIN", "example.com"), protocol: "https" }
+  config.action_mailer.default_url_options = { host: ENV.fetch("HELPVIBE_DOMAIN", "example.com"), protocol: ssl ? "https" : "http" }
 
   # Incoming support email: SendGrid Inbound Parse -> Action Mailbox.
   # Password from RAILS_INBOUND_EMAIL_PASSWORD (see replica/deploy.md).

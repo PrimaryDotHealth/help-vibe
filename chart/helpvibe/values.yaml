@@ -1,0 +1,81 @@
+# helpvibe Helm values. See chart/helpvibe/README.md.
+
+image:
+  repository: ghcr.io/primarydothealth/help-vibe   # where you push the image built from ./Dockerfile
+  tag: ""                                          # defaults to the chart's appVersion
+  pullPolicy: IfNotPresent
+imagePullSecrets: []
+
+# One replica. Uploaded files sit on a ReadWriteOnce volume and background jobs
+# run inside Puma, so a second pod would need S3 storage and a separate worker.
+replicaCount: 1
+
+# Public address. Links in emails and the widget snippet use it.
+domain: help.example.com
+
+ingress:
+  enabled: true
+  className: ""                 # e.g. nginx, traefik, alb
+  annotations: {}               # e.g. cert-manager.io/cluster-issuer: letsencrypt
+  tls:
+    enabled: true
+    secretName: ""              # defaults to <release>-tls
+
+# Plain settings (become environment variables).
+config:
+  timeZone: UTC                 # scheduled publishing and nightly backups run in this zone
+  frameAncestors: "'self'"      # sites allowed to embed the widget and help center, space-separated
+  mailFrom: help@example.com
+  inboundDomain: ""
+  # false only when nothing in front terminates TLS (a local cluster over plain http)
+  ssl: true
+  railsMaxThreads: 3
+  extraEnv: {}                  # anything else, e.g. HELPVIBE_EMAIL_MODE: full
+
+# Secrets. Either fill these in (the chart creates a Secret), or set
+# existingSecret to a Secret you manage that has the same keys:
+#   RAILS_MASTER_KEY, HELPVIBE_DATABASE_PASSWORD, HELPVIBE_WIDGET_SECRET,
+#   HELPVIBE_BACKUP_KEY, SENDGRID_API_KEY, RAILS_INBOUND_EMAIL_PASSWORD
+existingSecret: ""
+secrets:
+  railsMasterKey: ""            # contents of config/master.key (required)
+  databasePassword: ""          # required
+  widgetSecret: ""
+  backupKey: ""
+  sendgridApiKey: ""            # empty: emails are written to files in the storage volume
+  inboundEmailPassword: ""
+  extra: {}                     # any other secret env, e.g. HELPJUICE_API_KEY: ...
+
+# Uploaded files, emails-as-files and nightly backups.
+storage:
+  size: 10Gi
+  storageClass: ""              # use an encrypted class for patient data
+  existingClaim: ""
+
+resources:
+  requests: { cpu: 250m, memory: 512Mi }
+  limits: { memory: 1Gi }
+
+nodeSelector: {}
+tolerations: []
+affinity: {}
+
+# Bundled Postgres 17 (a single StatefulSet). Turn off to use RDS or another
+# server and fill in externalDatabase.
+postgresql:
+  enabled: true
+  image: postgres:17
+  size: 10Gi
+  storageClass: ""
+  resources:
+    requests: { cpu: 100m, memory: 256Mi }
+    limits: { memory: 768Mi }
+  args: ["-c", "shared_buffers=256MB", "-c", "max_connections=40", "-c", "work_mem=8MB"]
+
+# Used when postgresql.enabled is false. The user needs permission to create
+# databases: the app keeps cache, queue and cable in their own databases
+# (helpvibe_production, _cache, _queue, _cable).
+externalDatabase:
+  host: ""
+  port: 5432
+  user: helpvibe

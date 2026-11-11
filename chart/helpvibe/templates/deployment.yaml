@@ -1,0 +1,99 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "helpvibe.fullname" . }}
+  labels: {{- include "helpvibe.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  # The storage volume is ReadWriteOnce: stop the old pod before starting the new one.
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels: {{- include "helpvibe.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels: {{- include "helpvibe.selectorLabels" . | nindent 8 }}
+      annotations:
+        checksum/secret: {{ include (print $.Template.BasePath "/secret.yaml") . | sha256sum }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets: {{- toYaml . | nindent 8 }}
+      {{- end }}
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
+        runAsNonRoot: true
+        fsGroup: 1000
+      containers:
+        - name: app
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          # The image's entrypoint runs db:prepare (create and migrate) before the server starts.
+          ports:
+            - name: http
+              containerPort: 8080
+          env:
+            - name: HTTP_PORT            # Thruster listens here (not 80: the pod runs as non-root)
+              value: "8080"
+            - name: DB_HOST
+              value: {{ include "helpvibe.dbHost" . | quote }}
+            - name: DB_PORT
+              value: {{ ternary 5432 .Values.externalDatabase.port .Values.postgresql.enabled | quote }}
+            - name: DB_USER
+              value: {{ ternary "helpvibe" .Values.externalDatabase.user .Values.postgresql.enabled | quote }}
+            - name: HELPVIBE_DOMAIN
+              value: {{ .Values.domain | quote }}
+            - name: HELPVIBE_TIME_ZONE
+              value: {{ .Values.config.timeZone | quote }}
+            - name: HELPVIBE_FRAME_ANCESTORS
+              value: {{ .Values.config.frameAncestors | quote }}
+            - name: HELPVIBE_MAIL_FROM
+              value: {{ .Values.config.mailFrom | quote }}
+            - name: HELPVIBE_INBOUND_DOMAIN
+              value: {{ .Values.config.inboundDomain | quote }}
+            - name: HELPVIBE_SSL
+              value: {{ .Values.config.ssl | toString | quote }}
+            - name: SOLID_QUEUE_IN_PUMA
+              value: "true"
+            - name: WEB_CONCURRENCY
+              value: "1"
+            - name: RAILS_MAX_THREADS
+              value: {{ .Values.config.railsMaxThreads | quote }}
+            - name: RUBY_YJIT_ENABLE
+              value: "1"
+            {{- range $k, $v := .Values.config.extraEnv }}
+            - name: {{ $k }}
+              value: {{ $v | quote }}
+            {{- end }}
+          envFrom:
+            - secretRef:
+                name: {{ include "helpvibe.secretName" . }}
+          volumeMounts:
+            - name: storage
+              mountPath: /rails/storage
+          # /up answers once Rails has booted. Migrations run first, so allow time.
+          startupProbe:
+            httpGet: { path: /up, port: http }
+            periodSeconds: 5
+            failureThreshold: 60
+          readinessProbe:
+            httpGet: { path: /up, port: http }
+            periodSeconds: 10
+          livenessProbe:
+            httpGet: { path: /up, port: http }
+            periodSeconds: 20
+            failureThreshold: 3
+          resources: {{- toYaml .Values.resources | nindent 12 }}
+      volumes:
+        - name: storage
+          persistentVolumeClaim:
+            claimName: {{ .Values.storage.existingClaim | default (printf "%s-storage" (include "helpvibe.fullname" .)) }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector: {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations: {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity: {{- toYaml . | nindent 8 }}
+      {{- end }}
