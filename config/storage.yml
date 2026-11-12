@@ -25,3 +25,10 @@ local:
 #   service: Mirror
 #   primary: local
 #   mirrors: [ amazon, google, microsoft ]
+
+# Production on Porter: ACTIVE_STORAGE_SERVICE=amazon. Credentials come from the
+# standard AWS chain (AWS_ACCESS_KEY_ID / AWS_SECRET_ACCESS_KEY, or an IAM role).
+amazon:
+  service: S3
+  bucket: <%= ENV["HELPVIBE_S3_BUCKET"] %>
+  region: <%= ENV.fetch("AWS_REGION", "us-east-1") %>

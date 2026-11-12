@@ -1,0 +1,45 @@
+# Porter app (https://docs.porter.run/applications/configuration-as-code/reference).
+# Porter builds ./Dockerfile from this repo. Secrets and per-environment
+# settings go in the app's environment variables (or an env group) in Porter,
+# not here. See README.md → Deploy on Porter for the list.
+version: v2
+
+build:
+  method: docker
+  context: .
+  dockerfile: ./Dockerfile
+
+env:
+  HTTP_PORT: "8080"              # Thruster listens here (the container runs as non-root)
+  RAILS_MAX_THREADS: "3"
+  WEB_CONCURRENCY: "1"
+  RUBY_YJIT_ENABLE: "1"
+
+# Creates the four databases on first deploy, then migrates on every deploy.
+predeploy:
+  run: ./bin/rails db:prepare
+  cpuCores: 0.5
+  ramMegabytes: 768
+
+services:
+  - name: web
+    type: web
+    run: ./bin/thrust ./bin/rails server
+    port: 8080
+    instances: 1
+    cpuCores: 0.5
+    ramMegabytes: 1024
+    healthCheck:
+      enabled: true
+      httpPath: /up
+      timeoutSeconds: 3
+      initialDelaySeconds: 20
+
+  # Background jobs (email, webhooks, scheduled publishing, snooze) and the
+  # recurring schedule in config/recurring.yml.
+  - name: jobs
+    type: worker
+    run: ./bin/jobs
+    instances: 1
+    cpuCores: 0.25
+    ramMegabytes: 768
