@@ -1,9 +1,12 @@
 # helpvibe Helm values. See chart/helpvibe/README.md.
 
+# Built by .github/workflows/image.yml on every push to main (amd64 and arm64).
+# "main" follows the latest build: restart the app to pick it up. Pin a
+# release with a commit tag instead, e.g. tag: sha-eca8a29.
 image:
-  repository: ghcr.io/primarydothealth/help-vibe   # where you push the image built from ./Dockerfile
-  tag: ""                                          # defaults to the chart's appVersion
-  pullPolicy: IfNotPresent
+  repository: ghcr.io/primarydothealth/help-vibe
+  tag: main
+  pullPolicy: Always
 imagePullSecrets: []
 
 # One replica. Uploaded files sit on a ReadWriteOnce volume and background jobs
@@ -60,10 +63,21 @@ nodeSelector: {}
 tolerations: []
 affinity: {}
 
-# Bundled Postgres 17 (a single StatefulSet). Turn off to use RDS or another
-# server and fill in externalDatabase.
+# Your own Postgres (RDS, a Porter datastore...). The password goes in the
+# Secret as HELPVIBE_DATABASE_PASSWORD (secrets.databasePassword).
+# The user must be allowed to create databases: the app keeps cache, queue and
+# cable beside the main one (<name>, <name>_cache, <name>_queue, <name>_cable),
+# and creates and migrates all four when it starts.
+externalDatabase:
+  host: ""                      # required unless postgresql.enabled
+  port: 5432
+  user: helpvibe
+  name: helpvibe_production
+  sslMode: prefer               # require, verify-full... (libpq sslmode)
+
+# Or a bundled Postgres 17 (a single StatefulSet), for trying it out.
 postgresql:
-  enabled: true
+  enabled: false
   image: postgres:17
   size: 10Gi
   storageClass: ""
@@ -71,11 +85,3 @@ postgresql:
     requests: { cpu: 100m, memory: 256Mi }
     limits: { memory: 768Mi }
   args: ["-c", "shared_buffers=256MB", "-c", "max_connections=40", "-c", "work_mem=8MB"]
-
-# Used when postgresql.enabled is false. The user needs permission to create
-# databases: the app keeps cache, queue and cable in their own databases
-# (helpvibe_production, _cache, _queue, _cable).
-externalDatabase:
-  host: ""
-  port: 5432
-  user: helpvibe

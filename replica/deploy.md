@@ -1,8 +1,10 @@
 # Deploying helpvibe
 
-A Kubernetes cluster, with the Helm chart in `chart/helpvibe`. It runs the app
-(one pod) and, by default, Postgres 17 beside it (one StatefulSet). You build
-the image on your Mac and push it to a registry the cluster can pull from.
+A Kubernetes cluster (we use Porter), with the Helm chart in `chart/helpvibe`,
+published at `https://primarydothealth.github.io/help-vibe`. It runs the app
+(one pod) against your own Postgres (`externalDatabase`), or a bundled
+Postgres 17 for trying it out. GitHub Actions builds the image
+(`ghcr.io/primarydothealth/help-vibe`). The README has the Porter values.
 
 > **Before any patient data exists (Part 1, the help center only),** you can
 > skip the BAA steps. **Before Part 2 (support desk) goes live,** every box
@@ -55,8 +57,9 @@ And the plain settings in `values.prod.yaml` (safe to commit, no secrets):
 ```yaml
 domain: help.ourcompany.com
 existingSecret: helpvibe-secrets
-image:
-  repository: ghcr.io/primarydothealth/help-vibe
+externalDatabase:
+  host: your-db.xxxx.us-east-1.rds.amazonaws.com
+  sslMode: require
 ingress:
   className: nginx
   annotations:
@@ -67,16 +70,13 @@ config:
   mailFrom: help@ourcompany.com
 storage:
   storageClass: gp3-encrypted
-postgresql:
-  storageClass: gp3-encrypted
 ```
 
 ## Every deploy
 
 ```bash
-TAG=$(git rev-parse --short HEAD)
-docker buildx build --platform linux/arm64 -t ghcr.io/primarydothealth/help-vibe:$TAG --push .
-helm upgrade --install helpvibe chart/helpvibe -n helpvibe -f values.prod.yaml --set image.tag=$TAG
+# push to main; GitHub Actions builds ghcr.io/primarydothealth/help-vibe:sha-<commit>
+helm upgrade --install helpvibe chart/helpvibe -n helpvibe -f values.prod.yaml --set image.tag=sha-$(git rev-parse --short=7 HEAD)
 ```
 
 The pod migrates the database as it starts (`bin/docker-entrypoint` runs `db:prepare`), then `/up` turns ready. With one pod and a ReadWriteOnce volume, the old pod stops before the new one starts, so expect a few seconds of downtime per deploy.

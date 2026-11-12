@@ -41,6 +41,10 @@ spec:
               value: {{ ternary 5432 .Values.externalDatabase.port .Values.postgresql.enabled | quote }}
             - name: DB_USER
               value: {{ ternary "helpvibe" .Values.externalDatabase.user .Values.postgresql.enabled | quote }}
+            - name: DB_NAME
+              value: {{ ternary "helpvibe_production" .Values.externalDatabase.name .Values.postgresql.enabled | quote }}
+            - name: DB_SSLMODE
+              value: {{ ternary "prefer" .Values.externalDatabase.sslMode .Values.postgresql.enabled | quote }}
             - name: HELPVIBE_DOMAIN
               value: {{ .Values.domain | quote }}
             - name: HELPVIBE_TIME_ZONE

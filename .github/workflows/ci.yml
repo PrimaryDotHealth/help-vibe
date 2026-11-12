@@ -39,6 +39,19 @@ jobs:
       - name: Scan for security vulnerabilities in JavaScript dependencies
         run: bin/importmap audit
 
+  helm:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - uses: azure/setup-helm@v4
+
+      - name: Lint and render the chart
+        run: |
+          helm lint chart/helpvibe --set externalDatabase.host=db --set secrets.railsMasterKey=x --set secrets.databasePassword=x
+          helm template t chart/helpvibe --set postgresql.enabled=true --set existingSecret=s > /dev/null
+
   lint:
     runs-on: ubuntu-latest
     env:

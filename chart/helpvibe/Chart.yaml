@@ -1,6 +1,9 @@
 apiVersion: v2
 name: helpvibe
-description: Help center (Articles) and support desk (Helpdesk), with an optional bundled Postgres 17.
+description: Help center (Articles) and support desk (Helpdesk). Rails 8 on PostgreSQL.
+home: https://github.com/PrimaryDotHealth/help-vibe
+sources:
+  - https://github.com/PrimaryDotHealth/help-vibe
 type: application
 version: 0.1.0
 appVersion: "0.1.0"
