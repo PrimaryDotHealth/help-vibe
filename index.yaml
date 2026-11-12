@@ -1,0 +1,17 @@
+apiVersion: v1
+entries:
+  helpvibe:
+  - apiVersion: v2
+    appVersion: 0.1.0
+    created: "2026-11-12T00:43:06.715517486Z"
+    description: Help center (Articles) and support desk (Helpdesk). Rails 8 on PostgreSQL.
+    digest: c5639df80046be7fd0ad9d24c825356e2c0c4308295baea6234bbafa0919d8a1
+    home: https://github.com/PrimaryDotHealth/help-vibe
+    name: helpvibe
+    sources:
+    - https://github.com/PrimaryDotHealth/help-vibe
+    type: application
+    urls:
+    - https://github.com/PrimaryDotHealth/help-vibe/releases/download/helpvibe-0.1.0/helpvibe-0.1.0.tgz
+    version: 0.1.0
+generated: "2026-11-12T00:43:06.715521222Z"
