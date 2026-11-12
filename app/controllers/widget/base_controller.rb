@@ -5,6 +5,7 @@ class Widget::BaseController < ApplicationController
 
   include WidgetContact
   include Frameable
+  include CollectionFilter
 
   allow_unauthenticated_access
   layout "widget"
@@ -16,7 +17,7 @@ class Widget::BaseController < ApplicationController
       @widget_identity = WidgetIdentity.from_cookie(cookies.encrypted[WIDGET_COOKIE])
     end
 
-    def viewer = widget_identity&.viewer || Visibility::Viewer.anonymous
+    def viewer = @viewer ||= within_collections(widget_identity&.viewer || Visibility::Viewer.anonymous)
 
     def widget_cookie_options
       { same_site: (Rails.env.test? ? :lax : :none), secure: !Rails.env.test?, partitioned: !Rails.env.test?, httponly: true }

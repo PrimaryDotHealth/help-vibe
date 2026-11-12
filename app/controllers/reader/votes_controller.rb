@@ -16,5 +16,5 @@ class Reader::VotesController < Reader::BaseController
   end
 
   private
-    def viewer_for_vote = params[:source] == "widget" ? Visibility::Viewer.anonymous : viewer
+    def viewer_for_vote = params[:source] == "widget" ? within_collections(Visibility::Viewer.anonymous) : viewer
 end

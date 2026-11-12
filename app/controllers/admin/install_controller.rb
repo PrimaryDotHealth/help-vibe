@@ -17,5 +17,7 @@ class Admin::InstallController < Admin::BaseController
       @script_url = embed_script_url
       @frame_ancestors = Frameable.frame_ancestors
       @secret_set = ENV["HELPVIBE_WIDGET_SECRET"].present?
+      @collections = Collection.order(:name).to_a
+      @collection_example = @collections.first(2).map(&:slug).join(",").presence || "acme,general"
     end
 end

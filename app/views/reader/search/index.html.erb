@@ -1,7 +1,7 @@
 <% content_for :title, @query.present? ? "#{@query} · Search" : "Search" %>
 <% content_for :hide_header_search, true %>
 <main class="results">
-  <%= form_with url: search_path, method: :get, class: "search lg" do %>
+  <%= form_with url: search_path, method: :get, class: "search lg" do %><%= collection_field %>
     <%= icon "search" %>
     <%= search_field_tag :q, @query, class: "input", "aria-label": "Search", autofocus: @query.blank? %>
   <% end %>

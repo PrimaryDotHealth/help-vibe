@@ -57,6 +57,7 @@
           <% else %>
             <%= nav.("Articles", "file", admin_articles_path, controller_name == "articles") %>
             <%= nav.("Chapters", "folder", admin_chapters_path, controller_name == "chapters") %>
+            <%= nav.("Collections", "building", admin_collections_path, controller_name == "collections") %>
             <%= nav.("Analytics", "chart", admin_analytics_path, controller_name == "analytics") %>
             <%= nav.("Page suggestions", "sign", admin_context_rules_path, controller_name == "context_rules") %>
             <% if Current.user.admin? %>

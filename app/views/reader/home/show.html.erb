@@ -7,7 +7,7 @@
       <p>Step-by-step answers, kept current by our team.</p>
     </div>
     <div>
-      <%= form_with url: search_path, method: :get, class: "search lg" do %>
+      <%= form_with url: search_path, method: :get, class: "search lg" do %><%= collection_field %>
         <%= icon "search" %>
         <%= search_field_tag :q, nil, class: "input", placeholder: "Search for an answer, e.g. reset password", "aria-label": "Search", autofocus: true %>
       <% end %>

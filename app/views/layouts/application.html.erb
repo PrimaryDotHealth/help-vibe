@@ -16,7 +16,7 @@
       <div class="in">
         <%= link_to root_path, class: "wordmark" do %><span class="mark">h</span>Help Center<% end %>
         <% unless content_for?(:hide_header_search) %>
-          <%= form_with url: search_path, method: :get, class: "search head-search", data: { turbo_frame: "_top" } do %>
+          <%= form_with url: search_path, method: :get, class: "search head-search", data: { turbo_frame: "_top" } do %><%= collection_field %>
             <%= icon "search" %>
             <%= search_field_tag :q, params[:q], class: "input", placeholder: "Search articles", "aria-label": "Search" %>
           <% end %>

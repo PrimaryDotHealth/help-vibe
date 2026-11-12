@@ -48,6 +48,19 @@
   </section>
 
   <section>
+    <h2>Only some collections</h2>
+    <p>Add <code>collections=</code> with one or more <%= link_to "collection", admin_collections_path %> link names, separated by commas. The frame then shows only articles in those collections: in lists, chapters, search and related articles, and links to any other article show "not found". It stays that way as people click around inside the frame. Without it, every article shows.</p>
+    <%= render "snippet", code: %(<iframe src="#{root_url}?collections=#{@collection_example}" title="Help Center"
+        style="width:100%;height:80vh;border:0"></iframe>) %>
+    <% if @collections.any? %>
+      <p class="hint">Your collections: <% @collections.each_with_index do |c, i| %><%= ", " if i > 0 %><b><%= c.name %></b> <code><%= c.slug %></code><% end %>.</p>
+    <% else %>
+      <p class="hint">No collections yet. <%= link_to "Create them", admin_collections_path %>, then add articles to them from each article's Details panel.</p>
+    <% end %>
+    <p class="hint">This picks what a page shows; it doesn't hide anything from someone who edits the address. For articles only some people may read, use <b>Who can see it</b> on the article.</p>
+  </section>
+
+  <section>
     <h2>Match your page's colours</h2>
     <p>Framed pages follow the reader's light or dark system setting. To pin one, add <code>?theme=light</code> or <code>?theme=dark</code> to the address; it stays for the rest of the visit inside the frame.</p>
     <%= render "snippet", code: %(<iframe src="#{embedded_article_url(ex_link, theme: "light")}" ...></iframe>) %>

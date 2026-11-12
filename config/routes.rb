@@ -42,6 +42,7 @@ Rails.application.routes.draw do
     end
     resources :comments, only: :update
     resources :chapters, except: %i[show destroy]
+    resources :collections, except: :show
     resources :users, except: %i[show destroy]
     resources :groups, except: :show
     resources :api_keys, only: %i[index create destroy]

@@ -71,6 +71,7 @@
     <table class="table">
       <tr><td><code>data-label="Support"</code></td><td>Changes the button text from "Help".</td></tr>
       <tr><td><code>data-launcher="none"</code></td><td>Hides the bubble; open the panel from your own button instead.</td></tr>
+      <tr><td><code>data-collections="<%= @collection_example %>"</code></td><td>Only suggests and finds articles in these <%= link_to "collections", admin_collections_path %> (link names, comma-separated). Leave it out to include everything.</td></tr>
       <tr><td><code>HelpVibe.open()</code></td><td>Opens the panel.</td></tr>
       <tr><td><code>HelpVibe.open({ article: "BIL·01" })</code></td><td>Opens one article, by its code or link.</td></tr>
       <tr><td><code>HelpVibe.close()</code></td><td>Closes it.</td></tr>

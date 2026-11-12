@@ -1,4 +1,9 @@
 module ApplicationHelper
+  # Keeps ?collections= on GET forms (a GET form drops its action's query string).
+  def collection_field
+    hidden_field_tag(:collections, collection_param, id: nil) if collection_param
+  end
+
   def icon(name, **opts)
     tag.svg(class: [ "i", opts.delete(:class) ].compact.join(" "), "aria-hidden": "true", **opts) do
       tag.use(href: "#i-#{name}")

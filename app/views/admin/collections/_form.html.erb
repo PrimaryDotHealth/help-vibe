@@ -1,0 +1,10 @@
+<div class="card form-card" style="max-width:560px">
+  <%= form_with model: [ :admin, collection ] do |f| %>
+    <% if collection.errors.any? %><div class="errors"><%= collection.errors.full_messages.to_sentence %></div><% end %>
+    <label class="field"><span>Name</span><%= f.text_field :name, class: "input", required: true, placeholder: "Acme Clinics" %></label>
+    <label class="field"><span>Link name</span><%= f.text_field :slug, class: "input mono", placeholder: "acme" %><div class="hint">Used in embeds: <code>?collections=<%= collection.slug.presence || "acme" %></code>. Left blank, it's made from the name. Changing it breaks embeds that use the old one.</div></label>
+    <label class="field"><span>Description</span><%= f.text_area :description, rows: 2, class: "input" %><div class="hint">For your team only</div></label>
+    <div class="acts"><%= f.submit "Save", class: "btn primary" %><%= link_to "Cancel", admin_collections_path, class: "btn quiet" %></div>
+  <% end %>
+  <% if collection.persisted? %><%= button_to "Delete collection", admin_collection_path(collection), method: :delete, class: "btn quiet", form: { style: "margin-top:12px" }, data: { turbo_confirm: "Delete #{collection.name}? Its articles stay, but embeds asking for \"#{collection.slug}\" will show nothing from it." } %><% end %>
+</div>

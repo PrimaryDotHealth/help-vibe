@@ -7,6 +7,8 @@ class Admin::ArticlesController < Admin::BaseController
     scope = Article.live.includes(:versions, :main_category, :created_by).order(updated_at: :desc)
     scope = scope.published if @status == "live"
     scope = scope.where(id: ArticleVersion.where(status: "draft").select(:article_id)) if @status == "drafts"
+    @collection = Collection.find_by(slug: params[:collection]) if params[:collection].present?
+    scope = scope.where(id: @collection.article_collections.select(:article_id)) if @collection
     scope = scope.where("articles.code ilike :q or articles.slug ilike :q", q: "%#{Article.sanitize_sql_like(params[:q])}%") if params[:q].present?
     @articles = scope.limit(200)
     @counts = { "all" => Article.live.count, "drafts" => Article.live.where(id: ArticleVersion.where(status: "draft").select(:article_id)).count, "live" => Article.live.published.count }
@@ -34,12 +36,13 @@ class Admin::ArticlesController < Admin::BaseController
   def update
     @article = Article.find_by!(slug: params[:id])
     attrs = params.require(:editor).permit(:title, :subtitle, :body, :base_revision_id, :main_category_id, :accessibility, :keywords,
-                                           :publish_at, :expire_at, accessor_keys: [])
+                                           :publish_at, :expire_at, accessor_keys: [], collection_ids: [])
     notice = "Saved"
 
     ActiveRecord::Base.transaction do
       @article.update!(main_category_id: attrs[:main_category_id], accessibility: attrs[:accessibility], keyword_list: attrs[:keywords])
       @article.accessor_keys = attrs[:accessor_keys] if attrs.key?(:accessor_keys)
+      @article.collection_ids = Collection.where(id: attrs[:collection_ids].compact_blank).ids if attrs.key?(:collection_ids)
       version, base = @article.draft_for_save!(from_version: @article.versions.find(params[:editor][:version_id]),
                                                base_revision_id: attrs[:base_revision_id], author: Current.user)
       version.save_revision!(body: attrs[:body], author: Current.user, base_revision_id: base,

@@ -53,6 +53,19 @@
           </div>
         </section>
         <section>
+          <h3>Collections</h3>
+          <% if (all_collections = Collection.order(:name).to_a).any? %>
+            <% chosen = @article.collection_ids %>
+            <% all_collections.each do |c| %>
+              <label class="row" style="font-size:14px;padding:3px 0"><%= check_box_tag "editor[collection_ids][]", c.id, chosen.include?(c.id), id: "collection_#{c.id}", style: "accent-color:var(--ink)" %><%= c.name %> <span class="meta mono"><%= c.slug %></span></label>
+            <% end %>
+            <%= hidden_field_tag "editor[collection_ids][]", "", id: nil %>
+            <div class="hint">Embeds limited to collections show this article only if it's in one of them. Embeds without a limit show everything.</div>
+          <% else %>
+            <p class="hint">No collections yet. <%= link_to "Make one", admin_collections_path %> to show different articles to different organizations.</p>
+          <% end %>
+        </section>
+        <section>
           <h3>Found by</h3>
           <%= f.text_field :keywords, value: @article.keyword_list, class: "input", placeholder: "reschedule, move appointment" %>
           <div class="hint">Comma-separated. Matched alongside the title.</div>
