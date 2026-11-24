@@ -6,7 +6,7 @@
   </div>
   <% unless local_assigns[:hide_search] %>
     <div class="w-search">
-      <%= form_with url: widget_search_path, method: :get, class: "search" do %>
+      <%= form_with url: widget_search_path, method: :get, class: "search" do %><%= collection_field %>
         <%= hidden_field_tag :page, params[:page] %>
         <%= icon "search" %><%= search_field_tag :q, local_assigns[:query], class: "input", placeholder: "Search help", "aria-label": "Search help" %>
       <% end %>

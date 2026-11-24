@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Our app: embedded articles (stand-in)</title>
+  <style>
+    body{margin:0;font:14px/1.5 -apple-system,"Segoe UI",sans-serif;background:#eceef1;color:#4b5563}
+    .top{height:52px;background:#fff;border-bottom:1px solid #dfe2e7;display:flex;align-items:center;padding:0 20px}
+    .top b{color:#111827}.main{max-width:880px;margin:0 auto;padding:24px}
+    h2{font-size:15px;color:#111827;margin:24px 0 8px}
+    .box{background:#fff;border:1px solid #dfe2e7;border-radius:10px;overflow:hidden}
+  </style>
+</head>
+<body>
+  <div class="top"><b>Our app</b><span style="margin-left:auto;font:11px ui-monospace,monospace;color:#9ca3af">stand-in · development only</span></div>
+  <div class="main">
+    <% if @article %>
+      <h2>One article, sized to fit</h2>
+      <div class="box"><iframe id="one" src="<%= @base %>/embed/a/<%= @article.slug %>?theme=light" title="<%= @article.live_version.title %>" style="width:100%;height:480px;border:0;display:block"></iframe></div>
+    <% else %>
+      <p>Publish an article for Everyone to see it embedded here.</p>
+    <% end %>
+    <h2>The whole help center</h2>
+    <div class="box"><iframe id="all" src="<%= @base %>/?theme=light" title="Help Center" style="width:100%;height:640px;border:0;display:block"></iframe></div>
+  </div>
+  <script>
+    addEventListener("message", function (e) {
+      if (e.origin !== <%= raw @base.to_json %> || !e.data || e.data.helpvibe !== "embed-height") return;
+      document.querySelectorAll("iframe").forEach(function (f) {
+        if (f.contentWindow === e.source) f.style.height = e.data.height + "px";
+      });
+    });
+  </script>
+</body>
+</html>

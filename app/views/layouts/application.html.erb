@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" <%= tag.attributes(data: { theme: page_theme }) %>>
   <head>
     <title><%= content_for(:title) || "Help Center" %></title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -16,16 +16,17 @@
       <div class="in">
         <%= link_to root_path, class: "wordmark" do %><span class="mark">h</span>Help Center<% end %>
         <% unless content_for?(:hide_header_search) %>
-          <%= form_with url: search_path, method: :get, class: "search", style: "width:320px", data: { turbo_frame: "_top" } do %>
+          <%= form_with url: search_path, method: :get, class: "search head-search", data: { turbo_frame: "_top" } do %><%= collection_field %>
             <%= icon "search" %>
             <%= search_field_tag :q, params[:q], class: "input", placeholder: "Search articles", "aria-label": "Search" %>
           <% end %>
         <% end %>
         <span class="grow"></span>
         <nav class="links">
+          <%= link_to "Contact support", contact_path if help_center_contact? && controller_name != "contact" %>
           <% if authenticated? && Current.user&.editor? %>
             <%= link_to "Admin", admin_root_path %>
-          <% elsif !authenticated? %>
+          <% elsif !authenticated? && !in_frame? %>
             <%= link_to "Staff sign in", new_session_path %>
           <% end %>
         </nav>

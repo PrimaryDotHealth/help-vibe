@@ -11,3 +11,14 @@ namespace :helpvibe do
     puts "Password: #{password}" unless ENV["PASSWORD"]
   end
 end
+
+namespace :helpvibe do
+  desc "Rebuild the plain-text copies of every revision and the search index"
+  task reindex: :environment do
+    Revision.includes(:rich_text_body).find_each do |r|
+      r.update_column(:body_text, Revision.plain_text(r.body_html))
+    end
+    ArticleVersion.where(status: "published", is_default: true).find_each { SearchIndex.refresh!(_1) }
+    puts "Reindexed #{Revision.count} revisions."
+  end
+end

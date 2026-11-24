@@ -19,7 +19,7 @@
     <% if @version.subtitle.present? %><p class="lede"><%= @version.subtitle %></p><% end %>
     <div class="docmeta">
       <span class="meta">Updated <%= (@version.published_at || @version.updated_at).strftime("%-d %B %Y") %></span>
-      <% if viewer && @article.accessibility != "public" %><%= visibility_tag @article.accessibility %><% end %>
+      <% if Current.user && @article.accessibility != "public" %><%= visibility_tag @article.accessibility %><% end %>
     </div>
     <div class="rich"><%= body %></div>
 

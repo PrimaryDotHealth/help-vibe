@@ -8,7 +8,7 @@
   <% end %>
   <% if thread.is_shared %><p class="meta" style="margin-top:4px">Customer sees "<%= thread.ticket_state.external_label %>"</p><% end %>
   <% if type.live_fields.any? %>
-    <%= form_with url: admin_support_thread_path(thread), method: :patch, style: "margin-top:12px" do %>
+    <%= form_with url: admin_support_thread_path(thread), method: :patch, html: { style: "margin-top:12px" } do %>
       <%= hidden_field_tag :do, "fields" %>
       <% type.live_fields.each do |field| %>
         <%= render "admin/tickets/field_input", field: field, value: thread.ticket_attributes.to_h[field.key], required: false %>

@@ -1,0 +1,37 @@
+# Publishes chart/helpvibe as a Helm repository on GitHub Pages:
+#   https://primarydothealth.github.io/help-vibe   (chart name: helpvibe)
+# A new chart version is released only when `version` in Chart.yaml changes.
+name: Chart
+
+on:
+  push:
+    branches: [ main ]
+    paths: [ "chart/**" ]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - uses: azure/setup-helm@v4
+
+      - name: Lint
+        run: helm lint chart/helpvibe --set externalDatabase.host=db --set secrets.railsMasterKey=x --set secrets.databasePassword=x
+
+      - name: Configure git
+        run: |
+          git config user.name "$GITHUB_ACTOR"
+          git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
+
+      - uses: helm/chart-releaser-action@v1.7.0
+        with:
+          charts_dir: chart
+        env:
+          CR_TOKEN: ${{ secrets.GITHUB_TOKEN }}

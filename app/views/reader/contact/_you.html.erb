@@ -1,0 +1,6 @@
+<div class="row" style="gap:12px;align-items:flex-start">
+  <label class="field grow"><span>Your email *</span><%= email_field_tag :email, params[:email], class: "input", required: true, autocomplete: "email" %></label>
+  <label class="field grow" style="margin-top:0"><span>Your name</span><%= text_field_tag :name, params[:name], class: "input", autocomplete: "name" %></label>
+</div>
+<%= hidden_field_tag :from, params[:from] %>
+<%= hidden_field_tag :q, params[:q] %>

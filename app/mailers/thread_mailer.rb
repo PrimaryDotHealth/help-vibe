@@ -19,6 +19,14 @@ class ThreadMailer < ApplicationMailer
     mail to: thread.contact.email, subject: "We've opened a request for you (##{thread.number})", reply_to: self.class.reply_address(thread)
   end
 
+  # Sent after someone writes in from the help center: the link back to it.
+  def received(thread)
+    @thread = thread
+    @link = contact_thread_url(thread.generate_token_for(:contact_link))
+    subject = thread.ticket? ? "We've got your request (##{thread.number})" : "We've got your question (##{thread.number})"
+    mail to: thread.contact.email, subject: subject, reply_to: self.class.reply_address(thread)
+  end
+
   def ticket_state_changed(thread)
     @thread = thread
     @link = contact_thread_url(thread.generate_token_for(:contact_link))

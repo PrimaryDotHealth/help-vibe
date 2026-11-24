@@ -1,14 +1,30 @@
-<% content_for :title, "Conversation ##{@thread.number}" %>
+<% content_for :title, @thread.ticket? ? @thread.title : "Conversation ##{@thread.number}" %>
 <% content_for :hide_header_search, true %>
 <%= turbo_stream_from @thread, :contact %>
-<main class="results" style="max-width:640px">
-  <h1 style="font:400 28px/34px var(--serif)">Your question</h1>
-  <p class="meta" style="margin:4px 0 24px">Conversation #<%= @thread.number %> · <%= @thread.state == "closed" ? "solved" : "open" %></p>
+<main class="results contact-page">
+  <% if params[:sent] %>
+    <div class="sent" role="status"><%= icon "check" %>
+      <span>Sent. We've emailed <b><%= @thread.contact.email %></b> a link back to this page, and we'll email you when we reply.</span></div>
+  <% end %>
+  <% if @thread.ticket? %>
+    <span class="meta"><%= @thread.ticket_type.name %> · #<%= @thread.number %></span>
+    <h1><%= @thread.title %></h1>
+    <p style="margin:8px 0 24px"><span class="status <%= @thread.ticket_state.resolved? ? "live" : "review" %>"><%= @thread.ticket_state.external_label %></span></p>
+    <% if @thread.description.present? && @thread.ticket_type.description_visible %><p class="t2" style="white-space:pre-wrap;margin-bottom:8px"><%= @thread.description %></p><% end %>
+    <% @thread.ticket_type.live_fields.select(&:visible_to_contacts).each do |f| %>
+      <% value = @thread.ticket_attributes.to_h[f.key] %>
+      <% if value.present? %><p class="meta"><%= f.label %>: <span class="t2"><%= f.display(value) %></span></p><% end %>
+    <% end %>
+    <div style="height:24px"></div>
+  <% else %>
+    <h1>Your question</h1>
+    <p class="meta" style="margin:4px 0 24px">Conversation #<%= @thread.number %> · <%= @thread.state == "closed" ? "solved" : "open" %></p>
+  <% end %>
   <div class="conversation">
     <div id="thread_parts"><%= render partial: "widget/conversations/part", collection: @parts %></div>
     <%= form_with url: contact_thread_reply_path(params[:token]), class: "reply-box", data: { controller: "reset-form", action: "turbo:submit-end->reset-form#reset" } do %>
       <%= hidden_field_tag :client_id, SecureRandom.uuid %>
-      <%= text_area_tag :body, nil, class: "input", rows: 4, required: true, maxlength: 20000, placeholder: "Reply" %>
+      <%= text_area_tag :body, nil, class: "input", rows: 4, required: true, maxlength: 20000, placeholder: (@thread.state == "closed" ? "Reply to reopen" : "Reply") %>
       <div class="acts" style="margin-top:8px"><%= submit_tag "Send", class: "btn primary" %></div>
     <% end %>
   </div>

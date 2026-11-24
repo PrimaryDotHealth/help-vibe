@@ -1,11 +1,12 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" <%= tag.attributes(data: { theme: page_theme }) %>>
   <head>
     <title>Help</title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <%= csrf_meta_tags %>
     <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
     <%= javascript_importmap_tags %>
+    <%= yield :head %>
   </head>
   <body class="widget-page" data-controller="widget-identity" data-widget-identity-kind-value="<%= widget_identity&.kind %>" data-widget-identity-url-value="<%= widget_session_path %>">
     <%= render "shared/icons" %>

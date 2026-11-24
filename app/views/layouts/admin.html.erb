@@ -25,8 +25,13 @@
       <%= yield %>
     <% else %>
       <div class="app" style="min-height:100vh">
-        <nav class="side">
-          <%= link_to admin_root_path, class: "wordmark" do %><span class="mark">h</span>helpvibe<% end %>
+        <nav class="side" aria-label="Main">
+          <input type="checkbox" id="nav-toggle" class="nav-toggle" aria-label="Show menu">
+          <div class="side-top">
+            <%= link_to admin_root_path, class: "wordmark" do %><span class="mark">h</span>helpvibe<% end %>
+            <label for="nav-toggle" class="btn menu-btn"><%= icon "list" %>Menu</label>
+          </div>
+          <div class="side-body">
           <% nav = ->(label, ico, path, on) { link_to(safe_join([ icon(ico), label ]), path, class: [ "nav", ("on" if on) ]) } %>
           <% desk = helpdesk_area? %>
           <% if Current.user.agent? && Current.user.editor? %>
@@ -44,6 +49,7 @@
               <div class="label">Helpdesk settings</div>
               <%= nav.("Ticket types", "sliders", admin_ticket_types_path, %w[ticket_types ticket_states].include?(controller_name)) %>
               <%= nav.("Teams", "users", admin_teams_path, controller_name == "teams") %>
+              <%= nav.("Install", "code", admin_install_helpdesk_path, controller_name == "install") %>
             <% end %>
             <% if Current.user.superadmin? || Current.user.permissions.include?("compliance") %>
               <%= nav.("Access log", "eye", admin_audit_events_path, controller_name == "audit_events") %>
@@ -51,17 +57,21 @@
           <% else %>
             <%= nav.("Articles", "file", admin_articles_path, controller_name == "articles") %>
             <%= nav.("Chapters", "folder", admin_chapters_path, controller_name == "chapters") %>
+            <%= nav.("Collections", "building", admin_collections_path, controller_name == "collections") %>
             <%= nav.("Analytics", "chart", admin_analytics_path, controller_name == "analytics") %>
             <%= nav.("Page suggestions", "sign", admin_context_rules_path, controller_name == "context_rules") %>
             <% if Current.user.admin? %>
               <div class="label">Articles settings</div>
+              <%= nav.("Contact support", "message", admin_help_center_path, controller_name == "help_center") %>
               <%= nav.("API and webhooks", "key", admin_api_keys_path, %w[api_keys webhooks].include?(controller_name)) %>
               <%= nav.("Activity", "history", admin_activities_path, controller_name == "activities") %>
+              <%= nav.("Install", "code", admin_install_articles_path, controller_name == "install") %>
               <%= nav.("Import", "db", admin_import_path, controller_name == "import") %>
             <% end %>
             <div class="label">Readers</div>
-            <%= nav.("Help center", "globe", root_path, false) %>
-            <%= nav.("Widget preview", "help", (Rails.env.local? ? dev_host_path : widget_root_path), false) %>
+            <% ext = ->(label, ico, path) { link_to(safe_join([ icon(ico), label, icon("out", class: "ext") ]), path, class: "nav", target: "_blank", rel: "noopener", "aria-label": "#{label} (opens in a new tab)") } %>
+            <%= ext.("Help center", "globe", root_path) %>
+            <%= ext.("Widget preview", "help", (Rails.env.local? ? dev_host_path : widget_root_path)) %>
           <% end %>
           <% if Current.user.admin? %>
             <div class="label">Everyone</div>
@@ -69,6 +79,7 @@
           <% end %>
           <div class="me"><span class="avatar"><%= Current.user.initials %></span><%= Current.user.name %>
             <span class="grow"></span><%= button_to "Sign out", session_path, method: :delete, class: "link", form_class: "inline", style: "font-size:13px" %></div>
+          </div>
         </nav>
         <main class="main">
           <% flash.each do |type, message| %><div class="flash <%= type %>"><%= message %></div><% end %>

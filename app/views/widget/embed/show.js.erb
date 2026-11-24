@@ -2,12 +2,14 @@
 //   <script src="<%= embed_script_url %>" async></script>
 // API: HelpVibe.open(), HelpVibe.open({ article: "slug-or-code" }), HelpVibe.close(), HelpVibe.setPage("/billing"),
 //      HelpVibe.identify(tokenFromOurBackend)  (staff then see staff-only articles)
+// Only some collections: <script src="..." data-collections="acme,general" async></script>
 (function () {
   if (window.HelpVibe && window.HelpVibe.loaded) return;
   var BASE = <%= raw root_url.chomp("/").to_json %>;
   var script = document.currentScript;
   var label = (script && script.dataset.label) || "Help";
   var showLauncher = !(script && script.dataset.launcher === "none");
+  var collections = (script && script.dataset.collections) || "";
   var page = location.pathname;
   var iframe, launcher, open = false, identity = null;
 
@@ -40,7 +42,10 @@
     root.appendChild(launcher);
   }
 
-  function url(path) { return BASE + path + (path.indexOf("?") < 0 ? "?" : "&") + "page=" + encodeURIComponent(page); }
+  function url(path) {
+    return BASE + path + (path.indexOf("?") < 0 ? "?" : "&") + "page=" + encodeURIComponent(page) +
+      (collections ? "&collections=" + encodeURIComponent(collections) : "");
+  }
 
   var api = {
     loaded: true,

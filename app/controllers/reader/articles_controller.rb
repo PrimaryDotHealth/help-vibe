@@ -31,7 +31,7 @@ class Reader::ArticlesController < Reader::BaseController
     def record_view
       search = SearchEvent.find_by(id: params[:sid]) if params[:sid]
       search&.clicked!(@article)
-      ViewEvent.create!(article: @article, version: @version, search_event: search, source: "kb", user: viewer)
+      ViewEvent.create!(article: @article, version: @version, search_event: search, source: "kb", user: Current.user)
       Article.update_counters(@article.id, views: 1)
     end
 end

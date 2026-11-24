@@ -1,0 +1,17 @@
+helpvibe is starting. The first boot creates and migrates the databases, so give it a minute:
+
+  kubectl -n {{ .Release.Namespace }} rollout status deploy/{{ include "helpvibe.fullname" . }}
+
+Create the first staff account (prints a password):
+
+  kubectl -n {{ .Release.Namespace }} exec deploy/{{ include "helpvibe.fullname" . }} -- bin/rails 'helpvibe:user[you@company.com,superadmin]'
+
+{{- if .Values.ingress.enabled }}
+
+Then open {{ if .Values.ingress.tls.enabled }}https{{ else }}http{{ end }}://{{ .Values.domain }}/admin
+{{- else }}
+
+No ingress. To try it locally:
+
+  kubectl -n {{ .Release.Namespace }} port-forward svc/{{ include "helpvibe.fullname" . }} 3000:80
+{{- end }}

@@ -7,7 +7,7 @@
       <p>Step-by-step answers, kept current by our team.</p>
     </div>
     <div>
-      <%= form_with url: search_path, method: :get, class: "search lg" do %>
+      <%= form_with url: search_path, method: :get, class: "search lg" do %><%= collection_field %>
         <%= icon "search" %>
         <%= search_field_tag :q, nil, class: "input", placeholder: "Search for an answer, e.g. reset password", "aria-label": "Search", autofocus: true %>
       <% end %>
@@ -37,7 +37,10 @@
     </div>
   <% end %>
 
-  <section class="band">
-    <div><h2>Can't find it?</h2><p>Our support team replies within one business day. Mention the article code if you have one.</p></div>
-  </section>
+  <% if help_center_contact? %>
+    <section class="band">
+      <div><h2>Can't find it?</h2><p>Ask our support team, or file a request. We reply within one business day.</p></div>
+      <%= link_to "Contact support", contact_path, class: "btn" %>
+    </section>
+  <% end %>
 </main>

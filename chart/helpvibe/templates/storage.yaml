@@ -1,0 +1,17 @@
+{{- if not .Values.storage.existingClaim }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "helpvibe.fullname" . }}-storage
+  labels: {{- include "helpvibe.labels" . | nindent 4 }}
+  annotations:
+    helm.sh/resource-policy: keep    # uploads and backups survive helm uninstall
+spec:
+  accessModes: [ReadWriteOnce]
+  {{- with .Values.storage.storageClass }}
+  storageClassName: {{ . }}
+  {{- end }}
+  resources:
+    requests:
+      storage: {{ .Values.storage.size }}
+{{- end }}

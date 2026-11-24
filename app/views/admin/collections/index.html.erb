@@ -1,0 +1,24 @@
+<% content_for :title, "Collections" %>
+<div class="head">
+  <h1>Collections</h1><span class="count"><%= @collections.size %></span>
+  <span class="grow"></span>
+  <% if Current.user.can_publish? %><%= link_to new_admin_collection_path, class: "btn primary" do %><%= icon "plus" %>New collection<% end %><% end %>
+</div>
+<p class="lead" style="max-width:720px;margin-bottom:16px">Group articles, for example one collection per organization plus a shared one. An embedded help center or widget can then show only some collections by adding <code>?collections=</code> with their link names. Without it, every article shows. See <%= link_to "Install", admin_install_articles_path %>.</p>
+<div class="card">
+  <% if @collections.any? %>
+    <div class="table-wrap"><table class="data">
+      <thead><tr><th>Collection</th><th>Link name</th><th class="num">Articles</th><th></th></tr></thead>
+      <tbody><% @collections.each do |c| %>
+        <tr>
+          <td><b style="font-weight:500"><%= c.name %></b><% if c.description.present? %><div class="meta"><%= c.description %></div><% end %></td>
+          <td class="mono t2"><%= c.slug %></td>
+          <td class="num"><%= link_to (@counts[c.id] || 0), admin_articles_path(collection: c.slug) %></td>
+          <td style="text-align:right"><% if Current.user.can_publish? %><%= link_to "Edit", edit_admin_collection_path(c) %><% end %></td>
+        </tr>
+      <% end %></tbody>
+    </table></div>
+  <% else %>
+    <div class="blank"><h2>No collections yet</h2><p>Make one per organization (and one for articles everyone gets), then add articles to them from each article's Details panel.</p></div>
+  <% end %>
+</div>

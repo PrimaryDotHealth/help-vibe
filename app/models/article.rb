@@ -23,6 +23,8 @@ class Article < ApplicationRecord
   scope :published, -> { where(id: ArticleVersion.where(is_default: true).select(:article_id)) }
 
   has_many :access_grants, class_name: "ArticleAccess", dependent: :delete_all
+  has_many :article_collections, dependent: :delete_all
+  has_many :collections, through: :article_collections
 
   # Articles a viewer may see in lists (contents page, chapter pages).
   def self.listed_for(viewer)

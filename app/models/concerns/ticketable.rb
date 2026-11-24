@@ -69,7 +69,7 @@ module Ticketable
   def ticket? = kind == "ticket"
 
   def created_by_label
-    created_by&.name || (channel == "widget" ? contact&.display_name || "the customer" : "the team")
+    created_by&.name || (%w[widget help_center].include?(channel) ? contact&.display_name || "the customer" : "the team")
   end
   def description = ticket_attributes.to_h["description"]
   def shared_with_contact? = !ticket? || is_shared

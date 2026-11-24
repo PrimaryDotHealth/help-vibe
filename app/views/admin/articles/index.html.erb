@@ -8,12 +8,19 @@
 <div class="toolbar-row">
   <div class="seg">
     <% { "all" => "All", "drafts" => "Drafts", "live" => "Live" }.each do |key, label| %>
-      <%= link_to admin_articles_path(status: key, q: params[:q]), class: ("on" if @status == key) do %><%= label %> <span class="code"><%= @counts[key] %></span><% end %>
+      <%= link_to admin_articles_path(status: key, q: params[:q], collection: @collection&.slug), class: ("on" if @status == key) do %><%= label %> <span class="code"><%= @counts[key] %></span><% end %>
     <% end %>
   </div>
   <span class="grow"></span>
+  <% if (collections = Collection.order(:name).to_a).any? %>
+    <%= form_with url: admin_articles_path, method: :get do %>
+      <%= hidden_field_tag :status, @status, id: nil %><%= hidden_field_tag :q, params[:q], id: nil %>
+      <%= select_tag :collection, options_for_select(collections.map { [ _1.name, _1.slug ] }, @collection&.slug), include_blank: "All collections",
+            class: "input", style: "height:32px;width:auto;font-size:13px", onchange: "this.form.requestSubmit()", "aria-label": "Collection" %>
+    <% end %>
+  <% end %>
   <%= form_with url: admin_articles_path, method: :get, class: "search" do %>
-    <%= hidden_field_tag :status, @status %>
+    <%= hidden_field_tag :status, @status %><%= hidden_field_tag :collection, @collection&.slug, id: nil if @collection %>
     <%= icon "search" %><%= search_field_tag :q, params[:q], class: "input", style: "height:32px;font-size:13px", placeholder: "Code or address" %>
   <% end %>
 </div>

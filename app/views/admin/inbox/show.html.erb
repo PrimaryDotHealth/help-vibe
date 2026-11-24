@@ -26,7 +26,12 @@
         <span style="min-width:0">
           <span class="row" style="gap:8px"><% if unread %><span class="dot-unread"></span><% end %><b style="font-weight:500"><%= t.contact&.display_name || "Unknown" %></b>
             <span class="meta">#<%= t.number %><%= " · #{t.contact.kind}" if t.contact && t.contact.kind != "unknown" %><%= " · #{t.page_context}" if t.page_context %></span></span>
-          <div class="preview"><%= @previews[t.id]&.body.to_s.squish.truncate(140) %></div>
+          <% last = @previews[t.id]&.body.to_s.squish %>
+          <% if t.ticket? %>
+            <div class="preview"><span style="color:var(--text-3)"><%= t.ticket_type&.name || "Ticket" %> ·</span> <%= t.title %><%= " · #{last.truncate(100)}" if last.present? %></div>
+          <% else %>
+            <div class="preview"><%= last.truncate(140) %></div>
+          <% end %>
         </span>
         <span style="text-align:right">
           <% if t.waiting_since %><span class="status review">Waiting <%= waiting_for(t) %></span><% elsif t.state == "snoozed" %><span class="meta">Until <%= t.snoozed_until.strftime("%-d %b %H:%M") %></span><% else %><span class="meta"><%= relative_day(t.updated_at) %></span><% end %>

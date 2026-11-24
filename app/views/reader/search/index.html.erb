@@ -1,7 +1,7 @@
 <% content_for :title, @query.present? ? "#{@query} · Search" : "Search" %>
 <% content_for :hide_header_search, true %>
 <main class="results">
-  <%= form_with url: search_path, method: :get, class: "search lg" do %>
+  <%= form_with url: search_path, method: :get, class: "search lg" do %><%= collection_field %>
     <%= icon "search" %>
     <%= search_field_tag :q, @query, class: "input", "aria-label": "Search", autofocus: @query.blank? %>
   <% end %>
@@ -22,8 +22,8 @@
   <% else %>
     <section class="empty">
       <h2>No articles match "<%= @query %>"</h2>
-      <p>Try fewer words, or ask our support team. We log searches like this one so the right article gets written.</p>
-      <div class="row"><%= link_to "Browse the contents", root_path, class: "btn quiet" %></div>
+      <p>Try fewer words<%= ", or ask our support team" if help_center_contact? %>. We log searches like this one so the right article gets written.</p>
+      <div class="row"><%= link_to "Ask our team", contact_path(q: @query, from: request.fullpath), class: "btn" if help_center_contact? %><%= link_to "Browse the contents", root_path, class: "btn quiet" %></div>
     </section>
   <% end %>
 </main>

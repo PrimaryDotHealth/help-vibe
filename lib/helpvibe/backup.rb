@@ -22,6 +22,7 @@ module Helpvibe
       config = ActiveRecord::Base.connection_db_config.configuration_hash
       env = { "PGPASSWORD" => config[:password].to_s }
       args = [ "pg_dump", "--format=custom", "--no-owner", "--host", (config[:host] || "localhost").to_s,
+               "--port", (config[:port] || 5432).to_s,
                "--username", (config[:username] || ENV["USER"]).to_s, config[:database].to_s ]
       dump, err, status = Open3.capture3(env, *args, binmode: true)
       raise "pg_dump failed: #{err}" unless status.success?

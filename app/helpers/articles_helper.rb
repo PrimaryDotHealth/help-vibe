@@ -57,7 +57,8 @@ module ArticlesHelper
           if node.name == "h3"
             current = Nokogiri::XML::Node.new("details", doc.document)
             summary = Nokogiri::XML::Node.new("summary", doc.document)
-            summary.inner_html = node.inner_html
+            summary.inner_html = "<span>#{node.inner_html}</span>"
+            summary.add_child(Nokogiri::HTML5.fragment(icon("down")))
             current.add_child(summary)
             qa.add_child(current)
             node.remove

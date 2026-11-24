@@ -1,6 +1,11 @@
+<%# One article on its own, for an <iframe> in another site. Links open in a
+    new tab (not inside the frame), and the page reports its height so the
+    host page can size the frame to fit (see Articles → Install). %>
+<% content_for :head do %><base target="_blank"><% end %>
 <% body, _toc = article_body_with_toc(@version.current_revision) %>
-<div class="doc" style="padding:16px 20px">
+<div class="doc embed-doc" data-controller="embed-height" data-embed-height-slug-value="<%= @article.slug %>">
   <h3 style="font:400 22px/28px var(--serif)"><%= @version.title %></h3>
   <p class="meta" style="margin-top:4px">Updated <%= relative_day(@version.published_at || @version.updated_at).downcase %></p>
   <div class="rich" style="margin-top:16px;font-size:14px"><%= body %></div>
+  <p class="meta" style="margin-top:24px"><%= link_to "Open in the help center", article_url(@article) %></p>
 </div>

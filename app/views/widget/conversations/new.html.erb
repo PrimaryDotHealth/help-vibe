@@ -3,7 +3,7 @@
     <h3 style="font:400 20px/26px var(--serif)">Ask a question</h3>
     <p class="meta" style="margin-top:4px">We usually reply within one business day.</p>
     <% if flash[:alert] %><p class="errors" style="margin-top:8px"><%= flash[:alert] %></p><% end %>
-    <%= form_with url: widget_conversations_path, style: "margin-top:12px" do %>
+    <%= form_with url: widget_conversations_path, html: { style: "margin-top:12px" } do %>
       <%= hidden_field_tag :page, params[:page] %>
       <%= hidden_field_tag :client_id, SecureRandom.uuid %>
       <% unless current_contact %>

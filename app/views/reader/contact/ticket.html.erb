@@ -1,0 +1,23 @@
+<% content_for :title, @type.name %>
+<% content_for :hide_header_search, true %>
+<main class="results contact-page">
+  <%= link_to contact_path(from: params[:from], q: params[:q]), class: "back" do %><%= icon "back" %>Contact support<% end %>
+  <h1><%= @type.name %></h1>
+  <% if @type.description.present? %><p class="t2"><%= @type.description %></p><% end %>
+  <% if flash[:alert] %><p class="errors" role="alert"><%= flash[:alert] %></p><% end %>
+
+  <section class="card form-card">
+    <%= form_with url: contact_ticket_path(@type), data: { turbo_frame: "_top" } do %>
+      <%= render "you" %>
+      <label class="field"><span>Title *</span><%= text_field_tag :title, params[:title], class: "input", required: true, maxlength: 200 %></label>
+      <% if @type.description_visible %>
+        <label class="field"><span>What's happening?<%= " *" if @type.description_required %></span>
+          <%= text_area_tag :description, params[:description], rows: 5, class: "input", required: @type.description_required %></label>
+      <% end %>
+      <% @type.live_fields.select(&:visible_to_contacts).each do |field| %>
+        <%= render "admin/tickets/field_input", field: field, value: params.dig(:fields, field.key), required: field.required_for_contacts %>
+      <% end %>
+      <div class="acts"><%= submit_tag "Send request", class: "btn primary" %></div>
+    <% end %>
+  </section>
+</main>

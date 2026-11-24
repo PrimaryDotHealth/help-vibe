@@ -9,6 +9,6 @@ class Reader::SearchController < Reader::BaseController
     end
 
     @results, @fuzzy = SearchIndex.search(@query, viewer: viewer)
-    @event = SearchEvent.log!(query: @query, results_count: @results.size, source: "kb", user: viewer)
+    @event = SearchEvent.log!(query: @query, results_count: @results.size, source: "kb", user: Current.user)
   end
 end

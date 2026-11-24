@@ -1,9 +1,21 @@
 module ApplicationHelper
+  # Keeps ?collections= on GET forms (a GET form drops its action's query string).
+  def collection_field
+    hidden_field_tag(:collections, collection_param, id: nil) if collection_param
+  end
+
   def icon(name, **opts)
     tag.svg(class: [ "i", opts.delete(:class) ].compact.join(" "), "aria-hidden": "true", **opts) do
       tag.use(href: "#i-#{name}")
     end
   end
+
+  # Set by Frameable controllers (help center, widget); nil elsewhere.
+  def page_theme = controller.respond_to?(:embed_theme, true) ? controller.send(:embed_theme) : nil
+  def in_frame? = controller.respond_to?(:framed?, true) && controller.send(:framed?)
+
+  # The admin's "Contact support in the help center" switch, once per request.
+  def help_center_contact? = defined?(@help_center_contact) ? @help_center_contact : (@help_center_contact = Setting.help_center_contact?)
 
   def code_tag(code, **opts)
     tag.span(code, class: [ "code", opts.delete(:class) ].compact.join(" "), **opts)

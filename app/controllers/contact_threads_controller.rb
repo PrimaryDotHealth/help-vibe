@@ -2,7 +2,12 @@
 # signing in, and remembers this browser for that conversation.
 class ContactThreadsController < ApplicationController
   include WidgetContact
+  include Frameable
   allow_unauthenticated_access
+  # The token in the address is what grants access, not a cookie, so inside
+  # an iframe (where the session cookie with the CSRF token isn't sent) a
+  # reply doesn't need the CSRF check.
+  skip_forgery_protection if: -> { framed? }
   before_action :set_thread
 
   def show
@@ -11,7 +16,8 @@ class ContactThreadsController < ApplicationController
   end
 
   def reply
-    @thread.contact_comment!(body: params.require(:body), channel: "widget", client_id: params[:client_id].presence)
+    channel = @thread.channel == "help_center" ? "help_center" : "widget"
+    @thread.contact_comment!(body: params.require(:body), channel: channel, client_id: params[:client_id].presence)
     redirect_to contact_thread_path(params[:token])
   rescue ActiveRecord::RecordNotUnique
     redirect_to contact_thread_path(params[:token])
