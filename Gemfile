@@ -73,3 +73,5 @@ gem "jwt", "~> 3.3"
 gem "csv", "~> 3.3"
 
 gem "commonmarker", "~> 2.10"
+
+gem "aws-sdk-s3", "~> 1.245", require: false

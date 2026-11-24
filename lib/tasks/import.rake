@@ -13,5 +13,22 @@ namespace :helpvibe do
       puts "\nDone: #{run.stats.except("warnings").map { "#{_1} #{_2}" }.join(", ")}"
       Array(run.stats["warnings"]).each { puts "  ! #{_1}" }
     end
+
+    desc "Import a Helpjuice HTML export from S3 or a local folder. helpvibe:import:helpjuice_html[s3://bucket/folder/] " \
+         "(a folder, or one .html file with METADATA=s3://bucket/metadata.json). Options: IMAGES=0"
+    task :helpjuice_html, [ :location ] => :environment do |_, args|
+      location = args[:location].presence or abort "Pass a location: bin/rails 'helpvibe:import:helpjuice_html[s3://bucket/folder/]'"
+      author = User.find_by(role: "superadmin") or abort "Create a superadmin first: bin/rails 'helpvibe:user[you@company.com]'"
+      importer = Helpvibe::Importers::HelpjuiceHtml.new(location: location, metadata: ENV["METADATA"].presence, author: author,
+                                                        images: ENV["IMAGES"] != "0", log: ->(m) { puts m })
+      begin
+        importer.call
+      ensure
+        run = importer.run
+        puts "\n#{run.status.capitalize}: #{run.stats.except("warnings").map { "#{_1} #{_2}" }.join(", ")}"
+        puts "  #{run.error}" if run.error
+        Array(run.stats["warnings"]).each { puts "  ! #{_1}" }
+      end
+    end
   end
 end

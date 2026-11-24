@@ -17,6 +17,20 @@ HELPJUICE_API_KEY=…               # Helpjuice → Settings → API credentials
   <p class="meta" style="margin-top:16px">Not available from Helpjuice's API, so not imported: who private articles are shared with, comments, version history, analytics.</p>
 </div>
 
+<div class="card form-card" style="max-width:720px;margin-top:16px">
+  <p class="section-title" style="margin:0 0 8px">From an exported HTML folder in S3</p>
+  <p class="t2">Imports the .html files and <span class="mono">metadata.json</span> from a Helpjuice export: chapters, articles, drafts and images. Safe to run again. Private articles come in as internal until you set who can see them.</p>
+  <%= form_with url: html_admin_import_path, style: "margin-top:16px" do %>
+    <label class="field"><span>S3 path to the folder, or to one .html file</span>
+      <%= text_field_tag :location, nil, placeholder: "s3://your-bucket/helpjuice-export/", class: "input mono", required: true %></label>
+    <label class="field"><span>metadata.json path (optional: for one .html file, or if it isn't inside the folder)</span>
+      <%= text_field_tag :metadata, nil, placeholder: "s3://your-bucket/helpjuice-export/metadata.json", class: "input mono" %></label>
+    <label class="row" style="font-size:14px;margin-top:12px"><%= check_box_tag :images, "1", true, style: "accent-color:var(--ink)" %>Download images into helpvibe</label>
+    <div class="acts"><%= submit_tag "Start import", class: "btn primary" %></div>
+  <% end %>
+  <p class="meta" style="margin-top:12px">The server reads S3 with its own AWS credentials (<span class="mono">AWS_REGION</span> and an access key or IAM role) and needs <span class="mono">s3:GetObject</span> and <span class="mono">s3:ListBucket</span> on the bucket.</p>
+</div>
+
 <% if @runs.any? %>
   <p class="section-title">Runs</p>
   <div class="card"><div class="table-wrap"><table class="data">

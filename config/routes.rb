@@ -38,7 +38,9 @@ Rails.application.routes.draw do
     resources :users, except: %i[show destroy]
     resources :groups, except: :show
     resources :api_keys, only: %i[index create destroy]
-    resource :import, only: %i[show create], controller: "import"
+    resource :import, only: %i[show create], controller: "import" do
+      post :html
+    end
     resources :context_rules, except: :show
     resource :analytics, only: :show
 
